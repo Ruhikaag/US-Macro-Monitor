@@ -1,0 +1,13 @@
+{
+  "status": "loading",
+  "retrieved_at": null,
+  "last_success_at": null,
+  "last_attempt_at": null,
+  "error": "Waiting for the Windows helper to publish the first Haver snapshot.",
+  "themes": [
+    { "id": "real_economy", "label": "Real Economy", "indicator_ids": ["payroll", "unemployment", "income", "pce", "retail_sales", "confidence", "permits", "ip_mfg", "core_capital_goods", "trade_balance", "real_gdp", "corporate_profits"] },
+    { "id": "financial_markets", "label": "Financial Markets", "indicator_ids": ["sp500", "yield_spread", "vix", "kcfsi"] },
+    { "id": "inflation", "label": "Inflation", "indicator_ids": ["cpi", "core_cpi", "core_pce", "philly_inflation_expectations"] }
+  ],
+  "indicators": {}
+}
