@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>US Macro Monitor</title>
+  <script>if (location.protocol === "file:") location.replace("http://127.0.0.1:8766/");</script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #edf4f0; --ink-soft: #c1cec7; --panel: #19221f; --panel-line: #34443d;
+      --paper: #101714; --white: #202a26; --muted: #a0b0a8; --light-muted: #718078;
+      --red: #f08c86; --gold: #e8c66a; --green: #9bcf48; --blue: #43c5ca;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #1b282e; background: linear-gradient(145deg, #f2f7f4 0%, #f8faf8 52%, #edf6f3 100%); font: 14px/1.45 "Segoe UI", Arial, sans-serif; }
+    button { font: inherit; }
+    .masthead { min-height: 76px; display: flex; align-items: center; gap: 18px; padding: 13px max(28px, calc((100vw - 1400px)/2)); background: #fff; border-bottom: 1px solid #dce7e2; box-shadow: 0 2px 12px #173a2810; }
+    .brand-mark { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; border: 4px solid #242726; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px #86bc2524; }
+    .brand-mark::after { content: ""; width: 22px; height: 13px; border-radius: 9px; background: linear-gradient(to bottom, #2c2a29 0 48%, #fff 48% 53%, #86bc25 53%); }
+    .brand { min-width: 210px; }
+    .brand strong { display: block; color: #242726; font-size: 12px; letter-spacing: .12em; }
+    .brand span { color: var(--muted); font-size: 11px; }
+    .head-actions { display: flex; align-items: center; gap: 14px; }
+    .updated { color: var(--muted); font-size: 11px; text-align: right; }
+    .text-button { border: 1px solid #d7e4dd; border-radius: 999px; padding: 7px 12px; background: #f5faf6; color: #1f6465; font-size: 10px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
+    .text-button:hover { border-color: var(--green); background: #edf6e1; transform: translateY(-1px); }
+    .text-button:disabled { opacity: .5; cursor: wait; }
+    .hero { position: relative; overflow: hidden; padding: 46px max(38px, calc((100vw - 1360px)/2)) 52px; background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #242726 0%, #293431 62%, #214841 100%); color: #eef6f1; border-bottom: 4px solid var(--green); }
+    .hero::before { content: ""; position: absolute; width: 260px; height: 260px; right: 9%; top: -155px; border: 1px solid #86bc2555; border-radius: 50%; box-shadow: 0 0 0 26px #86bc2510, 0 0 0 54px #00a3ad0c; pointer-events: none; }
+    .hero::after { content: "US"; position: absolute; right: 20px; bottom: 8px; width: min(320px, calc(100% - 40px)); color: #fff; opacity: .04; font: 800 clamp(100px, 18vw, 210px)/1 Georgia, serif; letter-spacing: -.06em; text-align: right; white-space: nowrap; pointer-events: none; }
+    .eyebrow { position: relative; z-index: 1; margin: 0 0 14px; color: var(--green); font: 700 10px/1.5 "Segoe UI", Arial, sans-serif; letter-spacing: .17em; text-transform: uppercase; }
+    .hero h1 { position: relative; z-index: 1; margin: 0; color: #f4f4f1; font: 400 clamp(42px, 6vw, 68px)/.91 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+    .hero h1 span { display: block; color: #21c0c2; text-shadow: 0 6px 24px #00a3ad35; }
+    .hero-copy { position: relative; z-index: 1; max-width: 560px; margin: 22px 0 0; color: #d2e2db; font-size: 13px; line-height: 1.7; }
+    .workspace { max-width: 1420px; margin: 0 auto; padding: 28px 26px 50px; }
+    .workspace-layout { display: grid; grid-template-columns: 205px minmax(0, 1fr); gap: 24px; align-items: start; }
+    .theme-nav { position: sticky; top: 15px; }
+    .section-label { margin: 0 0 12px; color: #4f7564; font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .theme-list { display: grid; gap: 7px; }
+    .theme-button { --theme-color: #54821a; --theme-tint: #eff6e4; display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; border: 1px solid color-mix(in srgb, var(--theme-color) 26%, white); border-radius: 7px; padding: 12px; background: var(--theme-tint); color: #26322b; text-align: left; cursor: pointer; box-shadow: 0 3px 12px #20432a0b; transition: transform .16s, box-shadow .16s, background .16s; }
+    .theme-button[data-theme="financial_markets"] { --theme-color: #008c95; --theme-tint: #e4f5f5; }
+    .theme-button[data-theme="inflation"] { --theme-color: #397f58; --theme-tint: #eaf4ec; }
+    .theme-button:hover { border-color: var(--theme-color); transform: translateX(2px); box-shadow: 0 5px 14px #20432a16; }
+    .theme-button[aria-current="page"] { border-color: var(--theme-color); background: var(--theme-color); color: #fff; box-shadow: 0 5px 14px color-mix(in srgb, var(--theme-color) 28%, transparent); }
+    .theme-count { color: #839096; font-size: 10px; }
+    .theme-button[aria-current="page"] .theme-count { color: #f1ffe9; }
+    .workspace-main { min-width: 0; }
+    .workspace-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin: 0 0 14px; }
+    .workspace-head h2 { margin: 0; color: #26352d; font: 400 28px/1.1 Georgia, serif; }
+    .workspace-head p { margin: 4px 0 0; color: #5f766a; font-size: 11px; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .cards[data-theme="real_economy"] { --theme-accent: #79ad20; --theme-tint: #f3f8e9; }
+    .cards[data-theme="financial_markets"] { --theme-accent: #008c95; --theme-tint: #eaf7f7; }
+    .cards[data-theme="inflation"] { --theme-accent: #397f58; --theme-tint: #eef6ed; }
+    .indicator-card { min-width: 0; border: 1px solid #dce6e0; border-top: 3px solid var(--theme-accent, #86bc25); border-left: 4px solid var(--theme-accent, #86bc25); border-radius: 7px; padding: 14px 14px 12px; background: linear-gradient(118deg, var(--theme-tint, #f4f9ea) 0%, #fff 31%); cursor: pointer; box-shadow: 0 4px 14px #1c3f2b0b; transition: border-color .15s, transform .15s, box-shadow .15s; }
+    .indicator-card:hover { border-color: var(--theme-accent, var(--blue)); box-shadow: 0 9px 22px #153e2b1b; transform: translateY(-2px); }
+    .indicator-card:focus-visible, .theme-button:focus-visible, .text-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 38px; }
+    .card-head h3 { margin: 0; color: #1d282e; font-size: 14px; font-weight: 700; line-height: 1.35; }
+    .card-period { flex: 0 0 auto; color: #007c83; font-size: 10px; font-weight: 700; text-align: right; }
+    .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #dcebe3; }
+    .metric { min-width: 0; padding: 8px 8px 6px 0; }
+    .metric + .metric { border-left: 1px solid #e5eee8; padding-left: 9px; }
+    .metric-label { min-height: 29px; color: #6f7d82; font-size: 9px; line-height: 1.35; }
+    .metric-value { overflow: hidden; color: #183b35; font: 500 18px/1.15 Georgia, serif; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+    .metric-value.negative { color: #bd4148; }
+    .metric-value.positive { color: #54821a; }
+    .card-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 7px; color: #879298; font-size: 9px; }
+    .empty-state { min-height: 240px; display: grid; place-items: center; border: 1px solid #dce1de; background: #fafbf9; color: #728086; text-align: center; }
+    .empty-state strong { display: block; margin-bottom: 5px; color: #27353c; font: 20px Georgia, serif; }
+    .error { margin: 0 0 14px; border-left: 3px solid #c64b4b; padding: 10px 12px; background: #fff3f1; color: #792c2b; font-size: 12px; }
+    .error[hidden], [hidden] { display: none !important; }
+    .foot { margin: 16px 0 0; color: #819096; font-size: 10px; line-height: 1.6; }
+    dialog { width: min(980px, calc(100vw - 28px)); max-width: 980px; border: 1px solid #d5dddf; border-radius: 7px; padding: 0; color: #1d292e; box-shadow: 0 20px 70px #102c3b45; }
+    dialog::backdrop { background: #0d171dc4; }
+    .dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding: 20px 22px 8px; }
+    .dialog-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .chart-export-button { border: 1px solid #557c61; border-radius: 999px; padding: 8px 12px; background: #26382d; color: #e5f4dd; font-size: 10px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
+    .chart-export-button:hover { border-color: #b9fa38; background: #314832; }
+    .chart-export-button:focus-visible, .close-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .dialog-head h2 { margin: 0; color: #15232a; font: 400 25px/1.2 Georgia, serif; }
+    .dialog-head p { margin: 5px 0 0; color: #68777d; font-size: 11px; }
+    .close-button { flex: 0 0 auto; border: 1px solid #007c83; border-radius: 999px; padding: 8px 14px; background: #007c83; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+    .chart-wrap { padding: 0 12px 12px; }
+    #trend-chart { display: block; width: 100%; height: auto; min-height: 250px; }
+    #trend-chart text { fill: #586970; font: 11px "Segoe UI", Arial, sans-serif; }
+    #trend-chart .grid-line { stroke: #e2e8e9; stroke-width: 1; }
+    #trend-chart .series-line { fill: none; stroke: #00a3ad; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    #trend-chart .hover-target { fill: transparent; stroke: transparent; pointer-events: all; cursor: crosshair; }
+    #chart-empty { padding: 60px 20px; color: var(--muted); text-align: center; }
+    body { color: var(--ink); background: radial-gradient(ellipse at 90% 2%, #153b3424 0, transparent 32%), linear-gradient(145deg, #101714 0%, #141d19 54%, #101815 100%); }
+    .masthead { background: #141c19; border-bottom-color: #2a3932; box-shadow: 0 3px 16px #0005; }
+    .brand-mark { border-color: #dce9e2; background: #1a2420; box-shadow: 0 0 0 3px #9bcf4824; }
+    .brand-mark::after { background: linear-gradient(to bottom, #dce9e2 0 48%, #1a2420 48% 53%, #9bcf48 53%); }
+    .brand strong { color: #edf4f0; }
+    .text-button { border-color: #3a5047; background: #202d27; color: #8dd9d3; }
+    .text-button:hover { border-color: #9bcf48; background: #2b3a2d; }
+    .hero { background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #111715 0%, #182622 62%, #173b34 100%); }
+    .workspace { color: var(--ink); }
+    .section-label { color: #a9d66b; }
+    .theme-button { --theme-color: #9bcf48; --theme-tint: #202b22; border-color: color-mix(in srgb, var(--theme-color) 35%, #26332c); color: #e2ece6; box-shadow: 0 3px 12px #0003; }
+    .theme-button[data-theme="financial_markets"] { --theme-color: #42c2c8; --theme-tint: #1b2c2d; }
+    .theme-button[data-theme="inflation"] { --theme-color: #76bd91; --theme-tint: #1d2d25; }
+    .theme-button:hover { box-shadow: 0 5px 16px #0006; }
+    .theme-button[aria-current="page"] { color: #101714; }
+    .theme-button[aria-current="page"] .theme-count { color: #16231c; }
+    .workspace-head h2 { color: #edf4f0; }
+    .workspace-head p { color: #a9bcb2; }
+    .cards[data-theme="real_economy"] { --theme-accent: #9bcf48; --theme-tint: #202b22; }
+    .cards[data-theme="financial_markets"] { --theme-accent: #42c2c8; --theme-tint: #1b2c2d; }
+    .cards[data-theme="inflation"] { --theme-accent: #76bd91; --theme-tint: #1d2d25; }
+    .indicator-card { border-color: #35463e; background: linear-gradient(118deg, var(--theme-tint, #202b22) 0%, #19221f 56%); box-shadow: 0 4px 14px #0003; }
+    #cards .indicator-card:nth-child(8n + 1) { --theme-accent: #b9fa38; --theme-tint: #29391b; }
+    #cards .indicator-card:nth-child(8n + 2) { --theme-accent: #32e6e4; --theme-tint: #19383a; }
+    #cards .indicator-card:nth-child(8n + 3) { --theme-accent: #c5a0ff; --theme-tint: #302447; }
+    #cards .indicator-card:nth-child(8n + 4) { --theme-accent: #ffc05c; --theme-tint: #3a2c1d; }
+    #cards .indicator-card:nth-child(8n + 5) { --theme-accent: #ff7f91; --theme-tint: #3c222b; }
+    #cards .indicator-card:nth-child(8n + 6) { --theme-accent: #73b7ff; --theme-tint: #1e3047; }
+    #cards .indicator-card:nth-child(8n + 7) { --theme-accent: #ff94d1; --theme-tint: #3a2338; }
+    #cards .indicator-card:nth-child(8n) { --theme-accent: #6ef0a7; --theme-tint: #1d392c; }
+    #cards .indicator-card { background: linear-gradient(132deg, color-mix(in srgb, var(--theme-accent) 24%, #17201c) 0%, color-mix(in srgb, var(--theme-tint) 82%, #19221f) 50%, #19221f 100%); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-accent) 32%, transparent), 0 5px 18px #0004; }
+    #cards .metric-row { border-top-color: color-mix(in srgb, var(--theme-accent) 48%, #35463e); }
+    #cards .metric + .metric { border-left-color: color-mix(in srgb, var(--theme-accent) 24%, #2c3a34); }
+    #cards .card-head h3 { color: #f5faf7; }
+    #cards .card-period { color: #fff0a6; }
+    #cards .metric-label { color: #d2ddd7; }
+    #cards .metric-value { color: #ffffff; text-shadow: 0 1px 2px #0008; }
+    #cards .metric-value.negative { color: #ffb3ba; }
+    #cards .metric-value.positive { color: #d1ff9a; }
+    #cards .card-foot { color: #c0cec6; }
+    .indicator-card:hover { box-shadow: 0 9px 24px #0007; }
+    .card-head h3 { color: #edf4f0; }
+    .card-period { color: #72d2d0; }
+    .metric-row { border-top-color: #35463e; }
+    .metric + .metric { border-left-color: #2c3a34; }
+    .metric-label { color: #a0b0a8; }
+    .metric-value { color: #f0f5f2; }
+    .metric-value.negative { color: #f08c86; }
+    .metric-value.positive { color: #a9d66b; }
+    .card-foot, .foot { color: #9aa9a2; }
+    .empty-state { border-color: #35463e; background: #19221f; color: #a0b0a8; }
+    .empty-state strong { color: #edf4f0; }
+    .error { border-left-color: #eb7974; background: #382322; color: #ffc5c0; }
+    dialog { border-color: #3a4c44; background: #19221f; color: #e5eee9; box-shadow: 0 20px 70px #000b; }
+    .dialog-head h2 { color: #edf4f0; }
+    .dialog-head p { color: #a0b0a8; }
+    .close-button { border-color: #168c91; background: #168c91; color: #f3fffd; }
+    #trend-chart text { fill: #b1c0b8; }
+    #trend-chart .grid-line { stroke: #34443d; }
+    #trend-chart .series-line { stroke: #43c5ca; }
+    @media (max-width: 950px) { .workspace-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; } .workspace { padding-inline: 18px; } }
+    @media (max-width: 720px) {
+      .masthead { padding: 12px 15px; gap: 10px; } .brand { min-width: 0; } .head-actions { margin-left: auto; gap: 10px; }
+      .hero { padding: 39px 22px 42px; } .hero-copy { max-width: 480px; }
+      .hero::after { right: 16px; bottom: 8px; width: min(280px, calc(100% - 32px)); font-size: clamp(88px, 24vw, 140px); }
+      .workspace { padding: 22px 14px 36px; } .workspace-layout { display: block; } .theme-nav { position: static; margin-bottom: 22px; }
+      .theme-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } .theme-button { display: block; min-height: 52px; padding: 8px; font-size: 11px; text-align: center; } .theme-count { display: block; margin-top: 2px; }
+    }
+    @media (max-width: 480px) {
+      .masthead { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px 10px; padding: 10px 12px; }
+      .brand-mark { width: 32px; height: 32px; } .brand-mark::after { width: 18px; height: 11px; } .brand strong { font-size: 10px; } .brand span { font-size: 9px; }
+      .head-actions { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; }
+      .updated { max-width: none; font-size: 9px; text-align: left; } .text-button { font-size: 9px; }
+      .hero h1 { font-size: 46px; } .cards { grid-template-columns: 1fr; gap: 8px; } .indicator-card { padding: 12px; }
+      .workspace-head h2 { font-size: 24px; } .metric-label { font-size: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="brand-mark" aria-hidden="true"></div>
+    <div class="brand"><strong>US MACRO MONITOR</strong><span>Economic indicators · United States</span></div>
+    <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="refresh">Check updates</button><button class="text-button" id="export">Export CSV ↓</button></div>
+  </header>
+  <section class="hero">
+    <p class="eyebrow">United States economic indicators</p>
+    <h1>US Macro<span>Monitor</span></h1>
+    <p class="hero-copy">Your one-stop view of the economic indicators you need to watch.</p>
+  </section>
+  <main class="workspace">
+    <div class="error" id="error" role="status" hidden></div>
+    <div class="workspace-layout">
+      <nav class="theme-nav" aria-label="Dashboard themes">
+        <p class="section-label">Themes</p>
+        <div class="theme-list" id="theme-list"></div>
+      </nav>
+      <section class="workspace-main">
+        <div class="workspace-head"><div><h2 id="theme-title">Real Economy</h2><p id="theme-description">12 indicators · latest observations and changes</p></div></div>
+        <div class="cards" id="cards"></div>
+        <p class="foot" id="footnote">Monthly growth compares seasonally adjusted levels; quarterly growth is annualized quarter-over-quarter. Each tile shows its latest available observation period.</p>
+      </section>
+    </div>
+  </main>
+  <dialog id="trend-dialog" aria-labelledby="trend-title">
+    <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
+    <div class="chart-wrap"><svg id="trend-chart" viewBox="0 0 900 390" role="img" aria-labelledby="trend-title trend-subtitle"></svg><div id="chart-empty" hidden>No history is available to chart for this series.</div></div>
+  </dialog>
+  <script>
+    const $ = id => document.getElementById(id);
+    const fmt = (value, style = "decimal1") => {
+      if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+      let n = Number(value);
+      if (style === "integer1000") return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Math.round(n / 1000) * 1000);
+      if (Math.abs(n) < .05) n = 0;
+      const digits = style === "decimal0" ? 0 : (style === "decimal2" || style === "signed2" ? 2 : 1);
+      return new Intl.NumberFormat("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+    };
+    const fmtPeriod = p => {
+      if (!p) return "No date";
+      const q = p.match(/^(\d{4})Q([1-4])$/);
+      if (q) return `Q${q[2]} ${q[1]}`;
+      const d = p.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (d) return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(Number(d[1]), Number(d[2]) - 1, Number(d[3]))));
+      const m = p.match(/^(\d{4})-(\d{2})$/);
+      if (m) return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, 1)));
+      return p;
+    };
+    const compact = (value, style) => {
+      if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+      const number = Number(value);
+      if (style === "integer1000") return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(number);
+      return fmt(number, style);
+    };
+    let snapshot = null;
+    let activeTheme = "real_economy";
+    let activeChartItem = null;
+    let lastSuccessAt = null;
+    let lastAttemptAt = null;
+    function renderStatus(data) {
+      const indicators = Object.values(data.indicators || {});
+      const stamp = data.last_success_at || data.retrieved_at;
+      lastSuccessAt = data.last_success_at || null;
+      lastAttemptAt = data.last_attempt_at || null;
+      $("updated").textContent = stamp ? `Updated ${new Date(stamp).toLocaleString()}` : "No successful refresh yet";
+      const box = $("error");
+      if (data.error) { box.textContent = `Data update issue: ${data.error}. Showing the last available data, if any.`; box.hidden = false; }
+      else if (indicators.some(item => item.error)) { box.textContent = "Some series could not be retrieved. The affected tiles are marked unavailable."; box.hidden = false; }
+      else box.hidden = true;
+    }
+    function renderThemes(data) {
+      const nav = $("theme-list"); nav.replaceChildren();
+      for (const theme of data.themes || []) {
+        const button = document.createElement("button");
+        button.type = "button"; button.className = "theme-button";
+        button.dataset.theme = theme.id;
+        button.setAttribute("aria-current", theme.id === activeTheme ? "page" : "false");
+        const label = document.createElement("span"); label.textContent = theme.label;
+        const count = document.createElement("span"); count.className = "theme-count"; count.textContent = theme.indicator_ids.length ? String(theme.indicator_ids.length).padStart(2, "0") : "—";
+        button.append(label, count);
+        button.addEventListener("click", () => { activeTheme = theme.id; render(snapshot); });
+        nav.append(button);
+      }
+    }
+    function renderCard(item) {
+      const card = document.createElement("article");
+      card.className = "indicator-card"; card.tabIndex = 0; card.setAttribute("role", "button");
+      card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${item.title} chart`);
+      const head = document.createElement("div"); head.className = "card-head";
+      const title = document.createElement("h3"); title.textContent = item.title;
+      const period = document.createElement("span"); period.className = "card-period"; period.textContent = item.period_label || fmtPeriod(item.period);
+      head.append(title, period);
+      const row = document.createElement("div"); row.className = "metric-row";
+      for (const metric of item.metrics || []) {
+        const cell = document.createElement("div"); cell.className = "metric";
+        const label = document.createElement("div"); label.className = "metric-label"; label.textContent = metric.label;
+        const value = document.createElement("div"); value.className = "metric-value"; value.textContent = fmt(metric.value, metric.style);
+        if (Math.abs(Number(metric.value)) >= .05 && metric.value < 0) value.classList.add("negative");
+        else if (["signed1"].includes(metric.style) && metric.value >= .05) value.classList.add("positive");
+        cell.append(label, value); row.append(cell);
+      }
+      const foot = document.createElement("div"); foot.className = "card-foot";
+      const frequency = document.createElement("span"); frequency.textContent = `${item.frequency || ""} · ${item.unit || ""}`;
+      const source = document.createElement("span"); source.textContent = item.descriptor || (item.error ? "Series unavailable" : "Economic data");
+      foot.append(frequency, source);
+      card.append(head, row, foot);
+      card.addEventListener("click", () => openTrend(item));
+      card.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openTrend(item); } });
+      return card;
+    }
+    function render(data) {
+      snapshot = data;
+      renderStatus(data);
+      renderThemes(data);
+      const theme = (data.themes || []).find(item => item.id === activeTheme) || data.themes?.[0];
+      if (!theme) return;
+      activeTheme = theme.id;
+      $("export").disabled = !theme.indicator_ids.length;
+      $("theme-title").textContent = theme.label;
+      $("theme-description").textContent = theme.indicator_ids.length ? `${theme.indicator_ids.length} indicators · click a tile to view its chart` : "Theme series have not been added yet";
+      $("footnote").textContent = theme.id === "financial_markets"
+        ? "Daily comparisons use the latest observation on or before each prior date. The Treasury spread is the 10-year yield minus the 2-year yield; KCFSI changes are index-point differences."
+        : theme.id === "real_economy"
+          ? "Monthly growth compares seasonally adjusted levels; quarterly growth is annualized quarter-over-quarter. Each tile shows its latest available observation period."
+          : "Inflation indicators have not been added yet.";
+      const cards = $("cards"); cards.dataset.theme = theme.id; cards.replaceChildren();
+      if (!theme.indicator_ids.length) {
+        const empty = document.createElement("div"); empty.className = "empty-state";
+        const message = document.createElement("div");
+        const strong = document.createElement("strong"); strong.textContent = theme.label;
+        const note = document.createElement("span"); note.textContent = "No series have been added to this theme yet.";
+        message.append(strong, note); empty.append(message); cards.append(empty);
+      } else {
+        for (const id of theme.indicator_ids) {
+          const item = data.indicators?.[id];
+          if (item) cards.append(renderCard(item));
+        }
+      }
+    }
+    function svgNode(tag, attrs = {}, value = null) {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (const [name, attr] of Object.entries(attrs)) node.setAttribute(name, attr);
+      if (value !== null) node.textContent = value;
+      return node;
+    }
+    function openTrend(item) {
+      activeChartItem = item;
+      $("trend-title").textContent = item.title;
+      const historyWindow = item.frequency_code === "D" ? "latest 260 trading days" : "latest 36 observations";
+      $("trend-subtitle").textContent = `${item.frequency} · ${item.chart_label || item.descriptor || item.unit} · ${historyWindow}`;
+      $("download-chart-csv").disabled = !(item.history || []).some(point => point.value !== null && Number.isFinite(Number(point.value)));
+      drawTrend(item);
+      $("trend-dialog").showModal();
+    }
+    function downloadChartCsv() {
+      const item = activeChartItem;
+      if (!item) return;
+      const quote = value => `"${String(value ?? "").replaceAll('"', '""')}"`;
+      const rows = [["Indicator", "Ticker", "Measure", "Period", "Value", "Unit"]];
+      for (const point of item.history || []) {
+        if (point.value === null || !Number.isFinite(Number(point.value))) continue;
+        rows.push([item.title, item.ticker, item.chart_label || item.title, point.period, point.value, item.chart_unit || item.unit]);
+      }
+      if (rows.length === 1) return;
+      const csv = rows.map(row => row.map(quote).join(",")).join("\r\n");
+      const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `us-macro-${item.id}.csv`;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function drawTrend(item) {
+      const svg = $("trend-chart"), empty = $("chart-empty");
+      svg.replaceChildren();
+      const rows = item.history || [];
+      const available = rows.filter(point => point.value !== null && Number.isFinite(Number(point.value)));
+      if (available.length < 2) { svg.hidden = true; empty.hidden = false; return; }
+      svg.hidden = false; empty.hidden = true;
+      const width = 900, height = 390, margin = { top: 20, right: 22, bottom: 54, left: 92 };
+      const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
+      const values = available.map(point => Number(point.value));
+      let low = Math.min(...values), high = Math.max(...values);
+      const pad = (high - low || Math.max(Math.abs(high), 1)) * .09; low -= pad; high += pad;
+      const x = index => margin.left + index * plotW / Math.max(rows.length - 1, 1);
+      const y = value => margin.top + (high - value) * plotH / (high - low);
+      for (let tick = 0; tick <= 4; tick++) {
+        const value = high - (high - low) * tick / 4, yy = y(value);
+        svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line" }));
+        svg.append(svgNode("text", { x: margin.left - 10, y: yy + 4, "text-anchor": "end" }, fmt(value, Math.abs(high - low) > 100 ? "decimal0" : "decimal1")));
+      }
+      const tickCount = Math.min(6, rows.length);
+      for (let tick = 0; tick < tickCount; tick++) {
+        const index = Math.round(tick * (rows.length - 1) / Math.max(tickCount - 1, 1));
+        const label = fmtPeriod(rows[index].period);
+        svg.append(svgNode("text", { x: x(index), y: height - 20, "text-anchor": "middle" }, label));
+      }
+      let path = "", drawing = false;
+      rows.forEach((point, index) => {
+        const value = Number(point.value);
+        if (point.value === null || !Number.isFinite(value)) { drawing = false; return; }
+        path += `${drawing ? " L" : " M"} ${x(index)} ${y(value)}`; drawing = true;
+      });
+      svg.append(svgNode("path", { d: path.trim(), class: "series-line" }));
+      rows.forEach((point, index) => {
+        if (point.value === null || !Number.isFinite(Number(point.value))) return;
+        const circle = svgNode("circle", { cx: x(index), cy: y(Number(point.value)), r: 8, class: "hover-target" });
+        circle.append(svgNode("title", {}, `${fmtPeriod(point.period)}: ${fmt(point.value, Math.abs(high - low) > 100 ? "decimal0" : "decimal1")} ${item.chart_unit || item.unit}`));
+        svg.append(circle);
+      });
+    }
+    function exportCsv() {
+      if (!snapshot) return;
+      const theme = snapshot.themes?.find(item => item.id === activeTheme);
+      if (!theme || !theme.indicator_ids.length) return;
+      const quote = value => `"${String(value ?? "").replaceAll('"', '""')}"`;
+      const rows = [["Indicator", "Period", "Chart measure", "Observation value", "Observation unit", "Metric 1", "Value 1", "Metric 2", "Value 2", "Metric 3", "Value 3"]];
+      for (const id of theme.indicator_ids) {
+        const item = snapshot.indicators?.[id]; if (!item) continue;
+        const metrics = item.metrics || [];
+        for (const point of item.history || []) rows.push([
+          item.title, point.period, item.chart_label, point.value, item.chart_unit || item.unit,
+          metrics[0]?.label, metrics[0]?.value, metrics[1]?.label, metrics[1]?.value, metrics[2]?.label, metrics[2]?.value,
+        ]);
+      }
+      const csv = rows.map(row => row.map(quote).join(",")).join("\r\n");
+      const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+      const a = document.createElement("a"); a.href = url; a.download = `us-macro-${activeTheme}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    async function load() {
+      try {
+        const dataUrl = new URL("data/snapshot.json", document.baseURI);
+        dataUrl.searchParams.set("_", Date.now());
+        const response = await fetch(dataUrl, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Published snapshot returned ${response.status}`);
+        render(await response.json());
+      } catch (error) {
+        const box = $("error"); box.textContent = `Could not load published dashboard data. (${error.message})`; box.hidden = false;
+      }
+    }
+    async function refreshNow() {
+      const button = $("refresh");
+      button.disabled = true; button.textContent = "Checking…";
+      await load();
+      button.disabled = false; button.textContent = "Check updates";
+    }
+    $("close-trend").addEventListener("click", () => $("trend-dialog").close());
+    $("download-chart-csv").addEventListener("click", downloadChartCsv);
+    $("trend-dialog").addEventListener("click", event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
+    $("refresh").addEventListener("click", refreshNow);
+    $("export").addEventListener("click", exportCsv);
+    load();
+    window.setInterval(load, 60000);
+    window.addEventListener("pageshow", event => { if (event.persisted) load(); });
+  </script>
+</body>
+</html>
