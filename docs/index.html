@@ -227,12 +227,15 @@
     let activeChartItem = null;
     let lastSuccessAt = null;
     let lastAttemptAt = null;
+    let lastCheckedAt = null;
     function renderStatus(data) {
       const indicators = Object.values(data.indicators || {});
       const stamp = data.last_success_at || data.retrieved_at;
       lastSuccessAt = data.last_success_at || null;
       lastAttemptAt = data.last_attempt_at || null;
-      $("updated").textContent = stamp ? `Updated ${new Date(stamp).toLocaleString()}` : "No successful refresh yet";
+      const checkedText = lastCheckedAt ? `Checked ${lastCheckedAt.toLocaleTimeString()}` : "Not checked yet";
+      const publishedText = stamp ? `Data published ${new Date(stamp).toLocaleString()}` : "No published data yet";
+      $("updated").textContent = `${checkedText} · ${publishedText}`;
       const box = $("error");
       if (data.error) { box.textContent = `Data update issue: ${data.error}. Showing the last available data, if any.`; box.hidden = false; }
       else if (indicators.some(item => item.error)) { box.textContent = "Some series could not be retrieved. The affected tiles are marked unavailable."; box.hidden = false; }
@@ -403,7 +406,9 @@
         dataUrl.searchParams.set("_", Date.now());
         const response = await fetch(dataUrl, { cache: "no-store" });
         if (!response.ok) throw new Error(`Published snapshot returned ${response.status}`);
-        render(await response.json());
+        const data = await response.json();
+        lastCheckedAt = new Date();
+        render(data);
       } catch (error) {
         const box = $("error"); box.textContent = `Could not load published dashboard data. (${error.message})`; box.hidden = false;
       }
