@@ -97,6 +97,13 @@
     .text-button { border-color: #3a5047; background: #202d27; color: #8dd9d3; }
     .text-button:hover { border-color: #9bcf48; background: #2b3a2d; }
     .hero { background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #111715 0%, #182622 62%, #173b34 100%); }
+    .headline-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 1360px; margin: 28px auto 0; }
+    .headline-card { min-width: 0; min-height: 124px; border: 1px solid #35443f; padding: 14px 15px 12px; background: #202a26; }
+    .headline-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; color: #9aabb1; font-size: 10px; }
+    .headline-category { color: #d6e1db; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+    .headline-period { flex: 0 0 auto; color: #e8c66a; font-weight: 700; text-align: right; }
+    .headline-value { overflow: hidden; margin-top: 18px; color: #f0f5f2; font: 400 34px/1 Georgia, "Times New Roman", serif; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+    .headline-description { margin-top: 7px; color: #a0b0b8; font-size: 10px; line-height: 1.4; }
     .workspace { color: var(--ink); }
     .section-label { color: #a9d66b; }
     .theme-button { --theme-color: #9bcf48; --theme-tint: #202b22; border-color: color-mix(in srgb, var(--theme-color) 35%, #26332c); color: #e2ece6; box-shadow: 0 3px 12px #0003; }
@@ -157,11 +164,12 @@
     .tab-placeholder { max-width: 1420px; margin: 0 auto; padding: 42px 26px; }
     .tab-placeholder h2 { margin: 0; color: #edf4f0; font: 400 28px/1.1 Georgia, serif; }
     .tab-placeholder p { margin: 8px 0 0; color: #a0b0a8; font-size: 13px; }
-    @media (max-width: 950px) { .workspace-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; } .workspace { padding-inline: 18px; } }
+    @media (max-width: 950px) { .workspace-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; } .workspace { padding-inline: 18px; } .headline-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 720px) {
       .primary-tabs { gap: 0; padding-inline: 12px; } .primary-tab { padding-inline: 10px; font-size: 11px; }
       .masthead { padding: 12px 15px; gap: 10px; } .brand { min-width: 0; } .head-actions { margin-left: auto; gap: 10px; }
       .hero { padding: 39px 22px 42px; } .hero-copy { max-width: 480px; }
+      .headline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 22px; }
       .hero::after { right: 16px; bottom: 8px; width: min(280px, calc(100% - 32px)); font-size: clamp(88px, 24vw, 140px); }
       .workspace { padding: 22px 14px 36px; } .workspace-layout { display: block; } .theme-nav { position: static; margin-bottom: 22px; }
       .theme-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } .theme-button { display: block; min-height: 52px; padding: 8px; font-size: 11px; text-align: center; } .theme-count { display: block; margin-top: 2px; }
@@ -169,6 +177,7 @@
     @media (max-width: 480px) {
       .masthead { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px 10px; padding: 10px 12px; }
       .brand-mark { width: 32px; height: 32px; } .brand-mark::after { width: 18px; height: 11px; } .brand strong { font-size: 10px; } .brand span { font-size: 9px; }
+      .headline-card { min-height: 112px; padding: 11px; } .headline-value { margin-top: 15px; font-size: 29px; }
       .head-actions { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; }
       .updated { max-width: none; font-size: 9px; text-align: left; } .text-button { font-size: 9px; }
       .hero h1 { font-size: 46px; } .cards { grid-template-columns: 1fr; gap: 8px; } .indicator-card { padding: 12px; }
@@ -193,6 +202,7 @@
     <p class="eyebrow">United States economic indicators</p>
     <h1>US Macro<span>Monitor</span></h1>
     <p class="hero-copy">Your one-stop view of the economic indicators you need to watch.</p>
+    <div class="headline-grid" id="headline-grid" aria-label="Key US economic indicators" aria-live="polite"></div>
   </section>
   <main class="workspace">
     <div class="error" id="error" role="status" hidden></div>
@@ -278,6 +288,37 @@
     let lastSuccessAt = null;
     let lastAttemptAt = null;
     let lastCheckedAt = null;
+    const HEADLINE_TILES = [
+      { id: "headline_real_gdp", title: "Real GDP" },
+      { id: "headline_consumer_spending", title: "Real consumer spending" },
+      { id: "headline_pce_inflation", title: "PCE inflation" },
+      { id: "unemployment", title: "Unemployment rate" },
+      { id: "headline_federal_funds", title: "Federal funds rate" },
+    ];
+    function renderHeadlineTiles(data) {
+      const grid = $("headline-grid"); grid.replaceChildren();
+      for (const tile of HEADLINE_TILES) {
+        const item = data.indicators?.[tile.id];
+        const card = document.createElement("article"); card.className = "headline-card";
+        const head = document.createElement("div"); head.className = "headline-card-head";
+        const category = document.createElement("span"); category.className = "headline-category"; category.textContent = tile.title;
+        const period = document.createElement("span"); period.className = "headline-period";
+        period.textContent = item?.period
+          ? item.frequency_code === "D"
+            ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${item.period.slice(0, 10)}T00:00:00Z`))
+            : item.period_label || fmtPeriod(item.period)
+          : (item?.error ? "Unavailable" : data.error ? "Awaiting data" : "Loading");
+        head.append(category, period);
+        const value = document.createElement("div"); value.className = "headline-value";
+        value.textContent = item ? fmt(item.latest, "decimal2") : "—";
+        const description = document.createElement("div"); description.className = "headline-description";
+        const indicatorDescription = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
+        description.textContent = ["headline_real_gdp", "headline_consumer_spending"].includes(tile.id)
+          ? `${indicatorDescription} · % annual change`
+          : tile.id === "headline_pce_inflation" ? `${indicatorDescription} · % y/y` : indicatorDescription;
+        card.append(head, value, description); grid.append(card);
+      }
+    }
     function renderStatus(data) {
       const indicators = Object.values(data.indicators || {});
       const stamp = data.last_success_at || data.retrieved_at;
@@ -334,6 +375,7 @@
     function render(data) {
       snapshot = data;
       renderStatus(data);
+      renderHeadlineTiles(data);
       renderThemes(data);
       const theme = (data.themes || []).find(item => item.id === activeTheme) || data.themes?.[0];
       if (!theme) return;
