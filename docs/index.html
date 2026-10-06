@@ -149,8 +149,17 @@
     #trend-chart text { fill: #b1c0b8; }
     #trend-chart .grid-line { stroke: #34443d; }
     #trend-chart .series-line { stroke: #43c5ca; }
+    .primary-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 8px max(20px, calc((100vw - 1400px)/2)); background: #141c19; border-bottom: 1px solid #2a3932; scrollbar-width: thin; }
+    .primary-tab { flex: 0 0 auto; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 12px 14px 10px; background: transparent; color: #a0b0a8; font-size: 12px; font-weight: 700; text-align: left; white-space: nowrap; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+    .primary-tab:hover { background: #202d27; color: #edf4f0; }
+    .primary-tab[aria-selected="true"] { border-bottom-color: var(--green); background: #1c2822; color: #f3f8f4; }
+    .primary-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+    .tab-placeholder { max-width: 1420px; margin: 0 auto; padding: 42px 26px; }
+    .tab-placeholder h2 { margin: 0; color: #edf4f0; font: 400 28px/1.1 Georgia, serif; }
+    .tab-placeholder p { margin: 8px 0 0; color: #a0b0a8; font-size: 13px; }
     @media (max-width: 950px) { .workspace-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; } .workspace { padding-inline: 18px; } }
     @media (max-width: 720px) {
+      .primary-tabs { gap: 0; padding-inline: 12px; } .primary-tab { padding-inline: 10px; font-size: 11px; }
       .masthead { padding: 12px 15px; gap: 10px; } .brand { min-width: 0; } .head-actions { margin-left: auto; gap: 10px; }
       .hero { padding: 39px 22px 42px; } .hero-copy { max-width: 480px; }
       .hero::after { right: 16px; bottom: 8px; width: min(280px, calc(100% - 32px)); font-size: clamp(88px, 24vw, 140px); }
@@ -173,6 +182,17 @@
     <div class="brand"><strong>US MACRO MONITOR</strong><span>Economic indicators · United States</span></div>
     <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="refresh">Check updates</button><button class="text-button" id="export">Export CSV ↓</button></div>
   </header>
+  <nav class="primary-tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="primary-tab" id="tab-overview" type="button" role="tab" aria-selected="false" aria-controls="panel-overview" tabindex="-1">Economy at a glance</button>
+    <button class="primary-tab" id="tab-monitor" type="button" role="tab" aria-selected="true" aria-controls="panel-monitor" tabindex="0">Macro monitor</button>
+    <button class="primary-tab" id="tab-forecasts" type="button" role="tab" aria-selected="false" aria-controls="panel-forecasts" tabindex="-1">Economic forecasts</button>
+    <button class="primary-tab" id="tab-publications" type="button" role="tab" aria-selected="false" aria-controls="panel-publications" tabindex="-1">DI Publications</button>
+    <button class="primary-tab" id="tab-weekly" type="button" role="tab" aria-selected="false" aria-controls="panel-weekly" tabindex="-1">Weekly updates</button>
+  </nav>
+  <section class="tab-placeholder" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" hidden>
+    <h2>Economy at a glance</h2><p>Content will be added later.</p>
+  </section>
+  <section class="tab-panel" id="panel-monitor" role="tabpanel" aria-labelledby="tab-monitor">
   <section class="hero">
     <p class="eyebrow">United States economic indicators</p>
     <h1>US Macro<span>Monitor</span></h1>
@@ -192,12 +212,46 @@
       </section>
     </div>
   </main>
+  </section>
+  <section class="tab-placeholder" id="panel-forecasts" role="tabpanel" aria-labelledby="tab-forecasts" hidden>
+    <h2>Economic forecasts</h2><p>Content will be added later.</p>
+  </section>
+  <section class="tab-placeholder" id="panel-publications" role="tabpanel" aria-labelledby="tab-publications" hidden>
+    <h2>DI Publications</h2><p>Content will be added later.</p>
+  </section>
+  <section class="tab-placeholder" id="panel-weekly" role="tabpanel" aria-labelledby="tab-weekly" hidden>
+    <h2>Weekly updates</h2><p>Content will be added later.</p>
+  </section>
   <dialog id="trend-dialog" aria-labelledby="trend-title">
     <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
     <div class="chart-wrap"><svg id="trend-chart" viewBox="0 0 900 390" role="img" aria-labelledby="trend-title trend-subtitle"></svg><div id="chart-empty" hidden>No history is available to chart for this series.</div></div>
   </dialog>
   <script>
     const $ = id => document.getElementById(id);
+    const primaryTabs = [...document.querySelectorAll(".primary-tab")];
+    function selectPrimaryTab(selectedTab, focus = false) {
+      for (const tab of primaryTabs) {
+        const isSelected = tab === selectedTab;
+        tab.setAttribute("aria-selected", String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        $(tab.getAttribute("aria-controls")).hidden = !isSelected;
+      }
+      if (focus) selectedTab.focus();
+    }
+    primaryTabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => selectPrimaryTab(tab));
+      tab.addEventListener("keydown", event => {
+        let nextIndex = null;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % primaryTabs.length;
+        else if (event.key === "ArrowLeft") nextIndex = (index - 1 + primaryTabs.length) % primaryTabs.length;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = primaryTabs.length - 1;
+        if (nextIndex !== null) {
+          event.preventDefault();
+          selectPrimaryTab(primaryTabs[nextIndex], true);
+        }
+      });
+    });
     const fmt = (value, style = "decimal1") => {
       if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
       let n = Number(value);
