@@ -78,6 +78,7 @@
     .dialog-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
     .chart-export-button { border: 1px solid #557c61; border-radius: 999px; padding: 8px 12px; background: #26382d; color: #e5f4dd; font-size: 10px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
     .chart-export-button:hover { border-color: #b9fa38; background: #314832; }
+    .chart-export-button:disabled { opacity: .5; cursor: not-allowed; }
     .chart-export-button:focus-visible, .close-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
     .dialog-head h2 { margin: 0; color: #15232a; font: 400 25px/1.2 Georgia, serif; }
     .dialog-head p { margin: 5px 0 0; color: #68777d; font-size: 11px; }
@@ -98,7 +99,9 @@
     .text-button:hover { border-color: #9bcf48; background: #2b3a2d; }
     .hero { background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #111715 0%, #182622 62%, #173b34 100%); }
     .headline-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 1360px; margin: 28px auto 0; }
-    .headline-card { min-width: 0; min-height: 124px; border: 1px solid #35443f; padding: 14px 15px 12px; background: #202a26; }
+    .headline-card { min-width: 0; min-height: 124px; border: 1px solid #35443f; padding: 14px 15px 12px; background: #202a26; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
+    .headline-card:hover { border-color: #9bcf48; box-shadow: 0 9px 24px #0007; transform: translateY(-2px); }
+    .headline-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
     .headline-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; color: #9aabb1; font-size: 10px; }
     .headline-category { color: #d6e1db; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
     .headline-period { flex: 0 0 auto; color: #e8c66a; font-weight: 700; text-align: right; }
@@ -229,7 +232,7 @@
     <h2>DI Publications</h2><p>Content will be added later.</p>
   </section>
   <dialog id="trend-dialog" aria-labelledby="trend-title">
-    <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
+    <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="download-chart-svg" type="button">Download chart</button><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
     <div class="chart-wrap"><svg id="trend-chart" viewBox="0 0 900 390" role="img" aria-labelledby="trend-title trend-subtitle"></svg><div id="chart-empty" hidden>No history is available to chart for this series.</div></div>
   </dialog>
   <script>
@@ -299,7 +302,8 @@
       const grid = $("headline-grid"); grid.replaceChildren();
       for (const tile of HEADLINE_TILES) {
         const item = data.indicators?.[tile.id];
-        const card = document.createElement("article"); card.className = "headline-card";
+        const card = document.createElement("article"); card.className = "headline-card"; card.tabIndex = 0; card.setAttribute("role", "button");
+        card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tile.title} chart`);
         const head = document.createElement("div"); head.className = "headline-card-head";
         const category = document.createElement("span"); category.className = "headline-category"; category.textContent = tile.title;
         const period = document.createElement("span"); period.className = "headline-period";
@@ -317,6 +321,15 @@
           ? `${indicatorDescription} · % annual change`
           : tile.id === "headline_pce_inflation" ? `${indicatorDescription} · % y/y` : indicatorDescription;
         card.append(head, value, description); grid.append(card);
+        card.addEventListener("click", () => {
+          if (item) openTrend({ ...item, title: tile.title, chart_value_style: item.chart_value_style || "decimal2" });
+        });
+        card.addEventListener("keydown", event => {
+          if (item && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            openTrend({ ...item, title: tile.title, chart_value_style: item.chart_value_style || "decimal2" });
+          }
+        });
       }
     }
     function renderStatus(data) {
@@ -413,7 +426,9 @@
       $("trend-title").textContent = item.title;
       const historyWindow = item.frequency_code === "D" ? "latest 260 trading days" : "latest 36 observations";
       $("trend-subtitle").textContent = `${item.frequency} · ${item.chart_label || item.descriptor || item.unit} · ${historyWindow}`;
-      $("download-chart-csv").disabled = !(item.history || []).some(point => point.value !== null && Number.isFinite(Number(point.value)));
+      const observations = (item.history || []).filter(point => point.value !== null && Number.isFinite(Number(point.value))).length;
+      $("download-chart-svg").disabled = observations < 2;
+      $("download-chart-csv").disabled = observations === 0;
       drawTrend(item);
       $("trend-dialog").showModal();
     }
@@ -424,7 +439,8 @@
       const rows = [["Indicator", "Ticker", "Measure", "Period", "Value", "Unit"]];
       for (const point of item.history || []) {
         if (point.value === null || !Number.isFinite(Number(point.value))) continue;
-        rows.push([item.title, item.ticker, item.chart_label || item.title, point.period, point.value, item.chart_unit || item.unit]);
+        const value = item.chart_value_style === "decimal2" ? Number(point.value).toFixed(2) : point.value;
+        rows.push([item.title, item.ticker, item.chart_label || item.title, point.period, value, item.chart_unit || item.unit]);
       }
       if (rows.length === 1) return;
       const csv = rows.map(row => row.map(quote).join(",")).join("\r\n");
@@ -432,7 +448,35 @@
       const anchor = document.createElement("a");
       anchor.href = url;
       anchor.download = `us-macro-${item.id}.csv`;
+      document.body.append(anchor);
       anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function downloadChartSvg() {
+      const item = activeChartItem, svg = $("trend-chart");
+      if (!item || svg.hidden || $("download-chart-svg").disabled) return;
+      const exportSvg = svg.cloneNode(true);
+      exportSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      const graph = [...exportSvg.childNodes];
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.id = "export-title"; title.textContent = item.title;
+      const description = document.createElementNS("http://www.w3.org/2000/svg", "desc");
+      description.id = "export-description"; description.textContent = `${item.chart_label || item.title} (${item.chart_unit || item.unit})`;
+      const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      style.textContent = "#trend-chart text{fill:#b1c0b8;font:11px 'Segoe UI',Arial,sans-serif}#trend-chart .grid-line{stroke:#34443d;stroke-width:1}#trend-chart .series-line{fill:none;stroke:#43c5ca;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}#trend-chart .hover-target{fill:transparent;stroke:transparent}";
+      const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      background.setAttribute("width", "900"); background.setAttribute("height", "390"); background.setAttribute("fill", "#19221f");
+      exportSvg.setAttribute("aria-labelledby", "export-title export-description");
+      exportSvg.replaceChildren(title, description, style, background, ...graph);
+      const source = new XMLSerializer().serializeToString(exportSvg);
+      const url = URL.createObjectURL(new Blob([source], { type: "image/svg+xml;charset=utf-8" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `us-macro-${item.id}.svg`;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
     function drawTrend(item) {
@@ -452,7 +496,8 @@
       for (let tick = 0; tick <= 4; tick++) {
         const value = high - (high - low) * tick / 4, yy = y(value);
         svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line" }));
-        svg.append(svgNode("text", { x: margin.left - 10, y: yy + 4, "text-anchor": "end" }, fmt(value, Math.abs(high - low) > 100 ? "decimal0" : "decimal1")));
+        const valueStyle = item.chart_value_style || (Math.abs(high - low) > 100 ? "decimal0" : "decimal1");
+        svg.append(svgNode("text", { x: margin.left - 10, y: yy + 4, "text-anchor": "end" }, fmt(value, valueStyle)));
       }
       const tickCount = Math.min(6, rows.length);
       for (let tick = 0; tick < tickCount; tick++) {
@@ -470,7 +515,8 @@
       rows.forEach((point, index) => {
         if (point.value === null || !Number.isFinite(Number(point.value))) return;
         const circle = svgNode("circle", { cx: x(index), cy: y(Number(point.value)), r: 8, class: "hover-target" });
-        circle.append(svgNode("title", {}, `${fmtPeriod(point.period)}: ${fmt(point.value, Math.abs(high - low) > 100 ? "decimal0" : "decimal1")} ${item.chart_unit || item.unit}`));
+        const valueStyle = item.chart_value_style || (Math.abs(high - low) > 100 ? "decimal0" : "decimal1");
+        circle.append(svgNode("title", {}, `${fmtPeriod(point.period)}: ${fmt(point.value, valueStyle)} ${item.chart_unit || item.unit}`));
         svg.append(circle);
       });
     }
@@ -512,6 +558,7 @@
       button.disabled = false; button.textContent = "Check updates";
     }
     $("close-trend").addEventListener("click", () => $("trend-dialog").close());
+    $("download-chart-svg").addEventListener("click", downloadChartSvg);
     $("download-chart-csv").addEventListener("click", downloadChartCsv);
     $("trend-dialog").addEventListener("click", event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
     $("refresh").addEventListener("click", refreshNow);
