@@ -415,9 +415,7 @@
         return Number.isFinite(date) && date <= Date.now() && Date.now() - date <= 7 * 86400000;
       });
       const expired = fresh.length !== (story.sources || []).length;
-      $("story-text").textContent = expired || (!fresh.length && !story.basis_period && story.status !== "unavailable")
-        ? "Recent US coverage is unavailable. The helper needs to refresh its news sources."
-        : story.text;
+      $("story-text").textContent = story.text;
       if (!expired) {
         for (const source of fresh) {
           if (!/^https:\/\/(?:[\w-]+\.)*(?:cnbc\.com|deloitte\.com|bloomberg\.com|ft\.com|washingtonpost\.com)(?:\/|$)/i.test(source.url)) continue;
