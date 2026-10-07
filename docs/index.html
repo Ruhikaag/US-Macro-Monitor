@@ -120,7 +120,10 @@
     .theme-story { margin: 0 0 16px; border: 1px solid #34483d; border-left: 3px solid var(--green); border-radius: 7px; padding: 16px 19px; background: linear-gradient(110deg, #202e25, #19231f); box-shadow: 0 5px 18px #0002; }
     .theme-story h3 { margin: 0 0 7px; color: #bce18a; font: 400 19px/1.25 Georgia, serif; }
     .theme-story p { margin: 0; color: #e2eee5; font-size: 12px; line-height: 1.7; }
-    .story-sources { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 10px; }
+    .story-news { margin-top: 11px; border-top: 1px solid #34483d; padding-top: 9px; }
+    .story-news-label { color: #bce18a; font-size: 11px; font-weight: 700; }
+    .story-sources { display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; margin-top: 6px; font-size: 10px; }
+    .story-sources span { color: #bac9be; }
     .story-sources a { color: #69d4d4; text-decoration-color: #69d4d470; text-underline-offset: 3px; }
     .story-sources a:hover { color: #b2f2ee; }
     .theme-story .story-note { margin-top: 9px; color: #bac9be; font-size: 10px; }
@@ -223,7 +226,7 @@
       </nav>
       <section class="workspace-main">
         <div class="workspace-head"><div><h2 id="theme-title">National Accounts (GDP)</h2><p id="theme-description">6 indicators · latest observations and changes</p></div></div>
-        <aside class="theme-story" aria-live="polite"><h3>The story behind the numbers</h3><p id="story-text">Waiting for the latest coverage…</p><div class="story-sources" id="story-sources"></div><p class="story-note" id="story-note" hidden></p></aside>
+        <aside class="theme-story" aria-live="polite"><h3>The story behind the numbers</h3><p id="story-text">Waiting for the latest coverage…</p><div class="story-news"><span class="story-news-label">Recent news:</span><div class="story-sources" id="story-sources"></div></div><p class="story-note" id="story-note" hidden></p></aside>
         <div class="cards" id="cards"></div>
         <p class="foot" id="footnote">Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago.</p>
       </section>
@@ -404,6 +407,7 @@
       const note = $("story-note"); note.hidden = true;
       if (!story) {
         $("story-text").textContent = "Waiting for the Windows helper to publish recent US coverage for this theme.";
+        const waiting = document.createElement("span"); waiting.textContent = "Waiting for recent coverage."; sources.append(waiting);
         return;
       }
       const fresh = (story.sources || []).filter(source => {
@@ -423,9 +427,12 @@
           sources.append(link);
         }
       }
+      if (!sources.children.length) {
+        const empty = document.createElement("span");
+        empty.textContent = expired ? "Previously published links have expired." : "No recent matching US news is available.";
+        sources.append(empty);
+      }
       const warnings = [];
-      if (story.basis_period) warnings.push(`Based on Haver observations through ${fmtPeriod(story.basis_period)}.`);
-      if (story.status === "data_only") warnings.push("No recent matching US news was available.");
       if (story.status === "partial" || story.status === "error") warnings.push("Some news sources could not be refreshed.");
       if (expired) warnings.push("Published coverage has expired.");
       if (story.stale_sources?.length) warnings.push(`Unavailable: ${story.stale_sources.join(", ")}.`);
