@@ -28,7 +28,7 @@
     .text-button:disabled { opacity: .5; cursor: wait; }
     .hero { position: relative; overflow: hidden; padding: 46px max(38px, calc((100vw - 1360px)/2)) 52px; background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #242726 0%, #293431 62%, #214841 100%); color: #eef6f1; border-bottom: 4px solid var(--green); }
     .hero::before { content: ""; position: absolute; width: 260px; height: 260px; right: 9%; top: -155px; border: 1px solid #86bc2555; border-radius: 50%; box-shadow: 0 0 0 26px #86bc2510, 0 0 0 54px #00a3ad0c; pointer-events: none; }
-    .hero::after { content: "US"; position: absolute; right: 20px; bottom: 8px; width: min(320px, calc(100% - 40px)); color: #fff; opacity: .04; font: 800 clamp(100px, 18vw, 210px)/1 Georgia, serif; letter-spacing: -.06em; text-align: right; white-space: nowrap; pointer-events: none; }
+    .hero::after { content: "US"; position: absolute; right: 20px; top: 80px; width: min(520px, calc(100% - 40px)); color: #fff; opacity: .13; font: 800 clamp(320px, 32vw, 450px)/1 Georgia, serif; letter-spacing: -.06em; text-align: right; white-space: nowrap; pointer-events: none; }
     .eyebrow { position: relative; z-index: 1; margin: 0 0 14px; color: var(--green); font: 700 10px/1.5 "Segoe UI", Arial, sans-serif; letter-spacing: .17em; text-transform: uppercase; }
     .hero h1 { position: relative; z-index: 1; margin: 0; color: #f4f4f1; font: 400 clamp(42px, 6vw, 68px)/.91 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
     .hero h1 span { display: block; color: #21c0c2; text-shadow: 0 6px 24px #00a3ad35; }
@@ -172,7 +172,7 @@
       .masthead { padding: 12px 15px; gap: 10px; } .brand { min-width: 0; } .head-actions { margin-left: auto; gap: 10px; }
       .hero { padding: 39px 22px 42px; } .hero-copy { max-width: 480px; }
       .headline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 22px; }
-      .hero::after { right: 16px; bottom: 8px; width: min(280px, calc(100% - 32px)); font-size: clamp(88px, 24vw, 140px); }
+      .hero::after { right: 16px; top: 135px; width: min(340px, calc(100% - 32px)); font-size: clamp(230px, 54vw, 300px); }
       .workspace { padding: 22px 14px 36px; } .workspace-layout { display: block; } .theme-nav { position: static; margin-bottom: 22px; }
       .theme-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } .theme-button { display: block; min-height: 52px; padding: 8px; font-size: 11px; text-align: center; } .theme-count { display: block; margin-top: 2px; }
     }
