@@ -88,6 +88,7 @@
     #trend-chart text { fill: #586970; font: 11px "Segoe UI", Arial, sans-serif; }
     #trend-chart .grid-line { stroke: #e2e8e9; stroke-width: 1; }
     #trend-chart .series-line { fill: none; stroke: #00a3ad; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    #trend-chart .latest-point { fill: #b9fa38; stroke: #19221f; stroke-width: 2; }
     #trend-chart .hover-target { fill: transparent; stroke: transparent; pointer-events: all; cursor: crosshair; }
     #chart-empty { padding: 60px 20px; color: var(--muted); text-align: center; }
     body { color: var(--ink); background: radial-gradient(ellipse at 90% 2%, #153b3424 0, transparent 32%), linear-gradient(145deg, #101714 0%, #141d19 54%, #101815 100%); }
@@ -426,7 +427,8 @@
     function openTrend(item) {
       activeChartItem = item;
       $("trend-title").textContent = item.title;
-      const historyWindow = item.frequency_code === "D" ? "latest 260 trading days" : "latest 36 observations";
+      const rows = item.history || [];
+      const historyWindow = rows.length ? `${fmtPeriod(rows[0].period)}–${fmtPeriod(rows[rows.length - 1].period)}` : "No observations";
       $("trend-subtitle").textContent = `${item.frequency} · ${item.chart_label || item.descriptor || item.unit} · ${historyWindow}`;
       const observations = (item.history || []).filter(point => point.value !== null && Number.isFinite(Number(point.value))).length;
       $("download-chart-svg").disabled = observations < 2;
@@ -466,7 +468,7 @@
       const description = document.createElementNS("http://www.w3.org/2000/svg", "desc");
       description.id = "export-description"; description.textContent = `${item.chart_label || item.title} (${item.chart_unit || item.unit})`;
       const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
-      style.textContent = "#trend-chart text{fill:#b1c0b8;font:11px 'Segoe UI',Arial,sans-serif}#trend-chart .grid-line{stroke:#34443d;stroke-width:1}#trend-chart .series-line{fill:none;stroke:#43c5ca;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}#trend-chart .hover-target{fill:transparent;stroke:transparent}";
+      style.textContent = "#trend-chart text{fill:#b1c0b8;font:11px 'Segoe UI',Arial,sans-serif}#trend-chart .grid-line{stroke:#34443d;stroke-width:1}#trend-chart .series-line{fill:none;stroke:#43c5ca;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}#trend-chart .latest-point{fill:#b9fa38;stroke:#19221f;stroke-width:2}#trend-chart .hover-target{fill:transparent;stroke:transparent}";
       const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       background.setAttribute("width", "900"); background.setAttribute("height", "390"); background.setAttribute("fill", "#19221f");
       exportSvg.setAttribute("aria-labelledby", "export-title export-description");
@@ -505,7 +507,7 @@
       for (let tick = 0; tick < tickCount; tick++) {
         const index = Math.round(tick * (rows.length - 1) / Math.max(tickCount - 1, 1));
         const label = fmtPeriod(rows[index].period);
-        svg.append(svgNode("text", { x: x(index), y: height - 20, "text-anchor": "middle" }, label));
+        svg.append(svgNode("text", { x: x(index), y: height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle" }, label));
       }
       let path = "", drawing = false;
       rows.forEach((point, index) => {
@@ -514,6 +516,10 @@
         path += `${drawing ? " L" : " M"} ${x(index)} ${y(value)}`; drawing = true;
       });
       svg.append(svgNode("path", { d: path.trim(), class: "series-line" }));
+      const lastIndex = rows.length - 1, lastValue = Number(rows[lastIndex].value);
+      if (rows[lastIndex].value !== null && Number.isFinite(lastValue)) {
+        svg.append(svgNode("circle", { cx: x(lastIndex), cy: y(lastValue), r: 5, class: "latest-point" }));
+      }
       rows.forEach((point, index) => {
         if (point.value === null || !Number.isFinite(Number(point.value))) return;
         const circle = svgNode("circle", { cx: x(index), cy: y(Number(point.value)), r: 8, class: "hover-target" });
