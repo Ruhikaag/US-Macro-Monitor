@@ -216,7 +216,7 @@
       <section class="workspace-main">
         <div class="workspace-head"><div><h2 id="theme-title">National Accounts (GDP)</h2><p id="theme-description">6 indicators · latest observations and changes</p></div></div>
         <div class="cards" id="cards"></div>
-        <p class="foot" id="footnote">Quarterly growth is annualized quarter-over-quarter; the third measure compares with the same quarter one year ago.</p>
+        <p class="foot" id="footnote">Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago.</p>
       </section>
     </div>
   </main>
@@ -403,7 +403,7 @@
       $("footnote").textContent = theme.id === "financial_markets"
         ? "Daily comparisons use the latest observation on or before each prior date. The Treasury spread is the 10-year yield minus the 2-year yield; KCFSI changes are index-point differences."
         : theme.id === "real_economy"
-          ? "Quarterly growth is annualized quarter-over-quarter; the third measure compares with the same quarter one year ago."
+          ? "Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago."
           : "Inflation indicators have not been added yet.";
       const cards = $("cards"); cards.dataset.theme = theme.id; cards.replaceChildren();
       if (!theme.indicator_ids.length) {
