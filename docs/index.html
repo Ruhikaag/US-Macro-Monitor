@@ -317,8 +317,9 @@
         value.textContent = item ? fmt(item.latest, "decimal2") : "—";
         const description = document.createElement("div"); description.className = "headline-description";
         const indicatorDescription = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
-        description.textContent = ["headline_real_gdp", "headline_consumer_spending"].includes(tile.id)
-          ? `${indicatorDescription} · % annual change`
+        description.textContent = tile.id === "headline_real_gdp"
+          ? `${indicatorDescription} · % annualized change (QoQ)`
+          : tile.id === "headline_consumer_spending" ? `${indicatorDescription} · % annual change`
           : tile.id === "headline_pce_inflation" ? `${indicatorDescription} · % y/y` : indicatorDescription;
         card.append(head, value, description); grid.append(card);
         card.addEventListener("click", () => {
