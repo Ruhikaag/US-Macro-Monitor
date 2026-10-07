@@ -24,4 +24,5 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 - The **Check updates** button reloads the latest published snapshot; it does not force a Haver refresh.
 - The local and GitHub Pages dashboards show the same headline indicators. The local page continues to use its Python API; GitHub Pages reads the published JSON snapshot.
 - The National Accounts (GDP) theme contains six quarterly series: real GDP, personal consumption expenditure, real private fixed investment, exports, imports, and real government consumption and investment. Each card shows the current and previous quarter's annualized growth and the year-over-year change.
+- The remaining themes are listed as empty categories until their indicators are specified; the five headline tiles remain available independently of theme membership.
 - Never put the token in the repository, the batch file, or a screenshot. Anyone with access to the token could write to the repository.
