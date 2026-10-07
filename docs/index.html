@@ -99,14 +99,13 @@
     .text-button:hover { border-color: #9bcf48; background: #2b3a2d; }
     .hero { background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #111715 0%, #182622 62%, #173b34 100%); }
     .headline-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 1360px; margin: 28px auto 0; }
-    .headline-card { min-width: 0; min-height: 124px; border: 1px solid #35443f; padding: 14px 15px 12px; background: #202a26; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
-    .headline-card:hover { border-color: #9bcf48; box-shadow: 0 9px 24px #0007; transform: translateY(-2px); }
-    .headline-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-    .headline-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; color: #9aabb1; font-size: 10px; }
-    .headline-category { color: #d6e1db; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
-    .headline-period { flex: 0 0 auto; color: #e8c66a; font-weight: 700; text-align: right; }
-    .headline-value { overflow: hidden; margin-top: 18px; color: #f0f5f2; font: 400 34px/1 Georgia, "Times New Roman", serif; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
-    .headline-description { margin-top: 7px; color: #a0b0b8; font-size: 10px; line-height: 1.4; }
+    .headline-card { display: flex; flex-direction: column; min-height: 175px; }
+    .headline-card .card-head { min-height: 42px; }
+    .headline-card .metric-row { grid-template-columns: minmax(0, 1fr); }
+    .headline-card .metric-label { min-height: 24px; }
+    .headline-card .metric-value { font-size: 23px; }
+    .headline-card .card-foot { flex-wrap: wrap; margin-top: auto; padding-top: 12px; line-height: 1.4; }
+    .headline-card .card-foot span:last-child { overflow-wrap: anywhere; }
     .workspace { color: var(--ink); }
     .section-label { color: #a9d66b; }
     .theme-button { --theme-color: #9bcf48; --theme-tint: #202b22; border-color: color-mix(in srgb, var(--theme-color) 35%, #26332c); color: #e2ece6; box-shadow: 0 3px 12px #0003; }
@@ -121,24 +120,24 @@
     .cards[data-theme="financial_markets"] { --theme-accent: #42c2c8; --theme-tint: #1b2c2d; }
     .cards[data-theme="inflation"] { --theme-accent: #76bd91; --theme-tint: #1d2d25; }
     .indicator-card { border-color: #35463e; background: linear-gradient(118deg, var(--theme-tint, #202b22) 0%, #19221f 56%); box-shadow: 0 4px 14px #0003; }
-    #cards .indicator-card:nth-child(8n + 1) { --theme-accent: #b9fa38; --theme-tint: #29391b; }
-    #cards .indicator-card:nth-child(8n + 2) { --theme-accent: #32e6e4; --theme-tint: #19383a; }
-    #cards .indicator-card:nth-child(8n + 3) { --theme-accent: #c5a0ff; --theme-tint: #302447; }
-    #cards .indicator-card:nth-child(8n + 4) { --theme-accent: #ffc05c; --theme-tint: #3a2c1d; }
-    #cards .indicator-card:nth-child(8n + 5) { --theme-accent: #ff7f91; --theme-tint: #3c222b; }
-    #cards .indicator-card:nth-child(8n + 6) { --theme-accent: #73b7ff; --theme-tint: #1e3047; }
-    #cards .indicator-card:nth-child(8n + 7) { --theme-accent: #ff94d1; --theme-tint: #3a2338; }
-    #cards .indicator-card:nth-child(8n) { --theme-accent: #6ef0a7; --theme-tint: #1d392c; }
-    #cards .indicator-card { background: linear-gradient(132deg, color-mix(in srgb, var(--theme-accent) 24%, #17201c) 0%, color-mix(in srgb, var(--theme-tint) 82%, #19221f) 50%, #19221f 100%); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-accent) 32%, transparent), 0 5px 18px #0004; }
-    #cards .metric-row { border-top-color: color-mix(in srgb, var(--theme-accent) 48%, #35463e); }
-    #cards .metric + .metric { border-left-color: color-mix(in srgb, var(--theme-accent) 24%, #2c3a34); }
-    #cards .card-head h3 { color: #f5faf7; }
-    #cards .card-period { color: #fff0a6; }
-    #cards .metric-label { color: #d2ddd7; }
-    #cards .metric-value { color: #ffffff; text-shadow: 0 1px 2px #0008; }
-    #cards .metric-value.negative { color: #ffb3ba; }
-    #cards .metric-value.positive { color: #d1ff9a; }
-    #cards .card-foot { color: #c0cec6; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n + 1) { --theme-accent: #b9fa38; --theme-tint: #29391b; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n + 2) { --theme-accent: #32e6e4; --theme-tint: #19383a; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n + 3) { --theme-accent: #c5a0ff; --theme-tint: #302447; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n + 4) { --theme-accent: #ffc05c; --theme-tint: #3a2c1d; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n + 5) { --theme-accent: #ff7f91; --theme-tint: #3c222b; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n + 6) { --theme-accent: #73b7ff; --theme-tint: #1e3047; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n + 7) { --theme-accent: #ff94d1; --theme-tint: #3a2338; }
+    :is(#cards, #headline-grid) .indicator-card:nth-child(8n) { --theme-accent: #6ef0a7; --theme-tint: #1d392c; }
+    :is(#cards, #headline-grid) .indicator-card { background: linear-gradient(132deg, color-mix(in srgb, var(--theme-accent) 24%, #17201c) 0%, color-mix(in srgb, var(--theme-tint) 82%, #19221f) 50%, #19221f 100%); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--theme-accent) 32%, transparent), 0 5px 18px #0004; }
+    :is(#cards, #headline-grid) .metric-row { border-top-color: color-mix(in srgb, var(--theme-accent) 48%, #35463e); }
+    :is(#cards, #headline-grid) .metric + .metric { border-left-color: color-mix(in srgb, var(--theme-accent) 24%, #2c3a34); }
+    :is(#cards, #headline-grid) .card-head h3 { color: #f5faf7; }
+    :is(#cards, #headline-grid) .card-period { color: #fff0a6; }
+    :is(#cards, #headline-grid) .metric-label { color: #d2ddd7; }
+    :is(#cards, #headline-grid) .metric-value { color: #ffffff; text-shadow: 0 1px 2px #0008; }
+    :is(#cards, #headline-grid) .metric-value.negative { color: #ffb3ba; }
+    :is(#cards, #headline-grid) .metric-value.positive { color: #d1ff9a; }
+    :is(#cards, #headline-grid) .card-foot { color: #c0cec6; }
     .indicator-card:hover { box-shadow: 0 9px 24px #0007; }
     .card-head h3 { color: #edf4f0; }
     .card-period { color: #72d2d0; }
@@ -180,7 +179,7 @@
     @media (max-width: 480px) {
       .masthead { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px 10px; padding: 10px 12px; }
       .brand-mark { width: 32px; height: 32px; } .brand-mark::after { width: 18px; height: 11px; } .brand strong { font-size: 10px; } .brand span { font-size: 9px; }
-      .headline-card { min-height: 112px; padding: 11px; } .headline-value { margin-top: 15px; font-size: 29px; }
+      .headline-card { padding: 11px; }
       .head-actions { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; }
       .updated { max-width: none; font-size: 9px; text-align: left; } .text-button { font-size: 9px; }
       .hero h1 { font-size: 46px; } .cards { grid-template-columns: 1fr; gap: 8px; } .indicator-card { padding: 12px; }
@@ -302,25 +301,30 @@
       const grid = $("headline-grid"); grid.replaceChildren();
       for (const tile of HEADLINE_TILES) {
         const item = data.indicators?.[tile.id];
-        const card = document.createElement("article"); card.className = "headline-card"; card.tabIndex = 0; card.setAttribute("role", "button");
+        const card = document.createElement("article"); card.className = "indicator-card headline-card"; card.tabIndex = 0; card.setAttribute("role", "button");
         card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tile.title} chart`);
-        const head = document.createElement("div"); head.className = "headline-card-head";
-        const category = document.createElement("span"); category.className = "headline-category"; category.textContent = tile.title;
-        const period = document.createElement("span"); period.className = "headline-period";
+        const head = document.createElement("div"); head.className = "card-head";
+        const category = document.createElement("h3"); category.textContent = tile.title;
+        const period = document.createElement("span"); period.className = "card-period";
         period.textContent = item?.period
           ? item.frequency_code === "D"
             ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${item.period.slice(0, 10)}T00:00:00Z`))
             : item.period_label || fmtPeriod(item.period)
           : (item?.error ? "Unavailable" : data.error ? "Awaiting data" : "Loading");
         head.append(category, period);
-        const value = document.createElement("div"); value.className = "headline-value";
+        const row = document.createElement("div"); row.className = "metric-row";
+        const metric = document.createElement("div"); metric.className = "metric";
+        const label = document.createElement("div"); label.className = "metric-label";
+        label.textContent = item?.metrics?.[0]?.label || `${item?.period_label || "Latest"} value (${item?.unit || "%"})`;
+        const value = document.createElement("div"); value.className = "metric-value";
         value.textContent = item ? fmt(item.latest, "decimal2") : "—";
-        const description = document.createElement("div"); description.className = "headline-description";
-        const indicatorDescription = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
-        description.textContent = ["headline_real_gdp", "headline_consumer_spending"].includes(tile.id)
-          ? `${indicatorDescription} · % annualized change (QoQ)`
-          : tile.id === "headline_pce_inflation" ? `${indicatorDescription} · % y/y` : indicatorDescription;
-        card.append(head, value, description); grid.append(card);
+        if (item?.latest != null && item.latest < 0) value.classList.add("negative");
+        metric.append(label, value); row.append(metric);
+        const foot = document.createElement("div"); foot.className = "card-foot";
+        const frequency = document.createElement("span"); frequency.textContent = item ? `${item.frequency} · ${item.unit}` : "";
+        const source = document.createElement("span"); source.textContent = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
+        foot.append(frequency, source);
+        card.append(head, row, foot); grid.append(card);
         card.addEventListener("click", () => {
           if (item) openTrend({ ...item, title: tile.title, chart_value_style: item.chart_value_style || "decimal2" });
         });
