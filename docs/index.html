@@ -413,26 +413,22 @@
       const fresh = (story.sources || []).filter(source => {
         const date = Date.parse(source.published_at);
         return Number.isFinite(date) && date <= Date.now() && Date.now() - date <= 7 * 86400000;
-      });
-      const expired = fresh.length !== (story.sources || []).length;
+      }).sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at)).slice(0, 5);
       $("story-text").textContent = story.text;
-      if (!expired) {
-        for (const source of fresh) {
-          if (!/^https:\/\/(?:[\w-]+\.)*(?:cnbc\.com|deloitte\.com|bloomberg\.com|ft\.com|washingtonpost\.com)(?:\/|$)/i.test(source.url)) continue;
-          const link = document.createElement("a");
-          link.href = source.url; link.target = "_blank"; link.rel = "noopener noreferrer";
-          link.textContent = `${source.title} — ${source.publisher}, ${new Date(source.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}`;
-          sources.append(link);
-        }
+      for (const source of fresh) {
+        if (!/^https:\/\/(?:[\w-]+\.)*(?:cnbc\.com|deloitte\.com)(?:\/|$)/i.test(source.url)) continue;
+        const link = document.createElement("a");
+        link.href = source.url; link.target = "_blank"; link.rel = "noopener noreferrer";
+        link.textContent = `${source.title} — ${source.publisher}, ${new Date(source.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}`;
+        sources.append(link);
       }
       if (!sources.children.length) {
         const empty = document.createElement("span");
-        empty.textContent = expired ? "Previously published links have expired." : "No recent matching US news is available.";
+        empty.textContent = "No recent relevant news";
         sources.append(empty);
       }
       const warnings = [];
       if (story.status === "partial" || story.status === "error") warnings.push("Some news sources could not be refreshed.");
-      if (expired) warnings.push("Published coverage has expired.");
       if (story.stale_sources?.length) warnings.push(`Unavailable: ${story.stale_sources.join(", ")}.`);
       if (warnings.length) { note.textContent = warnings.join(" "); note.hidden = false; }
     }
