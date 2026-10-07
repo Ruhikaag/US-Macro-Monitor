@@ -411,7 +411,7 @@
         return Number.isFinite(date) && date <= Date.now() && Date.now() - date <= 7 * 86400000;
       });
       const expired = fresh.length !== (story.sources || []).length;
-      $("story-text").textContent = expired || (!fresh.length && story.status !== "unavailable")
+      $("story-text").textContent = expired || (!fresh.length && !story.basis_period && story.status !== "unavailable")
         ? "Recent US coverage is unavailable. The helper needs to refresh its news sources."
         : story.text;
       if (!expired) {
@@ -424,6 +424,8 @@
         }
       }
       const warnings = [];
+      if (story.basis_period) warnings.push(`Based on Haver observations through ${fmtPeriod(story.basis_period)}.`);
+      if (story.status === "data_only") warnings.push("No recent matching US news was available.");
       if (story.status === "partial" || story.status === "error") warnings.push("Some news sources could not be refreshed.");
       if (expired) warnings.push("Published coverage has expired.");
       if (story.stale_sources?.length) warnings.push(`Unavailable: ${story.stale_sources.join(", ")}.`);
