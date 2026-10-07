@@ -400,11 +400,9 @@
       $("export").disabled = !theme.indicator_ids.length;
       $("theme-title").textContent = theme.label;
       $("theme-description").textContent = theme.indicator_ids.length ? `${theme.indicator_ids.length} indicators · click a tile to view its chart` : "Theme series have not been added yet";
-      $("footnote").textContent = theme.id === "financial_markets"
-        ? "Daily comparisons use the latest observation on or before each prior date. The Treasury spread is the 10-year yield minus the 2-year yield; KCFSI changes are index-point differences."
-        : theme.id === "real_economy"
-          ? "Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago."
-          : "Inflation indicators have not been added yet.";
+      $("footnote").textContent = theme.id === "real_economy"
+        ? "Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago."
+        : "";
       const cards = $("cards"); cards.dataset.theme = theme.id; cards.replaceChildren();
       if (!theme.indicator_ids.length) {
         const empty = document.createElement("div"); empty.className = "empty-state";
