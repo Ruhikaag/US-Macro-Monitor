@@ -614,6 +614,7 @@
       if (frequency === "D" && /^\d{4}-\d{2}-\d{2}$/.test(period)) return [period, period];
       throw new Error(`Invalid observation period: ${period}`);
     }
+    const exportPoints = item => item.export_history || item.history || [];
     function exportGroups() {
       if (!snapshot) return [];
       const seen = new Set();
@@ -622,7 +623,7 @@
       return groups.map(group => ({
         label: group.label,
         items: group.ids.filter(id => {
-          if (seen.has(id) || !snapshot.indicators?.[id]?.history?.some(point => point.value !== null && Number.isFinite(Number(point.value)))) return false;
+          if (seen.has(id) || !exportPoints(snapshot.indicators?.[id] || {}).some(point => point.value !== null && Number.isFinite(Number(point.value)))) return false;
           seen.add(id); return true;
         }).map(id => snapshot.indicators[id]),
       })).filter(group => group.items.length);
@@ -640,7 +641,7 @@
           input.className = "export-indicator";
           const name = document.createElement("span"); name.textContent = `${item.title} (${item.frequency})`;
           label.append(input, name); fieldset.append(label);
-          for (const point of item.history) {
+          for (const point of exportPoints(item)) {
             if (point.value === null || !Number.isFinite(Number(point.value))) continue;
             const [start, end] = periodBounds(point, item.frequency_code);
             if (!first || start < first) first = start;
@@ -671,7 +672,7 @@
       const quote = value => `"${String(value ?? "").replaceAll('"', '""')}"`;
       const rows = [["Indicator", "Period", "Chart measure", "Observation value", "Observation unit", "Metric 1", "Value 1", "Metric 2", "Value 2", "Metric 3", "Value 3"]];
       for (const item of selected) {
-        for (const point of item.history || []) {
+        for (const point of exportPoints(item)) {
           if (point.value === null || !Number.isFinite(Number(point.value))) continue;
           const [start, end] = periodBounds(point, item.frequency_code);
           if (end < from || start > to) continue;
