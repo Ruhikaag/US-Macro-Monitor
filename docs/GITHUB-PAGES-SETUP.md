@@ -15,12 +15,12 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
    - `GITHUB_PAGES_REPOSITORY` = `OWNER/REPOSITORY`
    - `GITHUB_PAGES_TOKEN` = the token value
    - `GITHUB_PAGES_BRANCH` = `main` (optional; this is the default)
-3. Close and reopen the dashboard helper so it receives the new environment variables. For the hidden scheduled task, check `outputs/haver_labor_dashboard.log` for a `Published dashboard snapshot to GitHub` entry after refresh completes.
-4. The helper publishes `docs/data/snapshot.json` after every successful hourly Haver check, including when indicator values are unchanged, so the public refresh timestamp stays current. Leave the PC awake, online, and the helper running for hourly checks and publication.
+3. Sign out and back in (or run `outputs/Open US Macro Monitor.bat`) so the hidden **US Macro Monitor** Windows scheduled task starts with your user environment variables. It runs `pythonw.exe` without a helper console and publishes when it starts, then hourly while you are signed in. The batch file opens the dashboard in a browser, but the scheduled task itself does not. Check `outputs/haver_labor_dashboard.log` for a `Published dashboard snapshot to GitHub` entry after a refresh.
+4. The helper publishes `docs/data/snapshot.json` after every successful hourly Haver check, including when indicator values are unchanged, so the public data-update timestamp stays current. Leave the PC awake, online, signed in, and the helper running for hourly checks and publication. If the PC is shut down, asleep, offline, or not signed in, the shared site retains the last published data and labels updates older than three hours as overdue. If Haver fails before its first successful refresh after restart, the helper leaves the last public snapshot intact rather than publishing empty data.
 
 ## Notes
 
-- GitHub Pages deployment can take a few minutes after each hourly snapshot commit. The page reloads the public JSON every minute.
+- GitHub Pages deployment can take a few minutes after each hourly snapshot commit. The page reloads the public JSON every minute. **Last data update** is the helper's latest successful Haver refresh and publication; **Checked** is when the viewer last retrieved the public snapshot, not a new data update.
 - The **Check updates** button reloads the latest published snapshot; it does not force a Haver refresh.
 - The local and GitHub Pages dashboards show the same headline indicators. The local page continues to use its Python API; GitHub Pages reads the published JSON snapshot.
 - The National Accounts (GDP) theme contains six quarterly series: real GDP, personal consumption expenditure, real private fixed investment, exports, imports, and real government consumption and investment. Each card shows the current and previous quarter's annualized growth and the year-over-year change.
