@@ -354,8 +354,12 @@
       lastSuccessAt = data.last_success_at || null;
       lastAttemptAt = data.last_attempt_at || null;
       const checkedText = lastCheckedAt ? `Checked ${lastCheckedAt.toLocaleTimeString()}` : "Not checked yet";
-      const publishedText = stamp ? `Data published ${new Date(stamp).toLocaleString()}` : "No published data yet";
-      $("updated").textContent = `${checkedText} · ${publishedText}`;
+      const publishedAt = stamp ? new Date(stamp) : null;
+      const overdue = publishedAt && Number.isFinite(publishedAt.getTime()) && Date.now() - publishedAt.getTime() > 3 * 60 * 60 * 1000;
+      const publishedText = publishedAt && Number.isFinite(publishedAt.getTime())
+        ? `${overdue ? "Update overdue — last data update" : "Last data update"} ${publishedAt.toLocaleString()}`
+        : "No published data yet";
+      $("updated").textContent = `${publishedText} · ${checkedText}`;
       const box = $("error");
       if (data.error) { box.textContent = `Data update issue: ${data.error}. Showing the last available data, if any.`; box.hidden = false; }
       else if (indicators.some(item => item.error)) { box.textContent = "Some series could not be retrieved. The affected tiles are marked unavailable."; box.hidden = false; }
