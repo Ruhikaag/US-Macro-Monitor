@@ -268,9 +268,10 @@
     <form id="chart-controls" class="chart-controls">
       <label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label>
       <label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label>
-      <div id="combo-options" hidden><label>Right-axis measure <select id="combo-measure"></select></label><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label></div>
+      <div id="combo-options" hidden><label>Right-axis measure <select id="combo-measure"></select></label><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis decimals <input id="chart-right-decimals" type="number" min="0" max="12" step="1" placeholder="Auto"></label></div>
       <label>X-axis from <input id="chart-from" type="date" required></label><label>X-axis to <input id="chart-to" type="date" required></label>
       <label>Y-axis minimum <input id="chart-min" type="number" step="any" placeholder="Auto"></label><label>Y-axis maximum <input id="chart-max" type="number" step="any" placeholder="Auto"></label>
+      <label>Left Y-axis decimals <input id="chart-decimals" type="number" min="0" max="12" step="1" placeholder="Auto"></label>
       <button class="chart-export-button" type="submit">Apply axes</button><button class="chart-export-button" id="reset-chart" type="button">Reset</button>
     </form>
     <p id="chart-status" role="status" aria-live="polite"></p>
@@ -287,7 +288,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=combo-20261009"></script>
+  <script src="chart-tools.js?v=axis-decimals-20261009"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];

@@ -22,6 +22,7 @@ function changeComboIndicator() {
   const item = snapshot?.indicators?.[$("combo-indicator").value];
   $("combo-options").hidden = !item;
   $("chart-right-min").value = ""; $("chart-right-max").value = "";
+  $("chart-right-decimals").value = "";
   if (item) fillChartMeasures(item, "combo-measure");
   applyChartAxes();
 }
@@ -46,7 +47,24 @@ function chartRange(item, options) {
   }
   const customDigits = [options.low, options.high].reduce((digits, value) => Math.max(digits, (String(value).split(".")[1] || "").length), 0);
   const digits = Math.min(12, Math.max(2, customDigits, Math.ceil(-Math.log10(high - low)) + 2));
-  return { rows, low, high, digits };
+  const decimals = options.decimals === undefined || options.decimals === "" ? null : Number(options.decimals);
+  if (decimals !== null && (!Number.isInteger(decimals) || decimals < 0 || decimals > 12)) {
+    throw new Error("Decimal places must be a whole number from 0 to 12, or blank for Auto.");
+  }
+  return { rows, low, high, digits, decimals };
+}
+
+function axisTickLabel(value, view, valueStyle) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: view.decimals ?? view.digits,
+    minimumFractionDigits: view.decimals ?? (valueStyle === "decimal2" ? 2 : 0),
+  }).format(value);
+}
+
+function axisTickNode(label, attrs) {
+  return svgNode("text", {
+    ...attrs, ...(label.length > 11 ? { textLength: 72, lengthAdjust: "spacingAndGlyphs" } : {}),
+  }, label);
 }
 
 function chartMessage(message, error = false) {
@@ -91,6 +109,8 @@ function resetChartAxes() {
   $("chart-to").value = rows.length ? periodBounds(rows[rows.length - 1], activeChartItem.frequency_code)[1] : "";
   $("chart-min").value = "";
   $("chart-max").value = "";
+  $("chart-decimals").value = "";
+  $("chart-right-decimals").value = "";
   applyChartAxes();
 }
 
@@ -101,6 +121,7 @@ function applyChartAxes(event) {
     chartView = chartRange(item, {
       from: $("chart-from").value, to: $("chart-to").value,
       low: $("chart-min").value, high: $("chart-max").value,
+      decimals: $("chart-decimals").value,
     });
     chartView.item = item;
     if ($("combo-indicator").value) {
@@ -110,6 +131,7 @@ function applyChartAxes(event) {
       const second = chartRange(secondItem, {
         from: $("chart-from").value, to: $("chart-to").value,
         low: $("chart-right-min").value, high: $("chart-right-max").value,
+        decimals: $("chart-right-decimals").value,
       });
       second.item = secondItem;
       chartView.second = second;
@@ -138,7 +160,7 @@ function drawTrend(item) {
   svg.replaceChildren();
   svg.hidden = false;
   $("chart-empty").hidden = true;
-  const { rows, low, high, digits } = chartView;
+  const { rows, low, high } = chartView;
   const second = chartView.second;
   const width = 900, height = 390, margin = { top: second ? 64 : 20, right: second ? 92 : 22, bottom: 54, left: 92 };
   const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
@@ -163,12 +185,12 @@ function drawTrend(item) {
   for (let tick = 0; tick <= 4; tick++) {
     const value = high - (high - low) * tick / 4, yy = y(value);
     svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line" }));
-    const label = new Intl.NumberFormat("en-US", { maximumFractionDigits: digits, minimumFractionDigits: valueStyle === "decimal2" ? 2 : 0 }).format(value);
-    svg.append(svgNode("text", { x: margin.left - 10, y: yy + 4, "text-anchor": "end" }, label));
+    const label = axisTickLabel(value, chartView, valueStyle);
+    svg.append(axisTickNode(label, { x: margin.left - 10, y: yy + 4, "text-anchor": "end" }));
     if (second) {
       const rightValue = second.high - (second.high - second.low) * tick / 4;
-      const rightLabel = new Intl.NumberFormat("en-US", { maximumFractionDigits: second.digits, minimumFractionDigits: second.item.chart_value_style === "decimal2" ? 2 : 0 }).format(rightValue);
-      svg.append(svgNode("text", { x: width - margin.right + 12, y: yy + 4, style: "fill:#86bc25" }, rightLabel));
+      const rightLabel = axisTickLabel(rightValue, second, second.item.chart_value_style);
+      svg.append(axisTickNode(rightLabel, { x: width - margin.right + 12, y: yy + 4, style: "fill:#86bc25" }));
     }
   }
   const tickCount = second ? (lastDate === firstDate ? 1 : 6) : Math.min(6, rows.length);
