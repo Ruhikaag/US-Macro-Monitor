@@ -2,7 +2,7 @@ let chartView = null;
 
 function tileTitle(title) {
   const text = title.toLowerCase();
-  return text.charAt(0).toUpperCase() + text.slice(1);
+  return (text.charAt(0).toUpperCase() + text.slice(1)).replace(/\bgdp\b/gi, "GDP");
 }
 
 function selectChartTab(custom) {
