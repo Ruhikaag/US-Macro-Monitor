@@ -243,7 +243,7 @@ function drawTrend(item) {
       if (side === "left" || !chartView.axes.left) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line" }));
       const label = axisTickLabel(value, axis, axis.item.chart_value_style || valueStyle);
       svg.append(axisTickNode(label, { x: side === "left" ? margin.left - 10 : width - margin.right + 12, y: yy + 4,
-        "text-anchor": side === "left" ? "end" : "start", "data-axis": side, style: `fill:${axis.color}` }));
+        "text-anchor": side === "left" ? "end" : "start", "data-axis": side, style: "fill:#ffffff" }));
     }
   }
   const tickCount = second ? (lastDate === firstDate ? 1 : 6) : Math.min(6, rows.length);
@@ -251,7 +251,7 @@ function drawTrend(item) {
     const index = Math.round(tick * (rows.length - 1) / Math.max(tickCount - 1, 1));
     const position = second ? margin.left + tick * plotW / Math.max(tickCount - 1, 1) : x(index);
     const label = second ? new Date(firstDate + (lastDate - firstDate) * tick / Math.max(tickCount - 1, 1)).toISOString().slice(0, 10) : rows[index].period;
-    svg.append(svgNode("text", { x: position, y: height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle" }, fmtPeriod(label)));
+    svg.append(svgNode("text", { x: position, y: height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", style: "fill:#ffffff" }, fmtPeriod(label)));
   }
   const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
   const endpointPadding = 9;
