@@ -30,7 +30,7 @@ function chartMessage(message, error = false) {
 }
 
 function enableChartExports(enabled) {
-  for (const id of ["download-chart-svg", "download-chart-png", "copy-chart", "download-chart-csv"]) {
+  for (const id of ["copy-chart", "download-chart-csv"]) {
     $(id).disabled = !enabled;
   }
 }
@@ -125,7 +125,7 @@ function drawTrend(item) {
 }
 
 function chartSvgSource() {
-  if (!chartView || $("trend-chart").hidden) throw new Error("Apply valid axes before exporting the chart.");
+  if (!chartView || $("trend-chart").hidden) throw new Error("Apply valid axes before copying the chart.");
   const svg = $("trend-chart").cloneNode(true);
   svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   svg.setAttribute("viewBox", "0 0 900 460");
@@ -169,29 +169,17 @@ function chartPng(source) {
   });
 }
 
-function downloadChartSvg() {
-  try { downloadChartBlob(new Blob([chartSvgSource()], { type: "image/svg+xml;charset=utf-8" }), "svg"); }
-  catch (error) { chartMessage(error.message, true); console.error("Chart SVG export failed", error); }
-}
-
-async function downloadChartPng() {
-  try {
-    downloadChartBlob(await chartPng(chartSvgSource()), "png");
-    chartMessage("PNG downloaded.");
-  } catch (error) { chartMessage(error.message, true); console.error("Chart PNG export failed", error); }
-}
-
 async function copyChart() {
   try {
     if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
-      throw new Error("Copy image is unavailable in this browser. Use Download PNG instead.");
+      throw new Error("Copy image is unavailable. Use a browser that supports copying images, such as Chrome or Edge.");
     }
     const png = chartPng(chartSvgSource());
     const image = new ClipboardItem({ "image/png": png });
     await Promise.all([navigator.clipboard.write([image]), png]);
     chartMessage("Chart copied as an image. Paste it into your document or presentation.");
   } catch (error) {
-    chartMessage(`Could not copy the chart: ${error.message} Use Download PNG instead.`, true);
+    chartMessage(`Could not copy the chart: ${error.message} Check your browser's clipboard permission and try again.`, true);
     console.error("Chart copy failed", error);
   }
 }

@@ -262,7 +262,7 @@
     <h2>DI Publications</h2><p>Content will be added later.</p>
   </section>
   <dialog id="trend-dialog" aria-labelledby="trend-title">
-    <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="copy-chart" type="button">Copy chart</button><button class="chart-export-button" id="download-chart-png" type="button">Download PNG</button><button class="chart-export-button" id="download-chart-svg" type="button">Download SVG</button><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
+    <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="copy-chart" type="button">Copy chart</button><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
     <form id="chart-controls" class="chart-controls">
       <label>X-axis from <input id="chart-from" type="date" required></label><label>X-axis to <input id="chart-to" type="date" required></label>
       <label>Y-axis minimum <input id="chart-min" type="number" step="any" placeholder="Auto"></label><label>Y-axis maximum <input id="chart-max" type="number" step="any" placeholder="Auto"></label>
@@ -618,15 +618,13 @@
       button.disabled = false; button.textContent = "Check updates";
     }
     $("close-trend").addEventListener("click", () => $("trend-dialog").close());
-    $("download-chart-svg").addEventListener("click", downloadChartSvg);
-    $("download-chart-png").addEventListener("click", downloadChartPng);
     $("copy-chart").addEventListener("click", copyChart);
     $("download-chart-csv").addEventListener("click", downloadChartCsv);
     $("chart-controls").addEventListener("submit", applyChartAxes);
     $("reset-chart").addEventListener("click", resetChartAxes);
     $("chart-controls").addEventListener("input", () => {
       enableChartExports(false);
-      chartMessage("Choose Apply axes to update the preview before downloading or copying.");
+      chartMessage("Choose Apply axes to update the preview before copying or exporting data.");
     });
     $("trend-dialog").addEventListener("click", event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
     $("refresh").addEventListener("click", refreshNow);
