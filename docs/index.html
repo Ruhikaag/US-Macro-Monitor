@@ -504,7 +504,9 @@
       renderStory(data, theme);
       $("footnote").textContent = theme.id === "real_economy"
         ? "Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago."
-        : "";
+        : theme.id === "consumer_spending"
+          ? "Income, earnings, spending and retail sales show monthly, 3-month and 12-month percent changes in seasonally adjusted source levels. The personal saving rate shows its level and changes in percentage points. Earnings history starts in March 2006. Use chart measures to view source levels or other growth rates."
+          : "";
       const cards = $("cards"); cards.dataset.theme = theme.id; cards.replaceChildren();
       if (!theme.indicator_ids.length) {
         const empty = document.createElement("div"); empty.className = "empty-state";
