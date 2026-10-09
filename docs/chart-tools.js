@@ -1,5 +1,13 @@
 let chartView = null;
 
+function chartMeasureItem(item) {
+  if (!item.chart_measures) return item;
+  const measure = item.chart_measures[$("chart-measure").value];
+  if (!measure) throw new Error("Choose an available chart measure.");
+  return { ...item, chart_label: measure.label, chart_unit: measure.unit,
+    chart_value_style: measure.value_style, export_history: measure.history };
+}
+
 function chartRange(item, options) {
   if (!options.from || !options.to || options.from > options.to) {
     throw new Error("Choose a valid date range with From on or before To.");
@@ -38,6 +46,13 @@ function enableChartExports(enabled) {
 function openTrend(item) {
   activeChartItem = item;
   $("trend-title").textContent = item.title;
+  const selector = $("chart-measure"); selector.replaceChildren();
+  for (const [key, measure] of Object.entries(item.chart_measures || { current: { label: item.chart_label || "Current measure" } })) {
+    const option = document.createElement("option"); option.value = key; option.textContent = measure.label;
+    selector.append(option);
+  }
+  selector.value = item.default_chart_measure || "current";
+  selector.disabled = !item.chart_measures;
   const available = exportPoints(item).filter(point => point.value !== null && Number.isFinite(Number(point.value)));
   for (const id of ["chart-from", "chart-to"]) {
     $(id).min = available.length ? periodBounds(available[0], item.frequency_code)[0] : "";
@@ -48,6 +63,7 @@ function openTrend(item) {
 }
 
 function resetChartAxes() {
+  $("chart-measure").value = activeChartItem.default_chart_measure || "current";
   const rows = activeChartItem.history || [];
   $("chart-from").value = rows.length ? periodBounds(rows[0], activeChartItem.frequency_code)[0] : "";
   $("chart-to").value = rows.length ? periodBounds(rows[rows.length - 1], activeChartItem.frequency_code)[1] : "";
@@ -59,15 +75,18 @@ function resetChartAxes() {
 function applyChartAxes(event) {
   if (event) event.preventDefault();
   try {
-    chartView = chartRange(activeChartItem, {
+    const item = chartMeasureItem(activeChartItem);
+    chartView = chartRange(item, {
       from: $("chart-from").value, to: $("chart-to").value,
       low: $("chart-min").value, high: $("chart-max").value,
     });
+    chartView.item = item;
     const rows = chartView.rows;
-    $("trend-subtitle").textContent = `${activeChartItem.frequency} · ${activeChartItem.chart_label || activeChartItem.title} (${activeChartItem.chart_unit || activeChartItem.unit}) · ${fmtPeriod(rows[0].period)}–${fmtPeriod(rows[rows.length - 1].period)}`;
-    drawTrend(activeChartItem);
+    $("trend-subtitle").textContent = `${item.frequency} · ${item.chart_label || item.title} (${item.chart_unit || item.unit}) · ${fmtPeriod(rows[0].period)}–${fmtPeriod(rows[rows.length - 1].period)}`;
+    drawTrend(item);
     enableChartExports(true);
-    chartMessage("Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.");
+    const description = activeChartItem.chart_measures?.[$("chart-measure").value]?.description || "";
+    chartMessage(`${description} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.`);
   } catch (error) {
     chartView = null;
     $("trend-chart").hidden = true;
@@ -187,7 +206,7 @@ async function copyChart() {
 
 function downloadChartCsv() {
   if (!chartView) { chartMessage("Apply valid axes before exporting data.", true); return; }
-  const item = activeChartItem;
+  const item = chartView.item;
   const rows = [["Indicator", "Ticker", "Measure", "Period", "Value", "Unit"]];
   for (const point of chartView.rows) {
     if (point.value === null || !Number.isFinite(Number(point.value))) continue;
