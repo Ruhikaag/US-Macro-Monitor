@@ -101,7 +101,8 @@ function drawTrend(item) {
     svg.append(svgNode("text", { x: x(index), y: height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle" }, fmtPeriod(rows[index].period)));
   }
   const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
-  clip.append(svgNode("rect", { x: margin.left, y: margin.top, width: plotW, height: plotH }));
+  const endpointPadding = 9;
+  clip.append(svgNode("rect", { x: margin.left - endpointPadding, y: margin.top, width: plotW + 2 * endpointPadding, height: plotH }));
   defs.append(clip); svg.append(defs);
   const plot = svgNode("g", { "clip-path": "url(#chart-plot-clip)" });
   let path = "", drawing = false;
