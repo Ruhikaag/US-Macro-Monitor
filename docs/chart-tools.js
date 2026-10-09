@@ -46,10 +46,10 @@ function chartRange(item, options) {
     throw new Error("Y-axis minimum must be a finite number below the maximum.");
   }
   const customDigits = [options.low, options.high].reduce((digits, value) => Math.max(digits, (String(value).split(".")[1] || "").length), 0);
-  const digits = Math.min(12, Math.max(2, customDigits, Math.ceil(-Math.log10(high - low)) + 2));
+  const digits = Math.min(3, Math.max(2, customDigits, Math.ceil(-Math.log10(high - low)) + 2));
   const decimals = options.decimals === undefined || options.decimals === "" ? null : Number(options.decimals);
-  if (decimals !== null && (!Number.isInteger(decimals) || decimals < 0 || decimals > 12)) {
-    throw new Error("Decimal places must be a whole number from 0 to 12, or blank for Auto.");
+  if (decimals !== null && (!Number.isInteger(decimals) || decimals < 0 || decimals > 3)) {
+    throw new Error("Decimal places must be a whole number from 0 to 3, or blank for Auto.");
   }
   return { rows, low, high, digits, decimals };
 }
