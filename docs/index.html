@@ -83,6 +83,12 @@
     .chart-controls input, .chart-controls select { width: 140px; padding: 7px; border: 1px solid #4a6556; border-radius: 5px; background: #101714; color: #edf4f0; color-scheme: dark; font: inherit; }
     #combo-indicator { width: 230px; max-width: 100%; }
     #combo-options { display: flex; flex-wrap: wrap; gap: 10px; }
+    .chart-tabs { display: flex; gap: 8px; padding: 10px 22px; }
+    .chart-tabs [aria-selected="true"] { border-color: #86bc25; color: #b9fa38; }
+    .chart-controls fieldset { width: 100%; min-width: 0; margin: 0; padding: 12px; border: 1px solid #34483d; border-radius: 6px; }
+    .chart-controls legend { color: #b9fa38; font-weight: 700; font-size: 13px; }
+    .chart-option-row { display: flex; flex-wrap: wrap; gap: 10px; margin-block: 8px; }
+    .chart-controls[hidden], #combo-options[hidden] { display: none; }
     #chart-status { margin: 9px 22px; font-size: 11px; }
     .chart-export-button { border: 1px solid #557c61; border-radius: 999px; padding: 8px 12px; background: #26382d; color: #e5f4dd; font-size: 10px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
     .chart-export-button:hover { border-color: #b9fa38; background: #314832; }
@@ -265,17 +271,21 @@
   </section>
   <dialog id="trend-dialog" aria-labelledby="trend-title">
     <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="copy-chart" type="button">Copy chart</button><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
-    <form id="chart-controls" class="chart-controls">
-      <label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label>
-      <label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label>
-      <div id="combo-options" hidden><label>Right-axis measure <select id="combo-measure"></select></label><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis decimals <input id="chart-right-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label></div>
-      <label>X-axis from <input id="chart-from" type="date" required></label><label>X-axis to <input id="chart-to" type="date" required></label>
-      <label>Y-axis minimum <input id="chart-min" type="number" step="any" placeholder="Auto"></label><label>Y-axis maximum <input id="chart-max" type="number" step="any" placeholder="Auto"></label>
-      <label>Left Y-axis decimals <input id="chart-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label>
-      <button class="chart-export-button" type="submit">Apply axes</button><button class="chart-export-button" id="reset-chart" type="button">Reset</button>
+    <div class="chart-tabs" role="tablist" aria-label="Chart settings"><button id="chart-tab" class="chart-export-button" type="button" role="tab" aria-selected="true" aria-controls="chart-preview">Chart</button><button id="custom-tab" class="chart-export-button" type="button" role="tab" aria-selected="false" aria-controls="chart-controls">Custom</button></div>
+    <form id="chart-controls" class="chart-controls" role="tabpanel" aria-labelledby="custom-tab" hidden>
+      <fieldset><legend>Axis options</legend>
+        <div class="chart-option-row"><label>X-axis from <input id="chart-from" type="date" required></label><label>X-axis to <input id="chart-to" type="date" required></label></div>
+        <div class="chart-option-row"><label>Left Y-axis minimum <input id="chart-min" type="number" step="any" placeholder="Auto"></label><label>Left Y-axis maximum <input id="chart-max" type="number" step="any" placeholder="Auto"></label><label>Left Y-axis interval <input id="chart-interval" type="number" step="any" placeholder="Auto"></label><label>Left Y-axis decimals <input id="chart-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label></div>
+        <div class="chart-option-row"><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis interval <input id="chart-right-interval" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis decimals <input id="chart-right-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label></div>
+      </fieldset>
+      <fieldset><legend>Indicators</legend>
+        <div class="chart-option-row"><label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label><label>Original indicator axis <select id="chart-axis"><option value="left">Left</option><option value="right">Right</option></select></label></div>
+        <div class="chart-option-row"><label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label><div id="combo-options" hidden><label>Added indicator measure <select id="combo-measure"></select></label><label>Added indicator axis <select id="combo-axis"><option value="left">Left</option><option value="right" selected>Right</option></select></label></div></div>
+      </fieldset>
+      <button class="chart-export-button" type="submit">Apply changes</button><button class="chart-export-button" id="reset-chart" type="button">Reset</button>
     </form>
     <p id="chart-status" role="status" aria-live="polite"></p>
-    <div class="chart-wrap"><svg id="trend-chart" viewBox="0 0 900 390" role="img" aria-labelledby="trend-title trend-subtitle"></svg><div id="chart-empty" hidden>No history is available to chart for this series.</div></div>
+    <div id="chart-preview" class="chart-wrap" role="tabpanel" aria-labelledby="chart-tab"><svg id="trend-chart" viewBox="0 0 900 390" role="img" aria-labelledby="trend-title trend-subtitle"></svg><div id="chart-empty" hidden>No history is available to chart for this series.</div></div>
   </dialog>
   <dialog id="export-dialog" aria-labelledby="export-title">
     <div class="dialog-head"><div><h2 id="export-title">Export indicator data</h2><p>Choose dates and indicators for your CSV.</p></div><button class="close-button" id="close-export" type="button">Close</button></div>
@@ -288,7 +298,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=axis-decimals3-20261009"></script>
+  <script src="chart-tools.js?v=custom-axes-20261009"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -627,19 +637,20 @@
     $("copy-chart").addEventListener("click", copyChart);
     $("download-chart-csv").addEventListener("click", downloadChartCsv);
     $("chart-controls").addEventListener("submit", applyChartAxes);
+    setupChartCustomization();
     $("reset-chart").addEventListener("click", resetChartAxes);
     $("combo-indicator").addEventListener("change", changeComboIndicator);
     $("combo-measure").addEventListener("change", () => {
-      $("chart-right-min").value = ""; $("chart-right-max").value = "";
+      clearChartAxisBounds($("combo-axis").value);
       applyChartAxes();
     });
     $("chart-measure").addEventListener("change", () => {
-      $("chart-min").value = ""; $("chart-max").value = "";
+      clearChartAxisBounds($("chart-axis").value);
       applyChartAxes();
     });
     $("chart-controls").addEventListener("input", () => {
       enableChartExports(false);
-      chartMessage("Choose Apply axes to update the preview before copying or exporting data.");
+      chartMessage("Choose Apply changes to update the preview before copying or exporting data.");
     });
     $("trend-dialog").addEventListener("click", event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
     $("refresh").addEventListener("click", refreshNow);
