@@ -1,5 +1,10 @@
 let chartView = null;
 
+function tileTitle(title) {
+  const text = title.toLowerCase();
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 function selectChartTab(custom) {
   $("chart-controls").hidden = !custom;
   $("chart-preview").hidden = custom;

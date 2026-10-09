@@ -299,7 +299,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=chart-white-axes-20261009"></script>
+  <script src="chart-tools.js?v=tile-sentence-case-20261009"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -368,9 +368,9 @@
       for (const tile of HEADLINE_TILES) {
         const item = data.indicators?.[tile.id];
         const card = document.createElement("article"); card.className = "indicator-card headline-card"; card.tabIndex = 0; card.setAttribute("role", "button");
-        card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tile.title} chart`);
+        card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tileTitle(tile.title)} chart`);
         const head = document.createElement("div"); head.className = "card-head";
-        const category = document.createElement("h3"); category.textContent = tile.title;
+        const category = document.createElement("h3"); category.textContent = tileTitle(tile.title);
         const period = document.createElement("span"); period.className = "card-period";
         period.textContent = item?.period
           ? item.frequency_code === "D"
@@ -436,9 +436,9 @@
     function renderCard(item) {
       const card = document.createElement("article");
       card.className = "indicator-card"; card.tabIndex = 0; card.setAttribute("role", "button");
-      card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${item.title} chart`);
+      card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tileTitle(item.title)} chart`);
       const head = document.createElement("div"); head.className = "card-head";
-      const title = document.createElement("h3"); title.textContent = item.title;
+      const title = document.createElement("h3"); title.textContent = tileTitle(item.title);
       const period = document.createElement("span"); period.className = "card-period"; period.textContent = item.period_label || fmtPeriod(item.period);
       head.append(title, period);
       const row = document.createElement("div"); row.className = "metric-row";
