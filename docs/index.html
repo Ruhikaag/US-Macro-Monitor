@@ -81,6 +81,8 @@
     .chart-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; padding: 12px 22px; border-block: 1px solid #34483d; }
     .chart-controls label { display: grid; gap: 4px; font-size: 11px; color: #c1cec7; }
     .chart-controls input, .chart-controls select { width: 140px; padding: 7px; border: 1px solid #4a6556; border-radius: 5px; background: #101714; color: #edf4f0; color-scheme: dark; font: inherit; }
+    #combo-indicator { width: 230px; max-width: 100%; }
+    #combo-options { display: flex; flex-wrap: wrap; gap: 10px; }
     #chart-status { margin: 9px 22px; font-size: 11px; }
     .chart-export-button { border: 1px solid #557c61; border-radius: 999px; padding: 8px 12px; background: #26382d; color: #e5f4dd; font-size: 10px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
     .chart-export-button:hover { border-color: #b9fa38; background: #314832; }
@@ -265,6 +267,8 @@
     <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="copy-chart" type="button">Copy chart</button><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
     <form id="chart-controls" class="chart-controls">
       <label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label>
+      <label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label>
+      <div id="combo-options" hidden><label>Right-axis measure <select id="combo-measure"></select></label><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label></div>
       <label>X-axis from <input id="chart-from" type="date" required></label><label>X-axis to <input id="chart-to" type="date" required></label>
       <label>Y-axis minimum <input id="chart-min" type="number" step="any" placeholder="Auto"></label><label>Y-axis maximum <input id="chart-max" type="number" step="any" placeholder="Auto"></label>
       <button class="chart-export-button" type="submit">Apply axes</button><button class="chart-export-button" id="reset-chart" type="button">Reset</button>
@@ -283,7 +287,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=rate-levels-20261009"></script>
+  <script src="chart-tools.js?v=combo-20261009"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -623,6 +627,11 @@
     $("download-chart-csv").addEventListener("click", downloadChartCsv);
     $("chart-controls").addEventListener("submit", applyChartAxes);
     $("reset-chart").addEventListener("click", resetChartAxes);
+    $("combo-indicator").addEventListener("change", changeComboIndicator);
+    $("combo-measure").addEventListener("change", () => {
+      $("chart-right-min").value = ""; $("chart-right-max").value = "";
+      applyChartAxes();
+    });
     $("chart-measure").addEventListener("change", () => {
       $("chart-min").value = ""; $("chart-max").value = "";
       applyChartAxes();
