@@ -223,7 +223,7 @@
       .hero h1 { font-size: 46px; } .cards { grid-template-columns: 1fr; gap: 8px; } .indicator-card { padding: 12px; }
       .workspace-head h2 { font-size: 24px; } .metric-label { font-size: 8px; }
     }
-    *, *::before, *::after { font-family: "Calibri Light", Calibri, "Segoe UI", Arial, sans-serif !important; font-weight: 300 !important; }
+    #trend-chart text { font-family: "Calibri Light", Calibri, "Segoe UI", Arial, sans-serif; font-weight: 300; }
   </style>
 </head>
 <body>
@@ -299,7 +299,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=calibri-light-20261009"></script>
+  <script src="chart-tools.js?v=chart-calibri-light-20261009"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];

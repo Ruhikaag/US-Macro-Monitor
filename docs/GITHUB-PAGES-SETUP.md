@@ -20,7 +20,7 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
-- All dashboard text, controls, chart labels, and copied chart images use Calibri Light at light weight. Calibri, Segoe UI, Arial, and sans-serif are fallbacks for devices without Calibri Light installed. Fonts are not bundled or downloaded; existing sizes, colors, and layout are preserved.
+- Chart axis labels, legends, and copied chart images use Calibri Light at light weight. The rest of the dashboard retains its original fonts. Calibri, Segoe UI, Arial, and sans-serif are chart fallbacks for devices without Calibri Light installed. Fonts are not bundled or downloaded; existing sizes, colors, and layout are preserved.
 
 - GitHub Pages deployment can take a few minutes after each hourly snapshot commit. The page reloads the public JSON every minute. **Last data update** is the helper's latest successful Haver refresh and publication; **Checked** is when the viewer last retrieved the public snapshot, not a new data update.
 - The **Check updates** button reloads the latest published snapshot; it does not force a Haver refresh.
