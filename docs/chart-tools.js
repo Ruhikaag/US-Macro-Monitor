@@ -295,7 +295,7 @@ function chartSvgSource() {
   const graph = svgNode("g", { transform: "translate(0 70)" });
   graph.append(...svg.childNodes);
   graph.querySelectorAll(".hover-target").forEach(node => node.remove());
-  const style = svgNode("style", {}, "#trend-chart text{fill:#b1c0b8;font:11px 'Segoe UI',Arial,sans-serif}#trend-chart .grid-line{stroke:#34443d;stroke-width:1}#trend-chart .series-line{fill:none;stroke:#43c5ca;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}#trend-chart .latest-point{fill:#b9fa38;stroke:#19221f;stroke-width:2}#trend-chart .image-title{fill:#edf4f0;font:bold 20px 'Segoe UI',Arial,sans-serif}");
+  const style = svgNode("style", {}, "#trend-chart text{fill:#b1c0b8;font:300 11px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif}#trend-chart .grid-line{stroke:#34443d;stroke-width:1}#trend-chart .series-line{fill:none;stroke:#43c5ca;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}#trend-chart .latest-point{fill:#b9fa38;stroke:#19221f;stroke-width:2}#trend-chart .image-title{fill:#edf4f0;font-size:20px}");
   svg.replaceChildren(style, svgNode("rect", { width: 900, height: 460, fill: "#19221f" }),
     svgNode("text", { x: 22, y: 28, class: "image-title" }, $("trend-title").textContent),
     svgNode("text", { x: 22, y: 50 }, $("trend-subtitle").textContent), graph);
