@@ -234,6 +234,25 @@
     .search-result-title { color: #edf4f0; font-size: 15px; font-weight: 700; }
     .search-result:hover { border-color: #86bc25; }
     .search-result:focus-visible, #indicator-query:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .glance-page { max-width: 1420px; margin: auto; padding: 42px 28px; }
+    .glance-intro { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; align-items: center; }
+    .glance-intro h1 { margin: 0; font: 400 clamp(42px, 6vw, 68px)/.91 Georgia, "Times New Roman", serif; letter-spacing: -.045em; color: #fff; }
+    .glance-intro p, .glance-bottom p { color: #afc3b8; line-height: 1.6; }
+    .glance-live { border: 1px solid #49652d; border-radius: 12px; padding: 16px; color: #b9e874; background: #86bc2510; }
+    .glance-live p { margin: 8px 0 0; font-size: 11px; }
+    .glance-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #86bc25; margin-right: 6px; }
+    #panel-glance .headline-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 32px; }
+    #panel-glance .headline-card { --theme-accent: #86bc25; border: 1px solid #395042; border-top: 4px solid #86bc25; border-left: 1px solid #395042; padding: 24px; background: linear-gradient(145deg, #25351e, #151f1a); border-radius: 12px; min-height: 205px; }
+    #panel-glance .headline-card:nth-child(even) { border-top-color: #00a3ad; background: linear-gradient(145deg, #17363a, #151f1a); }
+    #panel-glance .headline-card .metric-value { font-size: 18px; margin-top: 12px; }
+    #panel-glance .headline-card .card-period { color: #c5ded1; }
+    #panel-glance .headline-card .card-foot { margin-top: 20px; }
+    .glance-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; padding: 24px 0; border-top: 1px solid #34443d; }
+    .glance-bottom h2 { color: #86bc25; font: 400 28px/1.1 Georgia, serif; }
+    .glance-note { color: #90a49a; font-size: 11px; }
+    @media (max-width: 720px) { .glance-page { padding: 28px 16px; } #panel-glance .headline-grid { grid-template-columns: 1fr 1fr; } .glance-bottom { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { #panel-glance .headline-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) { .glance-intro h1 { font-size: 46px; } }
   </style>
 </head>
 <body>
@@ -243,17 +262,23 @@
     <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="search" type="button" aria-haspopup="dialog">Search</button><button class="text-button" id="refresh">Check updates</button><button class="text-button" id="export">Export CSV ↓</button></div>
   </header>
   <nav class="primary-tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="primary-tab" id="tab-glance" type="button" role="tab" aria-selected="false" aria-controls="panel-glance" tabindex="-1">Economy at a Glance</button>
     <button class="primary-tab" id="tab-monitor" type="button" role="tab" aria-selected="true" aria-controls="panel-monitor" tabindex="0">Macro Monitor</button>
     <button class="primary-tab" id="tab-forecasts" type="button" role="tab" aria-selected="false" aria-controls="panel-forecasts" tabindex="-1">Economic Forecasts</button>
     <button class="primary-tab" id="tab-weekly" type="button" role="tab" aria-selected="false" aria-controls="panel-weekly" tabindex="-1">Weekly Updates</button>
     <button class="primary-tab" id="tab-publications" type="button" role="tab" aria-selected="false" aria-controls="panel-publications" tabindex="-1">DI Publications</button>
   </nav>
+  <section id="panel-glance" class="glance-page" role="tabpanel" aria-labelledby="tab-glance" hidden>
+    <div class="glance-intro"><div><p class="eyebrow">United States | Key economic signals</p><h1>Economy at a Glance</h1><p>A concise view of growth, consumers, prices, employment and policy.</p></div><div class="glance-live"><span class="glance-dot" aria-hidden="true"></span> Latest published data<p id="glance-updated">Waiting for the latest update...</p></div></div>
+    <div class="headline-grid" id="headline-grid" aria-label="Key US economic indicators" aria-live="polite"></div>
+    <div class="glance-bottom"><div><h2>Five signals. One economic picture.</h2><p>Select a signal to explore its history, compare indicators, or customize a chart.</p></div><div><h2>A broader view, coming next</h2><p>Space for additional major indicators as coverage expands.</p></div></div>
+    <p class="glance-note">Data refreshes hourly while the publishing system is online. Observation dates differ by indicator; these are the latest available releases, not real-time market quotes.</p>
+  </section>
   <section class="tab-panel" id="panel-monitor" role="tabpanel" aria-labelledby="tab-monitor">
   <section class="hero">
     <p class="eyebrow">United States economic indicators</p>
     <h1>US Macro<span>Monitor</span></h1>
     <p class="hero-copy">Your one-stop view of the economic indicators you need to watch.</p>
-    <div class="headline-grid" id="headline-grid" aria-label="Key US economic indicators" aria-live="polite"></div>
   </section>
   <main class="workspace">
     <div class="error" id="error" role="status" hidden></div>
@@ -313,7 +338,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=hide-tickers-20261012"></script>
+  <script src="chart-tools.js?v=glance-four-series-20261012"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -340,6 +365,7 @@
         }
       });
     });
+    selectPrimaryTab($("tab-glance"));
     const fmt = (value, style = "decimal1") => {
       if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
       let n = Number(value);
@@ -419,6 +445,7 @@
     function renderStatus(data) {
       const indicators = Object.values(data.indicators || {});
       const stamp = data.last_success_at || data.retrieved_at;
+      $("glance-updated").textContent = stamp ? `Last data update ${new Date(stamp).toLocaleString()}` : "Waiting for the latest update...";
       lastSuccessAt = data.last_success_at || null;
       lastAttemptAt = data.last_attempt_at || null;
       const checkedText = lastCheckedAt ? `Checked ${lastCheckedAt.toLocaleTimeString()}` : "Not checked yet";
@@ -519,9 +546,7 @@
       renderStory(data, theme);
       $("footnote").textContent = theme.id === "real_economy"
         ? "Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago."
-        : theme.id === "consumer_spending"
-          ? "Income, earnings, spending and retail sales show monthly, 3-month and 12-month percent changes in seasonally adjusted source levels. The personal saving rate shows its level and changes in percentage points. Earnings history starts in March 2006. Use chart measures to view source levels or other growth rates."
-          : "";
+        : "";
       const cards = $("cards"); cards.dataset.theme = theme.id; cards.replaceChildren();
       if (!theme.indicator_ids.length) {
         const empty = document.createElement("div"); empty.className = "empty-state";
@@ -657,7 +682,6 @@
     $("chart-controls").addEventListener("submit", applyChartAxes);
     setupChartCustomization();
     $("reset-chart").addEventListener("click", resetChartAxes);
-    $("combo-indicator").addEventListener("change", changeComboIndicator);
     $("combo-measure").addEventListener("change", () => {
       clearChartAxisBounds($("combo-axis").value);
       applyChartAxes();

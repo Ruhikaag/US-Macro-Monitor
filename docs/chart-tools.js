@@ -1,4 +1,10 @@
 let chartView = null;
+const CHART_SERIES_COLORS = ["#43c5ca", "#86bc25", "#b9fa38", "#f2a900", "#56b4e9", "#cc79a7"];
+const ADDITIONAL_SERIES_SLOTS = [
+  { key: "combo", indicator: "combo-indicator", options: "combo-options", measure: "combo-measure", axis: "combo-axis", type: "combo-type", color: "combo-color" },
+  { key: "combo2", indicator: "combo2-indicator", options: "combo2-options", measure: "combo2-measure", axis: "combo2-axis", type: "combo2-type", color: "combo2-color", container: "combo2-slot", add: "add-combo2" },
+  { key: "combo3", indicator: "combo3-indicator", options: "combo3-options", measure: "combo3-measure", axis: "combo3-axis", type: "combo3-type", color: "combo3-color", container: "combo3-slot", add: "add-combo3" },
+];
 
 function tileTitle(title) {
   const text = title.toLowerCase();
@@ -66,9 +72,42 @@ function selectChartTab(custom) {
 }
 
 function setupChartCustomization() {
+  const colorNames = ["Teal", "Deloitte green", "Light green", "Gold", "Blue", "Pink"];
+  const colorControl = (id, text) => {
+    const label = document.createElement("label"); label.textContent = text;
+    const select = document.createElement("select"); select.id = id;
+    CHART_SERIES_COLORS.forEach((color, index) => {
+      const option = document.createElement("option"); option.value = color; option.textContent = colorNames[index]; select.append(option);
+    });
+    label.append(select); return label;
+  };
+  $("chart-type").closest(".chart-option-row").append(colorControl("chart-color", "Original chart color "));
+  $("combo-options").append(colorControl("combo-color", "Added chart color "));
+  for (const slot of ADDITIONAL_SERIES_SLOTS.slice(1)) {
+    const row = $("combo-indicator").closest(".chart-option-row").cloneNode(true);
+    row.id = slot.container; row.hidden = true;
+    for (const node of row.querySelectorAll("[id]")) node.id = node.id.replace(/^combo-/, `${slot.key}-`);
+    row.querySelector("label").firstChild.textContent = slot.key === "combo2" ? "Add second indicator " : "Add third indicator ";
+    row.querySelector("select").setAttribute("aria-label", slot.key === "combo2" ? "Add second indicator" : "Add third indicator");
+    const button = document.createElement("button"); button.id = slot.add; button.type = "button"; button.className = "chart-export-button";
+    button.textContent = slot.key === "combo2" ? "Add second indicator" : "Add third indicator"; button.hidden = slot.key === "combo3";
+    $("combo-indicator").closest("fieldset").append(button, row);
+  }
   $("chart-tab").addEventListener("click", () => selectChartTab(false));
   $("custom-tab").addEventListener("click", () => selectChartTab(true));
-  for (const id of ["chart-axis", "combo-axis", "chart-type", "combo-type"]) $(id).addEventListener("change", () => applyChartAxes());
+  for (const id of ["chart-axis", "chart-type", "chart-color", ...ADDITIONAL_SERIES_SLOTS.flatMap(slot => [slot.axis, slot.type, slot.color])]) {
+    $(id).addEventListener("change", () => applyChartAxes());
+  }
+  for (const slot of ADDITIONAL_SERIES_SLOTS) {
+    $(slot.indicator).addEventListener("change", () => changeComboIndicator(slot.key));
+    if (slot.key !== "combo") {
+      $(slot.measure).addEventListener("change", () => {
+        clearChartAxisBounds($(slot.axis).value);
+        applyChartAxes();
+      });
+      $(slot.add).addEventListener("click", () => enableComboSlot(slot.key));
+    }
+  }
   const tabs = [$("chart-tab"), $("custom-tab")];
   tabs.forEach((tab, index) => tab.addEventListener("keydown", event => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
@@ -96,19 +135,62 @@ function fillChartMeasures(item, selectorId) {
   selector.disabled = !item.chart_measures || selector.options.length < 2;
 }
 
-function changeComboIndicator() {
-  const item = snapshot?.indicators?.[$("combo-indicator").value];
-  $("combo-options").hidden = !item;
-  clearChartAxisBounds($("combo-axis").value);
-  if (item) fillChartMeasures(item, "combo-measure");
+function enableComboSlot(key) {
+  const slot = ADDITIONAL_SERIES_SLOTS.find(candidate => candidate.key === key);
+  if (!slot?.container) return;
+  $(slot.container).hidden = false;
+  $(slot.add).hidden = true;
+  const next = ADDITIONAL_SERIES_SLOTS[ADDITIONAL_SERIES_SLOTS.indexOf(slot) + 1];
+  if (next?.add) $(next.add).hidden = false;
+}
+
+function resetComboSlots() {
+  for (const slot of ADDITIONAL_SERIES_SLOTS.slice(1)) {
+    $(slot.container).hidden = true;
+    $(slot.add).hidden = slot.key !== "combo2";
+  }
+}
+
+function refreshComboIndicatorOptions() {
+  const selected = new Set(ADDITIONAL_SERIES_SLOTS.map(slot => $(slot.indicator).value).filter(Boolean));
+  for (const slot of ADDITIONAL_SERIES_SLOTS) {
+    const selector = $(slot.indicator);
+    const previous = selector.value;
+    selector.replaceChildren();
+    const none = document.createElement("option"); none.value = ""; none.textContent = "None"; selector.append(none);
+    for (const candidate of Object.values(snapshot?.indicators || {})) {
+      if (candidate.id === activeChartItem.id || (selected.has(candidate.id) && candidate.id !== previous) ||
+          !exportPoints(candidate).some(point => point.value !== null && Number.isFinite(Number(point.value)))) continue;
+      const option = document.createElement("option"); option.value = candidate.id;
+      option.textContent = `${candidate.title} (${candidate.frequency})`; selector.append(option);
+    }
+    if ([...selector.options].some(option => option.value === previous)) selector.value = previous;
+    else selector.value = "";
+  }
+}
+
+function changeComboIndicator(key = "combo") {
+  const slot = ADDITIONAL_SERIES_SLOTS.find(candidate => candidate.key === key);
+  if (!slot) return;
+  refreshComboIndicatorOptions();
+  for (const candidate of ADDITIONAL_SERIES_SLOTS) {
+    const item = snapshot?.indicators?.[$(candidate.indicator).value];
+    $(candidate.options).hidden = !item;
+    if (item && $(candidate.measure).dataset.indicatorId !== item.id) {
+      fillChartMeasures(item, candidate.measure);
+      $(candidate.measure).dataset.indicatorId = item.id;
+    } else if (!item) $(candidate.measure).dataset.indicatorId = "";
+  }
+  clearChartAxisBounds($(slot.axis).value);
+  updateChartTypes();
   applyChartAxes();
 }
 
 function updateChartTypes() {
-  const combo = !!$("combo-indicator").value;
-  for (const id of ["chart-type", "combo-type"]) {
+  const combo = ADDITIONAL_SERIES_SLOTS.some(slot => !!$(slot.indicator).value);
+  for (const id of ["chart-type", ...ADDITIONAL_SERIES_SLOTS.map(slot => slot.type)]) {
     const horizontal = [...$(id).options].find(option => option.value === "bar");
-    horizontal.disabled = combo;
+    if (horizontal) horizontal.disabled = id !== "chart-type" || combo;
   }
 }
 
@@ -119,7 +201,7 @@ function clearChartAxisBounds(side) {
 
 function updateAxisOptions() {
   $("chart-right-options").hidden = $("chart-axis").value !== "right" &&
-    !($("combo-indicator").value && $("combo-axis").value === "right");
+    !ADDITIONAL_SERIES_SLOTS.some(slot => $(slot.indicator).value && $(slot.axis).value === "right");
   for (const input of $("chart-right-options").querySelectorAll("input")) input.disabled = $("chart-right-options").hidden;
 }
 
@@ -209,13 +291,8 @@ function openTrend(item) {
   activeChartItem = item;
   $("trend-title").textContent = item.title;
   fillChartMeasures(item, "chart-measure");
-  const combo = $("combo-indicator"); combo.replaceChildren();
-  const none = document.createElement("option"); none.value = ""; none.textContent = "None - single chart"; combo.append(none);
-  for (const candidate of Object.values(snapshot?.indicators || {})) {
-    if (candidate.id === item.id || !exportPoints(candidate).some(point => point.value !== null && Number.isFinite(Number(point.value)))) continue;
-    const option = document.createElement("option"); option.value = candidate.id;
-    option.textContent = `${candidate.title} (${candidate.frequency})`; combo.append(option);
-  }
+  for (const slot of ADDITIONAL_SERIES_SLOTS) $(slot.indicator).value = "";
+  refreshComboIndicatorOptions();
   const available = exportPoints(item).filter(point => point.value !== null && Number.isFinite(Number(point.value)));
   for (const id of ["chart-from", "chart-to"]) {
     $(id).min = available.length ? periodBounds(available[0], item.frequency_code)[0] : "";
@@ -227,8 +304,16 @@ function openTrend(item) {
 }
 
 function resetChartAxes() {
-  $("combo-indicator").value = "";
-  $("combo-options").hidden = true;
+  for (const slot of ADDITIONAL_SERIES_SLOTS) {
+    $(slot.indicator).value = "";
+    $(slot.options).hidden = true;
+    $(slot.measure).dataset.indicatorId = "";
+    $(slot.color).value = CHART_SERIES_COLORS[ADDITIONAL_SERIES_SLOTS.indexOf(slot) + 1];
+    $(slot.axis).value = "right";
+    $(slot.type).value = "line";
+  }
+  $("chart-color").value = CHART_SERIES_COLORS[0];
+  resetComboSlots();
   $("chart-right-min").value = ""; $("chart-right-max").value = "";
   $("chart-measure").value = activeChartItem.default_chart_measure || "current";
   const rows = activeChartItem.history || [];
@@ -256,22 +341,32 @@ function applyChartAxes(event) {
     chartView.item = item;
     chartView.side = $("chart-axis").value;
     chartView.type = $("chart-type").value;
+    chartView.color = seriesColor("chart-color", 0);
     chartView.xInterval = $("chart-x-interval").value === "" ? null : Number($("chart-x-interval").value);
     if (!["left", "right"].includes(chartView.side)) throw new Error("Choose Left or Right for the original indicator axis.");
-    if ($("combo-indicator").value) {
-      const other = snapshot?.indicators?.[$("combo-indicator").value];
-      if (!other || other.id === item.id) throw new Error("Choose a different available indicator.");
-      const secondItem = chartMeasureItem(other, "combo-measure");
-      const second = chartRange(secondItem, { ...dates, low: "", high: "" });
-      second.item = secondItem;
-      second.side = $("combo-axis").value;
-      second.type = $("combo-type").value;
-      if (!["left", "right"].includes(second.side)) throw new Error("Choose Left or Right for the added indicator axis.");
-      chartView.second = second;
+    const views = [chartView];
+    const chosen = new Set([item.id]);
+    for (const [index, slot] of ADDITIONAL_SERIES_SLOTS.entries()) {
+      const id = $(slot.indicator).value;
+      if (!id) continue;
+      const other = snapshot?.indicators?.[id];
+      if (!other || chosen.has(other.id)) throw new Error("Choose a different indicator for each series.");
+      chosen.add(other.id);
+      const seriesItem = chartMeasureItem(other, slot.measure);
+      const view = chartRange(seriesItem, { ...dates, low: "", high: "" });
+      view.item = seriesItem;
+      view.side = $(slot.axis).value;
+      view.type = $(slot.type).value;
+      view.color = seriesColor(slot.color, index + 1);
+      if (!["left", "right"].includes(view.side)) throw new Error("Choose Left or Right for each added indicator axis.");
+      views.push(view);
     }
-    const views = [chartView, ...(chartView.second ? [chartView.second] : [])];
+    chartView.series = views;
+    chartView.second = views[1];
+    chartView.third = views[2];
+    chartView.fourth = views[3];
     if (views.some(view => !["line", "column", "area", "step", "scatter", "bar"].includes(view.type))) throw new Error("Choose an available chart type.");
-    if (chartView.second && views.some(view => view.type === "bar")) throw new Error("Horizontal bars are available for a single indicator only. Remove the added indicator or choose another chart type.");
+    if (views.length > 1 && views.some(view => view.type === "bar")) throw new Error("Horizontal bars are available for a single indicator only. Remove the added indicators or choose another chart type.");
     const axes = {};
     for (const side of ["left", "right"]) {
       const members = views.filter(view => view.side === side);
@@ -282,19 +377,19 @@ function applyChartAxes(event) {
       const axis = chartRange(members[0].item, { ...dates, values,
         low: $(prefix + "min").value, high: $(prefix + "max").value,
         decimals: $(prefix + "decimals").value, interval: $(prefix + "interval").value });
-      axes[side] = { ...axis, item: members[0].item, color: members.length > 1 ? "#b1c0b8" : members[0] === chartView ? "#43c5ca" : "#86bc25" };
+      axes[side] = { ...axis, item: members[0].item };
       for (const view of members) Object.assign(view, { low: axis.low, high: axis.high, digits: axis.digits, decimals: axis.decimals, interval: axis.interval });
     }
     chartView.axes = axes;
     const rows = chartView.rows;
-    $("trend-title").textContent = chartView.second ? "Combo chart" : activeChartItem.title;
+    $("trend-title").textContent = views.length > 1 ? "Combo chart" : activeChartItem.title;
     $("trend-subtitle").textContent = `${item.frequency} · ${item.chart_label || item.title} (${item.chart_unit || item.unit}) · ${fmtPeriod(rows[0].period)}–${fmtPeriod(rows[rows.length - 1].period)}`;
-    if (chartView.second) $("trend-subtitle").textContent = `${$("chart-from").value} to ${$("chart-to").value} · ${chartView.side === chartView.second.side ? `Shared ${chartView.side} Y-axis scale` : "Independent left/right scales"}`;
+    if (views.length > 1) $("trend-subtitle").textContent = `${$("chart-from").value} to ${$("chart-to").value} · ${Object.keys(axes).length === 1 ? `Shared ${Object.keys(axes)[0]} Y-axis scale` : "Independent left/right scales"}`;
     drawTrend(item);
     enableChartExports(true);
     const description = activeChartItem.chart_measures?.[$("chart-measure").value]?.description || "";
-    const secondDescription = chartView.second ? ` ${snapshot.indicators[$("combo-indicator").value].chart_measures?.[$("combo-measure").value]?.description || ""} Combo points are aligned by period-end date, without resampling. Indicators on the same side share one scale.` : "";
-    chartMessage(`${description}${secondDescription} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.`);
+    const comboDescription = views.length > 1 ? " Combo points are aligned by period-end date, without resampling. Indicators on the same side share one scale." : "";
+    chartMessage(`${description}${comboDescription} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.`);
     if (event) { selectChartTab(false); $("chart-tab").focus(); }
   } catch (error) {
     chartView = null;
@@ -306,6 +401,15 @@ function applyChartAxes(event) {
   }
 }
 
+function seriesColor(selectorId, index) {
+  const value = $(selectorId).value;
+  return CHART_SERIES_COLORS.includes(value) ? value : CHART_SERIES_COLORS[index % CHART_SERIES_COLORS.length];
+}
+
+function currentChartSeries() {
+  return chartView?.series || [chartView, ...(chartView?.second ? [chartView.second] : [])];
+}
+
 function drawTrend(item) {
   const svg = $("trend-chart");
   svg.replaceChildren();
@@ -313,25 +417,28 @@ function drawTrend(item) {
   $("chart-empty").hidden = true;
   if (chartView.type === "bar") { drawHorizontalBars(svg); return; }
   const { rows, low, high } = chartView;
-  const second = chartView.second;
-  const width = 900, height = 390, margin = { top: second ? 64 : 20, right: chartView.axes.right ? 92 : 22, bottom: 54, left: 92 };
+  const seriesViews = currentChartSeries();
+  const multiple = seriesViews.length > 1;
+  const width = 900, height = 390, margin = { top: multiple ? 18 + seriesViews.length * 23 : 20, right: chartView.axes.right ? 92 : 22, bottom: 54, left: 92 };
   const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
   const date = (point, seriesItem) => Date.parse(`${periodBounds(point, seriesItem.frequency_code)[1]}T00:00:00Z`);
-  const timeScale = !!second || chartView.xInterval !== null;
-  const dates = [...rows.map(point => date(point, item)), ...(second ? second.rows.map(point => date(point, second.item)) : [])];
+  const timeScale = multiple || chartView.xInterval !== null;
+  const dates = seriesViews.flatMap(view => view.rows.map(point => date(point, view.item)));
   const firstDate = dates.length ? Math.min(...dates) : 0, lastDate = dates.length ? Math.max(...dates) : 0;
   const x = (index, seriesRows = rows, seriesItem = item) => timeScale
     ? margin.left + (date(seriesRows[index], seriesItem) - firstDate) * plotW / Math.max(lastDate - firstDate, 1)
     : margin.left + index * plotW / Math.max(rows.length - 1, 1);
   const valueStyle = item.chart_value_style || (Math.abs(high - low) > 100 ? "decimal0" : "decimal1");
-  if (second) {
-    for (const [index, view] of [chartView, second].entries()) {
-      const color = index ? "#86bc25" : "#43c5ca";
-      svg.append(["column", "area"].includes(view.type)
-        ? svgNode("rect", { x: 22, y: 10 + index * 23, width: 23, height: 12, fill: color })
-        : svgNode("line", { x1: 22, x2: 45, y1: 17 + index * 23, y2: 17 + index * 23, stroke: color, "stroke-width": 3 }));
+  if (multiple) {
+    for (const [index, view] of seriesViews.entries()) {
+      const color = view.color;
+      const itemAttrs = { "data-series": index };
+      const sample = ["column", "area"].includes(view.type)
+        ? svgNode("rect", { ...itemAttrs, class: "legend-swatch", x: 22, y: 10 + index * 23, width: 23, height: 12, fill: color })
+        : svgNode("line", { ...itemAttrs, class: "legend-swatch", x1: 22, x2: 45, y1: 17 + index * 23, y2: 17 + index * 23, stroke: color, "stroke-width": 3 });
+      svg.append(sample);
       const label = `${view.side === "right" ? "Right" : "Left"}: ${view.item.title} | ${view.item.chart_label || view.item.title} (${view.item.chart_unit || view.item.unit}) | ${view.item.frequency}`;
-      const attrs = { x: 54, y: 21 + index * 23, style: `fill:${color}` };
+      const attrs = { ...itemAttrs, class: "legend-item", x: 54, y: 21 + index * 23, style: `fill:${color}` };
       if (label.length > 110) { attrs.textLength = 820; attrs.lengthAdjust = "spacingAndGlyphs"; }
       svg.append(svgNode("text", attrs, label));
     }
@@ -346,13 +453,13 @@ function drawTrend(item) {
     }
   }
   const monthTicks = chartView.xInterval === null ? null : calendarTicks(firstDate, lastDate, chartView.xInterval);
-  const tickCount = monthTicks ? monthTicks.length : second ? (lastDate === firstDate ? 1 : 6) : Math.min(6, rows.length);
+  const tickCount = monthTicks ? monthTicks.length : multiple ? (lastDate === firstDate ? 1 : 6) : Math.min(6, rows.length);
   for (let tick = 0; tick < tickCount; tick++) {
     const index = Math.round(tick * (rows.length - 1) / Math.max(tickCount - 1, 1));
     const position = monthTicks ? margin.left + (monthTicks[tick] - firstDate) * plotW / Math.max(lastDate - firstDate, 1)
-      : second ? margin.left + tick * plotW / Math.max(tickCount - 1, 1) : x(index);
+      : multiple ? margin.left + tick * plotW / Math.max(tickCount - 1, 1) : x(index);
     const label = monthTicks ? new Date(monthTicks[tick]).toISOString().slice(0, 7)
-      : second ? new Date(firstDate + (lastDate - firstDate) * tick / Math.max(tickCount - 1, 1)).toISOString().slice(0, 10) : rows[index].period;
+      : multiple ? new Date(firstDate + (lastDate - firstDate) * tick / Math.max(tickCount - 1, 1)).toISOString().slice(0, 10) : rows[index].period;
     svg.append(svgNode("text", { x: position, y: height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, fmtPeriod(label)));
   }
   const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
@@ -360,7 +467,6 @@ function drawTrend(item) {
   clip.append(svgNode("rect", { x: margin.left - endpointPadding, y: margin.top, width: plotW + 2 * endpointPadding, height: plotH }));
   defs.append(clip); svg.append(defs);
   const plot = svgNode("g", { "clip-path": "url(#chart-plot-clip)" });
-  const seriesViews = [chartView, ...(second ? [second] : [])];
   for (const view of [...seriesViews].sort((a, b) => Number(["column", "area"].includes(b.type)) - Number(["column", "area"].includes(a.type)))) {
     const seriesIndex = seriesViews.indexOf(view);
     const seriesRows = view.rows, seriesItem = view.item;
@@ -370,9 +476,9 @@ function drawTrend(item) {
     const positions = [...new Set(seriesRows.map((_, index) => seriesX(index)))].sort((a, b) => a - b);
     const gaps = positions.slice(1).map((value, index) => value - positions[index]);
     const groupWidth = Math.max(.5, Math.min(16, gaps.length ? Math.min(...gaps) * .7 : 16));
-    const grouped = second && seriesViews.every(series => series.type === "column");
-    const barWidth = grouped ? groupWidth / 2 : groupWidth;
-    const offset = grouped ? (seriesIndex ? 1 : -1) * groupWidth / 4 : 0;
+    const grouped = multiple && seriesViews.every(series => series.type === "column");
+    const barWidth = grouped ? groupWidth / seriesViews.length : groupWidth;
+    const offset = grouped ? (seriesIndex - (seriesViews.length - 1) / 2) * barWidth : 0;
     const baseline = seriesY(Math.min(view.high, Math.max(view.low, 0)));
     let path = "", drawing = false;
     const areaSegments = [];
@@ -388,11 +494,11 @@ function drawTrend(item) {
         const yy = seriesY(value);
         const bar = svgNode("rect", { x: seriesX(index) + offset - barWidth / 2, y: Math.min(yy, baseline),
           width: barWidth, height: Math.abs(yy - baseline), class: "series-column", "data-series": seriesIndex,
-          fill: seriesIndex ? "#86bc25" : "#43c5ca" });
+          "data-period": point.period, fill: view.color });
         bar.append(svgNode("title", {}, `${seriesItem.title} · ${fmtPeriod(point.period)}: ${fmt(point.value, seriesStyle)} ${seriesItem.chart_unit || seriesItem.unit}`));
         plot.append(bar);
       } else if (view.type === "scatter") {
-        const dot = svgNode("circle", { cx: seriesX(index), cy: seriesY(value), r: 4, class: "series-scatter", fill: seriesIndex ? "#86bc25" : "#43c5ca" });
+        const dot = svgNode("circle", { cx: seriesX(index), cy: seriesY(value), r: 4, class: "series-scatter", fill: view.color, "data-series": seriesIndex });
         plot.append(dot);
       } else {
         const xx = seriesX(index), yy = seriesY(value);
@@ -404,13 +510,13 @@ function drawTrend(item) {
     if (view.type === "area") {
       for (const points of areaSegments) {
         const d = `M ${points[0][0]} ${baseline} ` + points.map(([xx, yy]) => `L ${xx} ${yy}`).join(" ") + ` L ${points[points.length - 1][0]} ${baseline} Z`;
-        plot.append(svgNode("path", { d, class: "series-area", fill: seriesIndex ? "#86bc25" : "#43c5ca", "fill-opacity": .28 }));
+        plot.append(svgNode("path", { d, class: "series-area", fill: view.color, "fill-opacity": .28, "data-series": seriesIndex }));
       }
     }
-    if (["line", "area", "step"].includes(view.type)) plot.append(svgNode("path", { d: path.trim(), class: "series-line", "data-type": view.type, ...(seriesIndex ? { style: "stroke:#86bc25" } : {}) }));
+    if (["line", "area", "step"].includes(view.type)) plot.append(svgNode("path", { d: path.trim(), class: "series-line", "data-type": view.type, "data-series": seriesIndex, style: `stroke:${view.color}` }));
     const lastIndex = seriesRows.findLastIndex(point => point.value !== null && Number.isFinite(Number(point.value)));
     if (lastIndex >= 0 && ["line", "area", "step"].includes(view.type)) {
-      plot.append(svgNode("circle", { cx: seriesX(lastIndex), cy: seriesY(Number(seriesRows[lastIndex].value)), r: 5, class: "latest-point", ...(seriesIndex ? { style: "fill:#86bc25" } : {}) }));
+      plot.append(svgNode("circle", { cx: seriesX(lastIndex), cy: seriesY(Number(seriesRows[lastIndex].value)), r: 5, class: "latest-point", "data-series": seriesIndex, style: `fill:${view.color}` }));
     }
     seriesRows.forEach((point, index) => {
       if (point.value === null || !Number.isFinite(Number(point.value))) return;
@@ -457,7 +563,7 @@ function drawHorizontalBars(svg) {
     if (point.value === null || !Number.isFinite(Number(point.value))) return;
     const xx = x(Number(point.value));
     const bar = svgNode("rect", { x: Math.min(xx, baseline), y: y(index) - barHeight / 2,
-      width: Math.abs(xx - baseline), height: barHeight, class: "series-bar", fill: "#43c5ca" });
+      width: Math.abs(xx - baseline), height: barHeight, class: "series-bar", fill: view.color });
     bar.append(svgNode("title", {}, `${item.title} · ${fmtPeriod(point.period)}: ${fmt(point.value, item.chart_value_style || "decimal2")} ${item.chart_unit || item.unit}`));
     plot.append(bar);
   });
@@ -527,7 +633,7 @@ async function copyChart() {
 function downloadChartCsv() {
   if (!chartView) { chartMessage("Apply valid axes before exporting data.", true); return; }
   const rows = [["Indicator", "Measure", "Period", "Value", "Unit"]];
-  for (const view of [chartView, ...(chartView.second ? [chartView.second] : [])]) {
+  for (const view of currentChartSeries()) {
     const item = view.item;
     for (const point of view.rows) {
       if (point.value === null || !Number.isFinite(Number(point.value))) continue;
