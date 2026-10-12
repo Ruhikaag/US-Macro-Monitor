@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- AI proxy badges sit directly below their investment card titles with a 3px gap; only these cards omit the standard minimum header height, including when titles wrap.
+
 - **Economy at a Glance** is the first/default dashboard tab, before **Macro Monitor**. Its Deloitte green/teal overview contains the five existing headline signals: real GDP, real consumer spending, PCE inflation, unemployment, and federal funds. Cards open the existing customizable charts. Values and the last-update timestamp use the same live/published snapshot as Macro Monitor; latest observation periods are shown individually. Future expansion space does not imply additional data or invented observations.
 - Economy at a Glance uses the same typography as Macro Monitor: Georgia headings and numeric values, and Segoe UI labels/body text. Chart-only Calibri Light remains unchanged.
 
