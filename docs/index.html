@@ -22,6 +22,8 @@
     .brand strong { display: block; color: #242726; font-size: 12px; letter-spacing: .12em; }
     .brand span { color: var(--muted); font-size: 11px; }
     .head-actions { display: flex; align-items: center; gap: 14px; }
+    .head-actions { margin-left: auto; }
+    .header-export { flex: 0 0 auto; }
     .updated { color: var(--muted); font-size: 11px; text-align: right; }
     .text-button { border: 1px solid #d7e4dd; border-radius: 999px; padding: 7px 12px; background: #f5faf6; color: #1f6465; font-size: 10px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
     .text-button:hover { border-color: var(--green); background: #edf6e1; transform: translateY(-1px); }
@@ -215,10 +217,13 @@
       .theme-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } .theme-button { display: block; min-height: 52px; padding: 8px; font-size: 11px; text-align: center; } .theme-count { display: block; margin-top: 2px; }
     }
     @media (max-width: 480px) {
-      .masthead { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px 10px; padding: 10px 12px; }
+      .masthead { display: grid; grid-template-columns: max-content 32px minmax(0, 1fr); gap: 8px 10px; padding: 10px 12px; }
       .brand-mark { width: 32px; height: 32px; } .brand-mark::after { width: 18px; height: 11px; } .brand strong { font-size: 10px; } .brand span { font-size: 9px; }
       .headline-card { padding: 11px; }
-      .head-actions { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, auto); gap: 12px; }
+      .header-export { grid-column: 1; grid-row: 1; }
+      .brand-mark { grid-column: 2; grid-row: 1; }
+      .brand { grid-column: 3; grid-row: 1; }
+      .head-actions { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(2, max-content); justify-content: space-between; gap: 8px; margin-left: 0; }
       .updated { grid-column: 1 / -1; }
       .updated { max-width: none; font-size: 9px; text-align: left; } .text-button { font-size: 9px; }
       .hero h1 { font-size: 46px; } .cards { grid-template-columns: 1fr; gap: 8px; } .indicator-card { padding: 12px; }
@@ -257,9 +262,10 @@
 </head>
 <body>
   <header class="masthead">
+    <button class="text-button header-export" id="export" type="button">Export CSV ↓</button>
     <div class="brand-mark" aria-hidden="true"></div>
     <div class="brand"><strong>ECONOMICS DASHBOARD</strong></div>
-    <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="search" type="button" aria-haspopup="dialog">Search</button><button class="text-button" id="refresh">Check updates</button><button class="text-button" id="export">Export CSV ↓</button></div>
+    <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="search" type="button" aria-haspopup="dialog">Search</button><button class="text-button" id="refresh" type="button">Check updates</button></div>
   </header>
   <nav class="primary-tabs" role="tablist" aria-label="Dashboard sections">
     <button class="primary-tab" id="tab-glance" type="button" role="tab" aria-selected="false" aria-controls="panel-glance" tabindex="-1">Economy at a Glance</button>
@@ -338,7 +344,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=deloitte-chart-palette-20261012"></script>
+  <script src="chart-tools.js?v=global-dashboard-actions-20261012"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -537,10 +543,10 @@
       renderStatus(data);
       renderHeadlineTiles(data);
       renderThemes(data);
+      $("export").disabled = !exportGroups().length;
       const theme = (data.themes || []).find(item => item.id === activeTheme) || data.themes?.[0];
       if (!theme) return;
       activeTheme = theme.id;
-      $("export").disabled = !theme.indicator_ids.length;
       $("theme-title").textContent = theme.label;
       $("theme-description").textContent = theme.indicator_ids.length ? `${theme.indicator_ids.length} indicators · click a tile to view its chart` : "Theme series have not been added yet";
       renderStory(data, theme);
