@@ -60,6 +60,8 @@
     .indicator-card:focus-visible, .theme-button:focus-visible, .text-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
     .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 38px; }
     .card-head h3 { margin: 0; color: #1d282e; font-size: 14px; font-weight: 700; line-height: 1.35; }
+    .ai-proxy-badge { display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; padding: 3px 7px; border: 1px solid #00a3ad; border-radius: 4px; color: #d5f5f3; background: #173b3c; font-size: 10px; line-height: 1.4; }
+    .ai-proxy-badge svg { width: 13px; height: 13px; flex-shrink: 0; }
     .card-period { flex: 0 0 auto; color: #007c83; font-size: 10px; font-weight: 700; text-align: right; }
     .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #dcebe3; }
     .metric { min-width: 0; padding: 8px 8px 6px 0; }
@@ -501,6 +503,14 @@
       const source = document.createElement("span"); source.textContent = item.descriptor || (item.error ? "Series unavailable" : "Economic data");
       foot.append(frequency, source);
       card.append(head, row, foot);
+      if (["investment_fnpsh", "investment_fnenh"].includes(item.id)) {
+        const badge = document.createElement("span"); badge.className = "ai-proxy-badge";
+        badge.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1"/><path d="M6 1v3m4-3v3M6 12v3m4-3v3M1 6h3m-3 4h3m8-4h3m-3 4h3"/></svg>';
+        badge.append(document.createTextNode("Proxy for AI-related investment"));
+        badge.title = "Broad investment category used as a proxy, not a direct measure of AI-only spending.";
+        card.setAttribute("aria-description", badge.textContent);
+        head.after(badge);
+      }
       card.addEventListener("click", () => openTrend(item));
       card.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openTrend(item); } });
       return card;
