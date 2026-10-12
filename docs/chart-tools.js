@@ -53,6 +53,14 @@ function changeComboIndicator() {
   applyChartAxes();
 }
 
+function updateChartTypes() {
+  const combo = !!$("combo-indicator").value;
+  for (const id of ["chart-type", "combo-type"]) {
+    const horizontal = [...$(id).options].find(option => option.value === "bar");
+    horizontal.disabled = combo;
+  }
+}
+
 function clearChartAxisBounds(side) {
   const prefix = side === "left" ? "chart-" : "chart-right-";
   $(prefix + "min").value = ""; $(prefix + "max").value = "";
@@ -189,6 +197,7 @@ function resetChartAxes() {
 function applyChartAxes(event) {
   if (event) event.preventDefault();
   updateAxisOptions();
+  updateChartTypes();
   try {
     const item = chartMeasureItem(activeChartItem);
     const dates = { from: $("chart-from").value, to: $("chart-to").value };
@@ -210,14 +219,15 @@ function applyChartAxes(event) {
       chartView.second = second;
     }
     const views = [chartView, ...(chartView.second ? [chartView.second] : [])];
-    if (views.some(view => !["line", "column"].includes(view.type))) throw new Error("Choose Line or Column for each indicator.");
+    if (views.some(view => !["line", "column", "area", "step", "scatter", "bar"].includes(view.type))) throw new Error("Choose an available chart type.");
+    if (chartView.second && views.some(view => view.type === "bar")) throw new Error("Horizontal bars are available for a single indicator only. Remove the added indicator or choose another chart type.");
     const axes = {};
     for (const side of ["left", "right"]) {
       const members = views.filter(view => view.side === side);
       if (!members.length) continue;
       const prefix = side === "left" ? "chart-" : "chart-right-";
       const values = members.flatMap(view => view.rows.filter(point => point.value !== null && Number.isFinite(Number(point.value))).map(point => Number(point.value)));
-      if (members.some(view => view.type === "column")) values.push(0);
+      if (members.some(view => ["column", "area", "bar"].includes(view.type))) values.push(0);
       const axis = chartRange(members[0].item, { ...dates, values,
         low: $(prefix + "min").value, high: $(prefix + "max").value,
         decimals: $(prefix + "decimals").value, interval: $(prefix + "interval").value });
@@ -250,6 +260,7 @@ function drawTrend(item) {
   svg.replaceChildren();
   svg.hidden = false;
   $("chart-empty").hidden = true;
+  if (chartView.type === "bar") { drawHorizontalBars(svg); return; }
   const { rows, low, high } = chartView;
   const second = chartView.second;
   const width = 900, height = 390, margin = { top: second ? 64 : 20, right: chartView.axes.right ? 92 : 22, bottom: 54, left: 92 };
@@ -265,7 +276,7 @@ function drawTrend(item) {
   if (second) {
     for (const [index, view] of [chartView, second].entries()) {
       const color = index ? "#86bc25" : "#43c5ca";
-      svg.append(view.type === "column"
+      svg.append(["column", "area"].includes(view.type)
         ? svgNode("rect", { x: 22, y: 10 + index * 23, width: 23, height: 12, fill: color })
         : svgNode("line", { x1: 22, x2: 45, y1: 17 + index * 23, y2: 17 + index * 23, stroke: color, "stroke-width": 3 }));
       const label = `${view.side === "right" ? "Right" : "Left"}: ${view.item.title} | ${view.item.chart_label || view.item.title} (${view.item.chart_unit || view.item.unit}) | ${view.item.frequency}`;
@@ -299,7 +310,7 @@ function drawTrend(item) {
   defs.append(clip); svg.append(defs);
   const plot = svgNode("g", { "clip-path": "url(#chart-plot-clip)" });
   const seriesViews = [chartView, ...(second ? [second] : [])];
-  for (const view of [...seriesViews].sort((a, b) => Number(b.type === "column") - Number(a.type === "column"))) {
+  for (const view of [...seriesViews].sort((a, b) => Number(["column", "area"].includes(b.type)) - Number(["column", "area"].includes(a.type)))) {
     const seriesIndex = seriesViews.indexOf(view);
     const seriesRows = view.rows, seriesItem = view.item;
     const seriesY = value => margin.top + (view.high - value) * plotH / (view.high - view.low);
@@ -313,9 +324,15 @@ function drawTrend(item) {
     const offset = grouped ? (seriesIndex ? 1 : -1) * groupWidth / 4 : 0;
     const baseline = seriesY(Math.min(view.high, Math.max(view.low, 0)));
     let path = "", drawing = false;
+    const areaSegments = [];
+    let segment = [];
     seriesRows.forEach((point, index) => {
       const value = Number(point.value);
-      if (point.value === null || !Number.isFinite(value)) { drawing = false; return; }
+      if (point.value === null || !Number.isFinite(value)) {
+        drawing = false;
+        if (segment.length) { areaSegments.push(segment); segment = []; }
+        return;
+      }
       if (view.type === "column") {
         const yy = seriesY(value);
         const bar = svgNode("rect", { x: seriesX(index) + offset - barWidth / 2, y: Math.min(yy, baseline),
@@ -323,13 +340,25 @@ function drawTrend(item) {
           fill: seriesIndex ? "#86bc25" : "#43c5ca" });
         bar.append(svgNode("title", {}, `${seriesItem.title} · ${fmtPeriod(point.period)}: ${fmt(point.value, seriesStyle)} ${seriesItem.chart_unit || seriesItem.unit}`));
         plot.append(bar);
+      } else if (view.type === "scatter") {
+        const dot = svgNode("circle", { cx: seriesX(index), cy: seriesY(value), r: 4, class: "series-scatter", fill: seriesIndex ? "#86bc25" : "#43c5ca" });
+        plot.append(dot);
       } else {
-        path += `${drawing ? " L" : " M"} ${seriesX(index)} ${seriesY(value)}`; drawing = true;
+        const xx = seriesX(index), yy = seriesY(value);
+        path += drawing && view.type === "step" ? ` H ${xx} V ${yy}` : `${drawing ? " L" : " M"} ${xx} ${yy}`;
+        segment.push([xx, yy]); drawing = true;
       }
     });
-    if (view.type === "line") plot.append(svgNode("path", { d: path.trim(), class: "series-line", ...(seriesIndex ? { style: "stroke:#86bc25" } : {}) }));
+    if (segment.length) areaSegments.push(segment);
+    if (view.type === "area") {
+      for (const points of areaSegments) {
+        const d = `M ${points[0][0]} ${baseline} ` + points.map(([xx, yy]) => `L ${xx} ${yy}`).join(" ") + ` L ${points[points.length - 1][0]} ${baseline} Z`;
+        plot.append(svgNode("path", { d, class: "series-area", fill: seriesIndex ? "#86bc25" : "#43c5ca", "fill-opacity": .28 }));
+      }
+    }
+    if (["line", "area", "step"].includes(view.type)) plot.append(svgNode("path", { d: path.trim(), class: "series-line", "data-type": view.type, ...(seriesIndex ? { style: "stroke:#86bc25" } : {}) }));
     const lastIndex = seriesRows.findLastIndex(point => point.value !== null && Number.isFinite(Number(point.value)));
-    if (lastIndex >= 0 && view.type === "line") {
+    if (lastIndex >= 0 && ["line", "area", "step"].includes(view.type)) {
       plot.append(svgNode("circle", { cx: seriesX(lastIndex), cy: seriesY(Number(seriesRows[lastIndex].value)), r: 5, class: "latest-point", ...(seriesIndex ? { style: "fill:#86bc25" } : {}) }));
     }
     seriesRows.forEach((point, index) => {
@@ -339,6 +368,48 @@ function drawTrend(item) {
       plot.append(circle);
     });
   }
+  svg.append(plot);
+}
+
+function drawHorizontalBars(svg) {
+  const view = chartView, { rows, item, low, high } = view;
+  const margin = { left: 100, right: 22, top: 25, bottom: 54 };
+  const width = 900 - margin.left - margin.right, height = 390 - margin.top - margin.bottom;
+  const dates = rows.map(point => Date.parse(`${periodBounds(point, item.frequency_code)[1]}T00:00:00Z`));
+  const first = Math.min(...dates), last = Math.max(...dates);
+  const x = value => margin.left + (value - low) * width / (high - low);
+  const yDate = date => margin.top + (date - first) * height / Math.max(last - first, 1);
+  const y = index => view.xInterval === null ? margin.top + index * height / Math.max(rows.length - 1, 1) : yDate(dates[index]);
+  const ticks = view.xInterval === null ? null : calendarTicks(first, last, view.xInterval);
+  const count = ticks ? ticks.length : Math.min(6, rows.length);
+  for (let tick = 0; tick < count; tick++) {
+    const index = Math.round(tick * (rows.length - 1) / Math.max(count - 1, 1));
+    const label = ticks ? new Date(ticks[tick]).toISOString().slice(0, 7) : rows[index].period;
+    svg.append(svgNode("text", { x: margin.left - 10, y: (ticks ? yDate(ticks[tick]) : y(index)) + 4,
+      "text-anchor": "end", "data-axis": "date", "data-period": label, style: "fill:#ffffff" }, fmtPeriod(label)));
+  }
+  for (const value of axisTicks(view)) {
+    const xx = x(value);
+    svg.append(svgNode("line", { x1: xx, x2: xx, y1: margin.top, y2: margin.top + height, class: "grid-line" }));
+    svg.append(axisTickNode(axisTickLabel(value, view, item.chart_value_style), { x: xx, y: 370,
+      "text-anchor": value === low ? "start" : value === high ? "end" : "middle", "data-axis": "value", style: "fill:#ffffff" }));
+  }
+  const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
+  clip.append(svgNode("rect", { x: margin.left, y: margin.top - 9, width, height: height + 18 }));
+  defs.append(clip); svg.append(defs);
+  const plot = svgNode("g", { "clip-path": "url(#chart-plot-clip)" });
+  const positions = rows.map((_, index) => y(index));
+  const gaps = positions.slice(1).map((value, index) => value - positions[index]).filter(value => value > 0);
+  const barHeight = Math.max(.5, Math.min(16, gaps.length ? Math.min(...gaps) * .7 : 16));
+  const baseline = x(Math.min(high, Math.max(low, 0)));
+  rows.forEach((point, index) => {
+    if (point.value === null || !Number.isFinite(Number(point.value))) return;
+    const xx = x(Number(point.value));
+    const bar = svgNode("rect", { x: Math.min(xx, baseline), y: y(index) - barHeight / 2,
+      width: Math.abs(xx - baseline), height: barHeight, class: "series-bar", fill: "#43c5ca" });
+    bar.append(svgNode("title", {}, `${item.title} · ${fmtPeriod(point.period)}: ${fmt(point.value, item.chart_value_style || "decimal2")} ${item.chart_unit || item.unit}`));
+    plot.append(bar);
+  });
   svg.append(plot);
 }
 

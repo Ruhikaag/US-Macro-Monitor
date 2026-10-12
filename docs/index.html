@@ -280,8 +280,8 @@
         <div id="chart-right-options" class="chart-option-row" hidden><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis interval <input id="chart-right-interval" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis decimals <input id="chart-right-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label></div>
       </fieldset>
       <fieldset><legend>Indicators</legend>
-        <div class="chart-option-row"><label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label><label>Original indicator axis <select id="chart-axis"><option value="left">Left</option><option value="right">Right</option></select></label><label>Original chart type <select id="chart-type"><option value="line">Line</option><option value="column">Column</option></select></label></div>
-        <div class="chart-option-row"><label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label><div id="combo-options" hidden><label>Added indicator measure <select id="combo-measure"></select></label><label>Added indicator axis <select id="combo-axis"><option value="left">Left</option><option value="right" selected>Right</option></select></label><label>Added chart type <select id="combo-type"><option value="line">Line</option><option value="column">Column</option></select></label></div></div>
+        <div class="chart-option-row"><label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label><label>Original indicator axis <select id="chart-axis"><option value="left">Left</option><option value="right">Right</option></select></label><label>Original chart type <select id="chart-type"><option value="line">Line (default)</option><option value="column">Column</option><option value="area">Area</option><option value="step">Stepped line</option><option value="scatter">Scatter / points</option><option value="bar">Horizontal bar (single only)</option></select></label></div>
+        <div class="chart-option-row"><label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label><div id="combo-options" hidden><label>Added indicator measure <select id="combo-measure"></select></label><label>Added indicator axis <select id="combo-axis"><option value="left">Left</option><option value="right" selected>Right</option></select></label><label>Added chart type <select id="combo-type"><option value="line">Line (default)</option><option value="column">Column</option><option value="area">Area</option><option value="step">Stepped line</option><option value="scatter">Scatter / points</option><option value="bar" disabled>Horizontal bar (single only)</option></select></label></div></div>
       </fieldset>
       <button class="chart-export-button" type="submit">Apply changes</button><button class="chart-export-button" id="reset-chart" type="button">Reset</button>
     </form>
@@ -299,7 +299,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=chart-types-20261012"></script>
+  <script src="chart-tools.js?v=chart-types-expanded-20261012"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
