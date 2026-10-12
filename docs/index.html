@@ -275,13 +275,13 @@
     <div class="chart-tabs" role="tablist" aria-label="Chart settings"><button id="chart-tab" class="chart-export-button" type="button" role="tab" aria-selected="true" aria-controls="chart-preview">Chart</button><button id="custom-tab" class="chart-export-button" type="button" role="tab" aria-selected="false" aria-controls="chart-controls">Custom</button></div>
     <form id="chart-controls" class="chart-controls" role="tabpanel" aria-labelledby="custom-tab" hidden>
       <fieldset><legend>Axis options</legend>
-        <div class="chart-option-row"><label>X-axis from <input id="chart-from" type="date" required></label><label>X-axis to <input id="chart-to" type="date" required></label></div>
+        <div class="chart-option-row"><label>X-axis from <input id="chart-from" type="date" required></label><label>X-axis to <input id="chart-to" type="date" required></label><label>X-axis interval (months) <input id="chart-x-interval" type="number" min="1" step="1" placeholder="Auto"></label></div>
         <div class="chart-option-row"><label>Left Y-axis minimum <input id="chart-min" type="number" step="any" placeholder="Auto"></label><label>Left Y-axis maximum <input id="chart-max" type="number" step="any" placeholder="Auto"></label><label>Left Y-axis interval <input id="chart-interval" type="number" step="any" placeholder="Auto"></label><label>Left Y-axis decimals <input id="chart-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label></div>
-        <div class="chart-option-row"><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis interval <input id="chart-right-interval" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis decimals <input id="chart-right-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label></div>
+        <div id="chart-right-options" class="chart-option-row" hidden><label>Right Y-axis minimum <input id="chart-right-min" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis maximum <input id="chart-right-max" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis interval <input id="chart-right-interval" type="number" step="any" placeholder="Auto"></label><label>Right Y-axis decimals <input id="chart-right-decimals" type="number" min="0" max="3" step="1" placeholder="Auto"></label></div>
       </fieldset>
       <fieldset><legend>Indicators</legend>
-        <div class="chart-option-row"><label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label><label>Original indicator axis <select id="chart-axis"><option value="left">Left</option><option value="right">Right</option></select></label></div>
-        <div class="chart-option-row"><label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label><div id="combo-options" hidden><label>Added indicator measure <select id="combo-measure"></select></label><label>Added indicator axis <select id="combo-axis"><option value="left">Left</option><option value="right" selected>Right</option></select></label></div></div>
+        <div class="chart-option-row"><label>Chart measure <select id="chart-measure" aria-label="Chart measure"></select></label><label>Original indicator axis <select id="chart-axis"><option value="left">Left</option><option value="right">Right</option></select></label><label>Original chart type <select id="chart-type"><option value="line">Line</option><option value="column">Column</option></select></label></div>
+        <div class="chart-option-row"><label>Add indicator <select id="combo-indicator" aria-label="Add indicator"></select></label><div id="combo-options" hidden><label>Added indicator measure <select id="combo-measure"></select></label><label>Added indicator axis <select id="combo-axis"><option value="left">Left</option><option value="right" selected>Right</option></select></label><label>Added chart type <select id="combo-type"><option value="line">Line</option><option value="column">Column</option></select></label></div></div>
       </fieldset>
       <button class="chart-export-button" type="submit">Apply changes</button><button class="chart-export-button" id="reset-chart" type="button">Reset</button>
     </form>
@@ -299,7 +299,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=tile-gdp-20261009"></script>
+  <script src="chart-tools.js?v=chart-types-20261012"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
