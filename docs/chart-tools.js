@@ -1,5 +1,5 @@
 let chartView = null;
-const CHART_SERIES_COLORS = ["#43c5ca", "#86bc25", "#b9fa38", "#f2a900", "#56b4e9", "#cc79a7"];
+const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
 const ADDITIONAL_SERIES_SLOTS = [
   { key: "combo", indicator: "combo-indicator", options: "combo-options", measure: "combo-measure", axis: "combo-axis", type: "combo-type", color: "combo-color" },
   { key: "combo2", indicator: "combo2-indicator", options: "combo2-options", measure: "combo2-measure", axis: "combo2-axis", type: "combo2-type", color: "combo2-color", container: "combo2-slot", add: "add-combo2" },
@@ -72,7 +72,7 @@ function selectChartTab(custom) {
 }
 
 function setupChartCustomization() {
-  const colorNames = ["Teal", "Deloitte green", "Light green", "Gold", "Blue", "Pink"];
+  const colorNames = ["Deloitte teal", "Deloitte green", "Deloitte grey", "Deloitte yellow"];
   const colorControl = (id, text) => {
     const label = document.createElement("label"); label.textContent = text;
     const select = document.createElement("select"); select.id = id;
