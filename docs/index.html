@@ -282,7 +282,7 @@
   </section>
   <dialog id="search-dialog" aria-labelledby="search-title">
     <div class="dialog-head"><div><h2 id="search-title">Search indicators</h2><p>Find indicators across all themes and open their charts.</p></div><button class="close-button" id="close-search" type="button">Close</button></div>
-    <div class="search-body"><label>Search indicators <input id="indicator-query" type="search" placeholder="e.g. GDP, consumer spending, GDPH@USECON" autocomplete="off" aria-controls="search-results" aria-describedby="search-status"></label><p id="search-status" role="status" aria-live="polite"></p><div id="search-results"></div></div>
+    <div class="search-body"><label>Search indicators <input id="indicator-query" type="search" placeholder="e.g. GDP, consumer spending, inflation" autocomplete="off" aria-controls="search-results" aria-describedby="search-status"></label><p id="search-status" role="status" aria-live="polite"></p><div id="search-results"></div></div>
   </dialog>
   <dialog id="trend-dialog" aria-labelledby="trend-title">
     <div class="dialog-head"><div><h2 id="trend-title">Indicator history</h2><p id="trend-subtitle">Recent observations</p></div><div class="dialog-actions"><button class="chart-export-button" id="copy-chart" type="button">Copy chart</button><button class="chart-export-button" id="download-chart-csv" type="button">Download CSV</button><button class="close-button" id="close-trend" type="button">Close</button></div></div>
@@ -313,7 +313,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=indicator-search-20261012"></script>
+  <script src="chart-tools.js?v=hide-tickers-20261012"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];

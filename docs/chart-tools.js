@@ -29,7 +29,7 @@ function renderIndicatorSearch() {
   const query = $("indicator-query").value;
   const results = $("search-results"); results.replaceChildren();
   const matches = searchIndicators(snapshot, query);
-  $("search-status").textContent = !query.trim() ? "Search by indicator name, theme, or Haver ticker."
+  $("search-status").textContent = !query.trim() ? "Search by indicator name or theme."
     : !snapshot?.indicators || !Object.keys(snapshot.indicators).length ? "Indicator data is still loading. Please try again shortly."
       : matches.length ? `${matches.length} matching indicator${matches.length === 1 ? "" : "s"}.` : "No matching indicators.";
   for (const { item, themes } of matches) {
@@ -37,7 +37,7 @@ function renderIndicatorSearch() {
     button.type = "button"; button.className = "search-result";
     const name = document.createElement("span"); name.className = "search-result-title"; name.textContent = tileTitle(item.title);
     const context = document.createElement("span");
-    context.textContent = [item.ticker, item.frequency, ...themes, item.error ? "Data unavailable" : item.period_label].filter(Boolean).join(" · ");
+    context.textContent = [item.frequency, ...themes, item.error ? "Data unavailable" : item.period_label].filter(Boolean).join(" · ");
     button.append(name, context);
     button.addEventListener("click", () => { $("search-dialog").close(); openTrend(item); });
     results.append(button);
@@ -526,13 +526,13 @@ async function copyChart() {
 
 function downloadChartCsv() {
   if (!chartView) { chartMessage("Apply valid axes before exporting data.", true); return; }
-  const rows = [["Indicator", "Ticker", "Measure", "Period", "Value", "Unit"]];
+  const rows = [["Indicator", "Measure", "Period", "Value", "Unit"]];
   for (const view of [chartView, ...(chartView.second ? [chartView.second] : [])]) {
     const item = view.item;
     for (const point of view.rows) {
       if (point.value === null || !Number.isFinite(Number(point.value))) continue;
       const value = item.chart_value_style === "decimal2" ? Number(point.value).toFixed(2) : point.value;
-      rows.push([item.title, item.ticker, item.chart_label || item.title, point.period, value, item.chart_unit || item.unit]);
+      rows.push([item.title, item.chart_label || item.title, point.period, value, item.chart_unit || item.unit]);
     }
   }
   const quote = value => `"${String(value ?? "").replaceAll('"', '""')}"`;
