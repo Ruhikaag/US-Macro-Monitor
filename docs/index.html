@@ -34,6 +34,8 @@
     .hero h1 { position: relative; z-index: 1; margin: 0; color: #f4f4f1; font: 400 clamp(42px, 6vw, 68px)/.91 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
     .hero h1 span { display: block; color: #21c0c2; text-shadow: 0 6px 24px #00a3ad35; }
     .hero-copy { position: relative; z-index: 1; max-width: 560px; margin: 22px 0 0; color: #d2e2db; font-size: 13px; line-height: 1.7; }
+    .hero-export { position: relative; z-index: 1; margin-top: 18px; border-color: #00a3ad; background: #00a3ad; color: #fff; }
+    .hero-export:hover { border-color: #4ed1d0; background: #087e83; }
     .workspace { max-width: 1420px; margin: 0 auto; padding: 28px 26px 50px; }
     .workspace-layout { display: grid; grid-template-columns: 205px minmax(0, 1fr); gap: 24px; align-items: start; }
     .theme-nav { position: sticky; top: 15px; }
@@ -284,6 +286,7 @@
     <p class="eyebrow">United States economic indicators</p>
     <h1>US Macro<span>Monitor</span></h1>
     <p class="hero-copy">Your one-stop view of the economic indicators you need to watch.</p>
+    <button class="text-button hero-export" id="export-monitor" type="button">Export CSV ↓</button>
   </section>
   <main class="workspace">
     <div class="error" id="error" role="status" hidden></div>
@@ -702,6 +705,7 @@
     $("trend-dialog").addEventListener("click", event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
     $("refresh").addEventListener("click", refreshNow);
     $("export").addEventListener("click", openExport);
+    $("export-monitor").addEventListener("click", openExport);
     setupIndicatorSearch();
     $("close-export").addEventListener("click", () => $("export-dialog").close());
     $("export-form").addEventListener("submit", exportCsv);
