@@ -5,6 +5,57 @@ function tileTitle(title) {
   return (text.charAt(0).toUpperCase() + text.slice(1)).replace(/\bgdp\b/gi, "GDP");
 }
 
+function searchIndicators(data, query) {
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length || !data?.indicators) return [];
+  const themes = data.themes || [];
+  const orderedIds = [...new Set([...themes.flatMap(theme => theme.indicator_ids), ...Object.keys(data.indicators)])];
+  const seen = new Set(), results = [];
+  for (const id of orderedIds) {
+    const item = data.indicators[id];
+    if (!item) continue;
+    const memberships = themes.filter(theme => theme.indicator_ids.includes(id)).map(theme => theme.label);
+    const text = [item.title, item.ticker, item.descriptor, ...memberships].join(" ").toLowerCase();
+    if (!terms.every(term => text.includes(term))) continue;
+    const key = `${item.ticker}|${item.frequency}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    results.push({ item, themes: memberships });
+  }
+  return results;
+}
+
+function renderIndicatorSearch() {
+  const query = $("indicator-query").value;
+  const results = $("search-results"); results.replaceChildren();
+  const matches = searchIndicators(snapshot, query);
+  $("search-status").textContent = !query.trim() ? "Search by indicator name, theme, or Haver ticker."
+    : !snapshot?.indicators || !Object.keys(snapshot.indicators).length ? "Indicator data is still loading. Please try again shortly."
+      : matches.length ? `${matches.length} matching indicator${matches.length === 1 ? "" : "s"}.` : "No matching indicators.";
+  for (const { item, themes } of matches) {
+    const button = document.createElement("button");
+    button.type = "button"; button.className = "search-result";
+    const name = document.createElement("span"); name.className = "search-result-title"; name.textContent = tileTitle(item.title);
+    const context = document.createElement("span");
+    context.textContent = [item.ticker, item.frequency, ...themes, item.error ? "Data unavailable" : item.period_label].filter(Boolean).join(" · ");
+    button.append(name, context);
+    button.addEventListener("click", () => { $("search-dialog").close(); openTrend(item); });
+    results.append(button);
+  }
+}
+
+function setupIndicatorSearch() {
+  $("search").addEventListener("click", () => {
+    $("indicator-query").value = "";
+    renderIndicatorSearch();
+    $("search-dialog").showModal();
+    $("indicator-query").focus();
+  });
+  $("indicator-query").addEventListener("input", renderIndicatorSearch);
+  $("close-search").addEventListener("click", () => $("search-dialog").close());
+  $("search-dialog").addEventListener("click", event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
+}
+
 function selectChartTab(custom) {
   $("chart-controls").hidden = !custom;
   $("chart-preview").hidden = custom;

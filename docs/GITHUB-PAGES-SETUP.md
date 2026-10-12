@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- The header **Search** button is available across dashboard sections. Type an indicator name, theme, descriptor, or Haver ticker (for example `gdp` or `GDPH@USECON`) to search all indicators, regardless of the selected theme. Matching is case-insensitive and supports multiple words. Results show the indicator, ticker, frequency, theme, and latest period; repeated ticker/frequency series are deduplicated. Click a result or use Tab and Enter to open its chart directly. Unavailable indicators remain searchable and are marked accordingly. Blank, loading, and no-match states are explicit, and open results refresh when the snapshot updates.
+
 - Headline and theme tile titles use sentence case, with **GDP** always uppercase. This is display formatting only; Haver descriptors, tickers, chart metadata, dates, units, and exported data remain unchanged.
 
 - Chart axis labels, legends, and copied chart images use Calibri Light at light weight. X-axis and both Y-axis labels are white in previews and copied images; indicator lines and legends retain their teal/Deloitte green colors. The rest of the dashboard retains its original fonts. Calibri, Segoe UI, Arial, and sans-serif are chart fallbacks for devices without Calibri Light installed. Fonts are not bundled or downloaded; existing sizes and layout are preserved.
