@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- Automatic value axes use round tick intervals (0.25 minimum, then steps such as 0.5, 1, 2, 2.5, 5 and powers of ten). Percentage-change measures (% Period, % y/y and % Annual Rate) include a labeled zero by default on either axis, including shared/combo axes and horizontal bars. Level measures remain data-focused. Explicit minimum/maximum bounds and tick intervals retain their existing override behavior; exported chart images use the same axes as the preview.
+
 - AI proxy badges sit directly below their investment card titles with a 3px gap; only these cards omit the standard minimum header height, including when titles wrap.
 
 - **Economy at a Glance** is the first/default dashboard tab, before **Macro Monitor**. Its Deloitte green/teal overview contains the five existing headline signals: real GDP, real consumer spending, PCE inflation, unemployment, and federal funds. Cards open the existing customizable charts. Values and the last-update timestamp use the same live/published snapshot as Macro Monitor; latest observation periods are shown individually. Future expansion space does not imply additional data or invented observations.

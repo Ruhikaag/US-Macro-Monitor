@@ -122,7 +122,8 @@ function chartMeasureItem(item, selectorId = "chart-measure") {
   const measure = item.chart_measures[$(selectorId).value];
   if (!measure) throw new Error("Choose an available chart measure.");
   return { ...item, chart_label: measure.label, chart_unit: measure.unit,
-    chart_value_style: measure.value_style, export_history: measure.history };
+    chart_value_style: measure.value_style, export_history: measure.history,
+    chart_percent_change: ["period", "yoy", "annual"].includes($(selectorId).value) };
 }
 
 function fillChartMeasures(item, selectorId) {
@@ -233,12 +234,20 @@ function chartRange(item, options) {
   let low = Math.min(...values), high = Math.max(...values);
   const pad = (high - low || Math.max(Math.abs(high), 1)) * .09;
   low -= pad; high += pad;
+  if (options.includeZero ?? item.chart_percent_change) {
+    low = Math.min(low, 0); high = Math.max(high, 0);
+  }
   if (options.low !== "") low = Number(options.low);
   if (options.high !== "") high = Number(options.high);
   if (!Number.isFinite(low) || !Number.isFinite(high) || low >= high || !Number.isFinite(high - low)) {
     throw new Error("Y-axis minimum must be a finite number below the maximum.");
   }
-  const interval = options.interval === undefined || options.interval === "" ? null : Number(options.interval);
+  let interval = options.interval === undefined || options.interval === "" ? null : Number(options.interval);
+  if (interval === null && options.low === "" && options.high === "") {
+    const target = Math.max((high - low) / 4, .25);
+    const magnitude = 10 ** Math.floor(Math.log10(target));
+    interval = [1, 2, 2.5, 5, 10].find(step => step * magnitude >= target) * magnitude;
+  }
   if (interval !== null) {
     if (!Number.isFinite(interval) || interval <= 0) throw new Error("Y-axis interval must be a positive finite number, or blank for Auto.");
     if (options.low === "") low = Math.floor(low / interval) * interval;
@@ -375,6 +384,7 @@ function applyChartAxes(event) {
       const values = members.flatMap(view => view.rows.filter(point => point.value !== null && Number.isFinite(Number(point.value))).map(point => Number(point.value)));
       if (members.some(view => ["column", "area", "bar"].includes(view.type))) values.push(0);
       const axis = chartRange(members[0].item, { ...dates, values,
+        includeZero: members.some(view => view.item.chart_percent_change),
         low: $(prefix + "min").value, high: $(prefix + "max").value,
         decimals: $(prefix + "decimals").value, interval: $(prefix + "interval").value });
       axes[side] = { ...axis, item: members[0].item };
