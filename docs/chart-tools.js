@@ -5,8 +5,8 @@ const CURATED_COMBO_CHARTS = [
     indicatorIds: ["combo_unemployment_20_24", "combo_unemployment_25_54"],
     labels: ["20-24 Years", "25-54 Years"], colors: ["#006b3c", "#86bc25"], connectMissing: true,
     from: "2016-01-01", low: "0", high: "12", interval: "2", decimals: "0", xInterval: "12" },
-  { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, private sector",
-    indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy",
+  { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, 3-month MA, private sector",
+    indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy", threeMonthAverage: true,
     labels: ["Weekly Earnings", "Hourly Earnings"], colors: ["#86bc25", "#006b3c"],
     from: "2024-01-01", low: "2.5", high: "4.5", interval: "1", decimals: "1", xInterval: "4", percentLabels: true },
 ];
@@ -128,12 +128,28 @@ function setupChartCustomization() {
   }));
 }
 
+function threeMonthAverage(history) {
+  return history.map((point, index) => {
+    const window = history.slice(Math.max(0, index - 2), index + 1);
+    const months = window.map(row => {
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(row.period)) return NaN;
+      const [year, month] = row.period.split("-").map(Number);
+      return year * 12 + month;
+    });
+    const complete = window.length === 3 && window.every((row, offset) =>
+      Number.isFinite(row.value) && Number.isFinite(months[offset]) &&
+      (offset === 0 || months[offset] === months[offset - 1] + 1));
+    return { ...point, value: complete ? window.reduce((sum, row) => sum + row.value, 0) / 3 : null };
+  });
+}
+
 function chartMeasureItem(item, selectorId = "chart-measure") {
   if (!item.chart_measures) return item;
   const measure = item.chart_measures[$(selectorId).value];
   if (!measure) throw new Error("Choose an available chart measure.");
-  return { ...item, chart_label: measure.label, chart_unit: measure.unit,
-    chart_value_style: measure.value_style, export_history: measure.history,
+  const smooth = activeComboPreset?.threeMonthAverage && activeComboPreset.indicatorIds.includes(item.id);
+  return { ...item, chart_label: smooth ? `${measure.label} (3-month MA)` : measure.label, chart_unit: measure.unit,
+    chart_value_style: measure.value_style, export_history: smooth ? threeMonthAverage(measure.history) : measure.history,
     chart_percent_change: ["period", "yoy", "annual"].includes($(selectorId).value) };
 }
 
@@ -473,7 +489,9 @@ function applyChartAxes(event) {
     const description = activeChartItem.chart_measures?.[$("chart-measure").value]?.description || "";
     const comboDescription = views.length > 1 ? " Combo points are aligned by period-end date, without resampling. Indicators on the same side share one scale." : "";
     const missingNote = activeComboPreset?.connectMissing ? " Lines connect across missing observations; no values are imputed." : "";
-    chartMessage(`${description}${comboDescription} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.${missingNote}`);
+    const smoothingNote = activeComboPreset?.threeMonthAverage
+      ? " Earnings show the trailing average of three consecutive monthly Y/Y growth rates. Incomplete or missing months remain unavailable." : "";
+    chartMessage(`${description}${comboDescription} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.${missingNote}${smoothingNote}`);
     if (event) { selectChartTab(false); $("chart-tab").focus(); }
   } catch (error) {
     chartView = null;
