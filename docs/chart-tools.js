@@ -315,6 +315,7 @@ function axisTickNode(label, attrs) {
 function chartMessage(message, error = false) {
   const status = $("chart-status");
   status.textContent = message;
+  status.hidden = !message;
   status.classList.toggle("export-error", error);
 }
 
@@ -322,6 +323,17 @@ function chartSourceText(items) {
   const sources = [...new Set(items.map(item => item.source?.trim()).filter(Boolean))];
   if (items.some(item => !item.source?.trim())) sources.push("not available in Haver metadata");
   return `Source: ${sources.join("; ")}`;
+}
+
+function appendChartSource(svg, height, curated = false) {
+  const text = chartSourceText(currentChartSeries().map(view => view.item));
+  const attrs = { x: curated ? 45 : 22, y: height - 12, class: "chart-source",
+    style: `fill:#ffffff;font:300 ${curated ? 16 : 12}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif` };
+  if (text.length > (curated ? 90 : 110)) {
+    attrs.textLength = curated ? 810 : 856;
+    attrs.lengthAdjust = "spacingAndGlyphs";
+  }
+  svg.append(svgNode("text", attrs, text));
 }
 
 function enableChartExports(enabled) {
@@ -491,7 +503,7 @@ function applyChartAxes(event) {
     }
     drawTrend(item);
     enableChartExports(true);
-    chartMessage(chartSourceText(views.map(view => view.item)));
+    chartMessage("");
     if (event) { selectChartTab(false); $("chart-tab").focus(); }
   } catch (error) {
     chartView = null;
@@ -524,15 +536,15 @@ function drawTrend(item) {
   const multiple = seriesViews.length > 1;
   const curated = Boolean(activeComboPreset);
   const width = 900, height = curated ? 800 : 390;
-  const margin = curated ? { top: 120, right: 25, bottom: 105, left: 60 }
-    : { top: multiple ? 18 + seriesViews.length * 23 : 20, right: chartView.axes.right ? 92 : 22, bottom: 54, left: 92 };
+  const margin = curated ? { top: 120, right: 25, bottom: 150, left: 60 }
+    : { top: multiple ? 38 + seriesViews.length * 23 : 20, right: chartView.axes.right ? 92 : 22, bottom: 74, left: 92 };
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   if (curated) {
     svg.append(svgNode("rect", { width, height, fill: "#000000" }),
       svgNode("text", { x: 45, y: 45, class: "curated-title" }, activeComboPreset.title),
       svgNode("text", { x: 45, y: 82, class: "curated-title" }, activeComboPreset.unit));
     if (activeComboPreset.note) svg.append(svgNode("text",
-      { x: 45, y: height - 12, class: "curated-note" }, activeComboPreset.note));
+      { x: 45, y: height - 40, class: "curated-note" }, activeComboPreset.note));
   }
   const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
   const date = (point, seriesItem) => Date.parse(`${periodBounds(point, seriesItem.frequency_code)[1]}T00:00:00Z`);
@@ -549,7 +561,7 @@ function drawTrend(item) {
       const color = view.color;
       const itemAttrs = { "data-series": index };
       if (curated) {
-        const xx = 290 + index * 220, yy = height - (activeComboPreset.note ? 50 : 30);
+        const xx = 290 + index * 220, yy = height - 70;
         svg.append(svgNode("line", { ...itemAttrs, x1: xx, x2: xx + 45, y1: yy - 6, y2: yy - 6, stroke: color, "stroke-width": 5 }),
           svgNode("text", { ...itemAttrs, class: "legend-item", x: xx + 50, y: yy }, activeComboPreset.labels[index]));
         continue;
@@ -588,7 +600,7 @@ function drawTrend(item) {
       ? label.slice(0, 4)
       : curated ? new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" })
         .format(new Date(`${label.slice(0, 7)}-01T00:00:00Z`)) + "-" + label.slice(2, 4) : fmtPeriod(label);
-    svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
+    svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 40, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
     if (curated) svg.append(svgNode("line", { x1: position, x2: position, y1: height - margin.bottom, y2: height - margin.bottom + 7, stroke: "#ffffff" }));
   }
   if (curated) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#ffffff" }));
@@ -659,17 +671,18 @@ function drawTrend(item) {
   svg.append(plot);
   if (curated) {
     svg.querySelectorAll("text").forEach(node => {
-      node.setAttribute("style", `fill:#ffffff;font:300 ${node.classList.contains("curated-title") ? 32 : 21}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif`);
+      node.setAttribute("style", `fill:#ffffff;font:300 ${node.classList.contains("curated-title") ? 32 : node.classList.contains("curated-note") ? 18 : 21}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif`);
     });
     svg.querySelectorAll(".series-line").forEach(node => {
       node.style.fill = "none"; node.style.strokeWidth = "5"; node.style.strokeLinejoin = "round";
     });
   }
+  appendChartSource(svg, height, curated);
 }
 
 function drawHorizontalBars(svg) {
   const view = chartView, { rows, item, low, high } = view;
-  const margin = { left: 100, right: 22, top: 25, bottom: 54 };
+  const margin = { left: 100, right: 22, top: 25, bottom: 74 };
   const width = 900 - margin.left - margin.right, height = 390 - margin.top - margin.bottom;
   const dates = rows.map(point => Date.parse(`${periodBounds(point, item.frequency_code)[1]}T00:00:00Z`));
   const first = Math.min(...dates), last = Math.max(...dates);
@@ -687,7 +700,7 @@ function drawHorizontalBars(svg) {
   for (const value of axisTicks(view)) {
     const xx = x(value);
     svg.append(svgNode("line", { x1: xx, x2: xx, y1: margin.top, y2: margin.top + height, class: "grid-line" }));
-    svg.append(axisTickNode(axisTickLabel(value, view, item.chart_value_style), { x: xx, y: 370,
+    svg.append(axisTickNode(axisTickLabel(value, view, item.chart_value_style), { x: xx, y: 350,
       "text-anchor": value === low ? "start" : value === high ? "end" : "middle", "data-axis": "value", style: "fill:#ffffff" }));
   }
   const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
@@ -707,6 +720,7 @@ function drawHorizontalBars(svg) {
     plot.append(bar);
   });
   svg.append(plot);
+  appendChartSource(svg, 390);
 }
 
 function chartSvgSource() {

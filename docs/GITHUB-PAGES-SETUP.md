@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- Source attribution is drawn inside the **bottom-left chart footer**, not above the plot, for all chart types, gallery previews and copied images. Successful chart rendering clears the above-chart status area; validation and clipboard errors remain visible there. Dedicated footer space separates date/value labels, combo legends, the requested 3MMA note and source attribution. Curated legends have at least 20 SVG units of clearance from axis-label bounds; ordinary combo legends retain their top position with at least 24 units of clearance. Chart dimensions and exported PNG sizes are unchanged.
+
 - Chart information now displays only **Source:** attribution from Haver's `longsource` metadata (or `shortsource` when the full name is absent), deduplicating publishers for combinations. Missing attribution is explicitly labeled unavailable, never inferred from descriptors. The helper includes this metadata in each refreshed indicator. Generated source-level descriptions, alignment/scaling/date-window guidance, smoothing commentary and missing-data commentary are removed from every chart and gallery tile. Validation/copy errors still appear when relevant, and the explicitly requested 3MMA definition remains below earnings. This supersedes older references below to explanatory chart notes.
 
 - Gallery guidance appears once in the header: **Click chart to customize or copy**. Individual chart tiles do not repeat it; chart-specific data disclosures remain below the relevant chart.
