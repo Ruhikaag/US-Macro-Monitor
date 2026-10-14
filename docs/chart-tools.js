@@ -3,7 +3,7 @@ let activeComboPreset = null;
 const CURATED_COMBO_CHARTS = [
   { id: "unemployment-age-groups", title: "Unemployment Rates", unit: "Percent",
     indicatorIds: ["combo_unemployment_20_24", "combo_unemployment_25_54"],
-    labels: ["20-24 Years", "25-54 Years"], colors: ["#006b3c", "#86bc25"],
+    labels: ["20-24 Years", "25-54 Years"], colors: ["#006b3c", "#86bc25"], connectMissing: true,
     from: "2016-01-01", low: "0", high: "12", interval: "2", decimals: "0", xInterval: "12" },
   { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, private sector",
     indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy",
@@ -330,7 +330,8 @@ function openComboGallery() {
     preview.querySelector("clipPath").id = clipId;
     preview.querySelector("[clip-path]").setAttribute("clip-path", `url(#${clipId})`);
     preview.querySelectorAll(".hover-target").forEach(node => node.remove());
-    const hint = document.createElement("span"); hint.textContent = "Click chart to customize or copy";
+    const hint = document.createElement("span"); hint.textContent = "Click chart to customize or copy" +
+      (preset.connectMissing ? " · Lines connect across missing observations; no values are imputed." : "");
     button.append(preview, hint);
     button.addEventListener("click", () => {
       $("combo-gallery").close();
@@ -471,7 +472,8 @@ function applyChartAxes(event) {
     enableChartExports(true);
     const description = activeChartItem.chart_measures?.[$("chart-measure").value]?.description || "";
     const comboDescription = views.length > 1 ? " Combo points are aligned by period-end date, without resampling. Indicators on the same side share one scale." : "";
-    chartMessage(`${description}${comboDescription} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.`);
+    const missingNote = activeComboPreset?.connectMissing ? " Lines connect across missing observations; no values are imputed." : "";
+    chartMessage(`${description}${comboDescription} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.${missingNote}`);
     if (event) { selectChartTab(false); $("chart-tab").focus(); }
   } catch (error) {
     chartView = null;
@@ -563,7 +565,10 @@ function drawTrend(item) {
       : multiple ? margin.left + tick * plotW / Math.max(tickCount - 1, 1) : x(index);
     const label = monthTicks ? new Date(monthTicks[tick]).toISOString().slice(0, 7)
       : multiple ? new Date(firstDate + (lastDate - firstDate) * tick / Math.max(tickCount - 1, 1)).toISOString().slice(0, 10) : rows[index].period;
-    const tickLabel = curated && chartView.xInterval !== null && chartView.xInterval % 12 === 0 ? label.slice(0, 4) : fmtPeriod(label);
+    const tickLabel = curated && chartView.xInterval !== null && chartView.xInterval % 12 === 0
+      ? label.slice(0, 4)
+      : curated ? new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" })
+        .format(new Date(`${label.slice(0, 7)}-01T00:00:00Z`)) + "-" + label.slice(2, 4) : fmtPeriod(label);
     svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
     if (curated) svg.append(svgNode("line", { x1: position, x2: position, y1: height - margin.bottom, y2: height - margin.bottom + 7, stroke: "#ffffff" }));
   }
@@ -592,6 +597,7 @@ function drawTrend(item) {
     seriesRows.forEach((point, index) => {
       const value = Number(point.value);
       if (point.value === null || !Number.isFinite(value)) {
+        if (activeComboPreset?.connectMissing) return;
         drawing = false;
         if (segment.length) { areaSegments.push(segment); segment = []; }
         return;
