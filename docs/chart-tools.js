@@ -5,6 +5,10 @@ const CURATED_COMBO_CHARTS = [
     indicatorIds: ["combo_unemployment_20_24", "combo_unemployment_25_54"],
     labels: ["20-24 Years", "25-54 Years"], colors: ["#006b3c", "#86bc25"],
     from: "2016-01-01", low: "0", high: "12", interval: "2", decimals: "0", xInterval: "12" },
+  { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, private sector",
+    indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy",
+    labels: ["Weekly Earnings", "Hourly Earnings"], colors: ["#86bc25", "#006b3c"],
+    from: "2024-01-01", low: "0", high: "", interval: ".5", decimals: "1", xInterval: "4", percentLabels: true },
 ];
 const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
 const ADDITIONAL_SERIES_SLOTS = [
@@ -390,6 +394,10 @@ function resetChartAxes() {
     $("combo-measure").dataset.indicatorId = preset.indicatorIds[1];
     $("combo-options").hidden = false;
     $("combo-axis").value = "left";
+    if (preset.measure) {
+      $("chart-measure").value = preset.measure;
+      $("combo-measure").value = preset.measure;
+    }
     const lastDates = preset.indicatorIds.flatMap(id => exportPoints(snapshot.indicators[id])
       .filter(point => point.value !== null && Number.isFinite(Number(point.value)))
       .map(point => periodBounds(point, snapshot.indicators[id].frequency_code)[1]));
@@ -537,8 +545,12 @@ function drawTrend(item) {
   for (const [side, axis] of Object.entries(chartView.axes)) {
     for (const value of axisTicks(axis).reverse()) {
       const yy = margin.top + (axis.high - value) * plotH / (axis.high - axis.low);
-      if (!curated && (side === "left" || !chartView.axes.left)) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line" }));
-      const label = axisTickLabel(value, axis, axis.item.chart_value_style || valueStyle);
+      if (side === "left" || !chartView.axes.left) svg.append(svgNode("line", {
+        x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line",
+        ...(curated ? { stroke: "#34443d", "stroke-width": 1 } : {}),
+      }));
+      const label = axisTickLabel(value, axis, axis.item.chart_value_style || valueStyle) +
+        (activeComboPreset?.percentLabels ? "%" : "");
       svg.append(axisTickNode(label, { x: side === "left" ? margin.left - 10 : width - margin.right + 12, y: yy + 4,
         "text-anchor": side === "left" ? "end" : "start", "data-axis": side, style: "fill:#ffffff" }));
     }
