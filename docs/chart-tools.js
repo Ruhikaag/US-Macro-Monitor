@@ -14,6 +14,11 @@ const CURATED_COMBO_CHARTS = [
     indicatorIds: ["combo_hiring_rate", "combo_job_openings_rate"], measure: "level",
     labels: ["Hiring Rate", "Openings Rate"], colors: ["#86bc25", "#006b3c"],
     from: "2018-01-01", low: "3", high: "8", interval: "0.5", decimals: "", xInterval: "24" },
+  { id: "employment-surveys", title: "Employment Growth by Survey", unit: "3-mo CAGR, %",
+    indicatorIds: ["combo_establishment_employment", "combo_household_employment"], measure: "cagr3", type: "column",
+    labels: ["Establishment survey", "Household survey"], colors: ["#86bc25", "#006b3c"],
+    from: "2026-02-01", low: "-3", high: "", interval: "0.5", decimals: "1", xInterval: "1",
+    percentLabels: true, categories: true, valueLabels: true, legendStart: 180, legendGap: 350 },
 ];
 const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
 const ADDITIONAL_SERIES_SLOTS = [
@@ -155,7 +160,7 @@ function chartMeasureItem(item, selectorId = "chart-measure") {
   const smooth = activeComboPreset?.threeMonthAverage && activeComboPreset.indicatorIds.includes(item.id);
   return { ...item, chart_label: smooth ? `${measure.label} (3MMA)` : measure.label, chart_unit: measure.unit,
     chart_value_style: measure.value_style, export_history: smooth ? threeMonthAverage(measure.history) : measure.history,
-    chart_percent_change: ["period", "yoy", "annual"].includes($(selectorId).value) };
+    chart_percent_change: ["period", "yoy", "annual", "cagr3"].includes($(selectorId).value) };
 }
 
 function fillChartMeasures(item, selectorId) {
@@ -427,6 +432,7 @@ function resetChartAxes() {
     $("chart-min").value = preset.low; $("chart-max").value = preset.high;
     $("chart-interval").value = preset.interval; $("chart-decimals").value = preset.decimals;
     $("chart-x-interval").value = preset.xInterval;
+    $("chart-type").value = preset.type || "line"; $("combo-type").value = preset.type || "line";
     $("combo-indicator").value = preset.indicatorIds[1];
     fillChartMeasures(snapshot.indicators[preset.indicatorIds[1]], "combo-measure");
     $("combo-measure").dataset.indicatorId = preset.indicatorIds[1];
@@ -556,7 +562,11 @@ function drawTrend(item) {
   const dates = seriesViews.flatMap(view => view.rows.map(point => date(point, view.item)));
   const firstDate = curated ? Date.parse($("chart-from").value) : dates.length ? Math.min(...dates) : 0;
   const lastDate = curated ? Date.parse($("chart-to").value) : dates.length ? Math.max(...dates) : 0;
-  const x = (index, seriesRows = rows, seriesItem = item) => timeScale
+  const categories = activeComboPreset?.categories
+    ? [...new Set(seriesViews.flatMap(view => view.rows.map(point => point.period)))].sort() : null;
+  const x = (index, seriesRows = rows, seriesItem = item) => categories
+    ? margin.left + (categories.indexOf(seriesRows[index].period) + .5) * plotW / categories.length
+    : timeScale
     ? margin.left + (date(seriesRows[index], seriesItem) - firstDate) * plotW / Math.max(lastDate - firstDate, 1)
     : margin.left + index * plotW / Math.max(rows.length - 1, 1);
   const valueStyle = item.chart_value_style || (Math.abs(high - low) > 100 ? "decimal0" : "decimal1");
@@ -565,7 +575,7 @@ function drawTrend(item) {
       const color = view.color;
       const itemAttrs = { "data-series": index };
       if (curated) {
-        const xx = 290 + index * 220, yy = height - 70;
+        const xx = (activeComboPreset.legendStart ?? 290) + index * (activeComboPreset.legendGap ?? 220), yy = height - 70;
         svg.append(svgNode("line", { ...itemAttrs, x1: xx, x2: xx + 45, y1: yy - 6, y2: yy - 6, stroke: color, "stroke-width": 5 }),
           svgNode("text", { ...itemAttrs, class: "legend-item", x: xx + 50, y: yy }, activeComboPreset.labels[index]));
         continue;
@@ -593,18 +603,20 @@ function drawTrend(item) {
     }
   }
   const monthTicks = chartView.xInterval === null ? null : calendarTicks(firstDate, lastDate, chartView.xInterval);
-  const tickCount = monthTicks ? monthTicks.length : multiple ? (lastDate === firstDate ? 1 : 6) : Math.min(6, rows.length);
+  const categoryTicks = categories?.filter((period, index) => index % (chartView.xInterval || 1) === 0);
+  const tickCount = categoryTicks ? categoryTicks.length : monthTicks ? monthTicks.length : multiple ? (lastDate === firstDate ? 1 : 6) : Math.min(6, rows.length);
   for (let tick = 0; tick < tickCount; tick++) {
     const index = Math.round(tick * (rows.length - 1) / Math.max(tickCount - 1, 1));
-    const position = monthTicks ? margin.left + (monthTicks[tick] - firstDate) * plotW / Math.max(lastDate - firstDate, 1)
+    const position = categories ? margin.left + (categories.indexOf(categoryTicks[tick]) + .5) * plotW / categories.length
+      : monthTicks ? margin.left + (monthTicks[tick] - firstDate) * plotW / Math.max(lastDate - firstDate, 1)
       : multiple ? margin.left + tick * plotW / Math.max(tickCount - 1, 1) : x(index);
-    const label = monthTicks ? new Date(monthTicks[tick]).toISOString().slice(0, 7)
+    const label = categories ? categoryTicks[tick] : monthTicks ? new Date(monthTicks[tick]).toISOString().slice(0, 7)
       : multiple ? new Date(firstDate + (lastDate - firstDate) * tick / Math.max(tickCount - 1, 1)).toISOString().slice(0, 10) : rows[index].period;
     const tickLabel = curated && chartView.xInterval !== null && chartView.xInterval % 12 === 0
       ? label.slice(0, 4)
       : curated ? new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" })
         .format(new Date(`${label.slice(0, 7)}-01T00:00:00Z`)) + "-" + label.slice(2, 4) : fmtPeriod(label);
-    svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 40, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
+    svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 40, "text-anchor": categories ? "middle" : tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
     if (curated) svg.append(svgNode("line", { x1: position, x2: position, y1: height - margin.bottom, y2: height - margin.bottom + 7, stroke: "#ffffff" }));
   }
   if (curated) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#ffffff" }));
@@ -613,6 +625,7 @@ function drawTrend(item) {
   clip.append(svgNode("rect", { x: margin.left - endpointPadding, y: margin.top, width: plotW + 2 * endpointPadding, height: plotH }));
   defs.append(clip); svg.append(defs);
   const plot = svgNode("g", { "clip-path": "url(#chart-plot-clip)" });
+  const valueLabels = svgNode("g");
   for (const view of [...seriesViews].sort((a, b) => Number(["column", "area"].includes(b.type)) - Number(["column", "area"].includes(a.type)))) {
     const seriesIndex = seriesViews.indexOf(view);
     const seriesRows = view.rows, seriesItem = view.item;
@@ -621,7 +634,7 @@ function drawTrend(item) {
     const seriesStyle = seriesItem.chart_value_style || (Math.abs(view.high - view.low) > 100 ? "decimal0" : "decimal1");
     const positions = [...new Set(seriesRows.map((_, index) => seriesX(index)))].sort((a, b) => a - b);
     const gaps = positions.slice(1).map((value, index) => value - positions[index]);
-    const groupWidth = Math.max(.5, Math.min(16, gaps.length ? Math.min(...gaps) * .7 : 16));
+    const groupWidth = Math.max(.5, Math.min(categories ? 64 : 16, gaps.length ? Math.min(...gaps) * .7 : 16));
     const grouped = multiple && seriesViews.every(series => series.type === "column");
     const barWidth = grouped ? groupWidth / seriesViews.length : groupWidth;
     const offset = grouped ? (seriesIndex - (seriesViews.length - 1) / 2) * barWidth : 0;
@@ -644,6 +657,13 @@ function drawTrend(item) {
           "data-period": point.period, fill: view.color });
         bar.append(svgNode("title", {}, `${seriesItem.title} · ${fmtPeriod(point.period)}: ${fmt(point.value, seriesStyle)} ${seriesItem.chart_unit || seriesItem.unit}`));
         plot.append(bar);
+        if (activeComboPreset?.valueLabels) {
+          const label = axisTickLabel(Math.abs(value) < .05 ? 0 : value, { ...view, decimals: 1 }, "decimal1") + "%";
+          valueLabels.append(svgNode("text", {
+            x: seriesX(index) + offset, y: value >= 0 ? yy - 12 : yy + 24,
+            "text-anchor": "middle", class: "column-value", "data-series": seriesIndex,
+          }, label));
+        }
       } else if (view.type === "scatter") {
         const dot = svgNode("circle", { cx: seriesX(index), cy: seriesY(value), r: 4, class: "series-scatter", fill: view.color, "data-series": seriesIndex });
         plot.append(dot);
@@ -673,6 +693,12 @@ function drawTrend(item) {
     });
   }
   svg.append(plot);
+  svg.append(valueLabels);
+  if (categories && low <= 0 && high >= 0) {
+    const zeroY = margin.top + high * plotH / (high - low);
+    svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right,
+      y1: zeroY, y2: zeroY, stroke: "#ffffff", "stroke-width": 1 }));
+  }
   if (curated) {
     svg.querySelectorAll("text").forEach(node => {
       node.setAttribute("style", `fill:#ffffff;font:300 ${node.classList.contains("curated-title") ? 32 : node.classList.contains("curated-note") ? 18 : 21}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif`);
