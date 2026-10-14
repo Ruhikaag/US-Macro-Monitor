@@ -318,6 +318,12 @@ function chartMessage(message, error = false) {
   status.classList.toggle("export-error", error);
 }
 
+function chartSourceText(items) {
+  const sources = [...new Set(items.map(item => item.source?.trim()).filter(Boolean))];
+  if (items.some(item => !item.source?.trim())) sources.push("not available in Haver metadata");
+  return `Source: ${sources.join("; ")}`;
+}
+
 function enableChartExports(enabled) {
   for (const id of ["copy-chart", "download-chart-csv"]) {
     $(id).disabled = !enabled;
@@ -348,11 +354,6 @@ function openComboGallery() {
     preview.querySelector("[clip-path]").setAttribute("clip-path", `url(#${clipId})`);
     preview.querySelectorAll(".hover-target").forEach(node => node.remove());
     button.append(preview);
-    if (preset.connectMissing) {
-      const note = document.createElement("span");
-      note.textContent = "Lines connect across missing observations; no values are imputed.";
-      button.append(note);
-    }
     button.addEventListener("click", () => {
       $("combo-gallery").close();
       openTrend(items[0], preset);
@@ -490,12 +491,7 @@ function applyChartAxes(event) {
     }
     drawTrend(item);
     enableChartExports(true);
-    const description = activeChartItem.chart_measures?.[$("chart-measure").value]?.description || "";
-    const comboDescription = views.length > 1 ? " Combo points are aligned by period-end date, without resampling. Indicators on the same side share one scale." : "";
-    const missingNote = activeComboPreset?.connectMissing ? " Lines connect across missing observations; no values are imputed." : "";
-    const smoothingNote = activeComboPreset?.threeMonthAverage
-      ? " Earnings show the trailing average of three consecutive monthly Y/Y growth rates. Incomplete or missing months remain unavailable." : "";
-    chartMessage(`${description}${comboDescription} Leave Y limits blank for automatic scaling. Monthly and quarterly observations overlap the selected dates.${missingNote}${smoothingNote}`);
+    chartMessage(chartSourceText(views.map(view => view.item)));
     if (event) { selectChartTab(false); $("chart-tab").focus(); }
   } catch (error) {
     chartView = null;

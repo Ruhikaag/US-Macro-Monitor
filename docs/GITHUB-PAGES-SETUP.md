@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- Chart information now displays only **Source:** attribution from Haver's `longsource` metadata (or `shortsource` when the full name is absent), deduplicating publishers for combinations. Missing attribution is explicitly labeled unavailable, never inferred from descriptors. The helper includes this metadata in each refreshed indicator. Generated source-level descriptions, alignment/scaling/date-window guidance, smoothing commentary and missing-data commentary are removed from every chart and gallery tile. Validation/copy errors still appear when relevant, and the explicitly requested 3MMA definition remains below earnings. This supersedes older references below to explanatory chart notes.
+
 - Gallery guidance appears once in the header: **Click chart to customize or copy**. Individual chart tiles do not repeat it; chart-specific data disclosures remain below the relevant chart.
 
 - Latest chart-design preference: all multi-indicator combo charts (curated and ad-hoc), previews and copied images omit gridlines. This supersedes earlier gridline requests below; single-indicator charts are unchanged. Do not add additional text above charts unless specifically requested. Earnings smoothing is labeled **3MMA** in the existing subtitle and chart CSV, replacing **3-month MA**, with the requested definition **3MMA is the 3-month moving average.** below the legend in previews, customization and copied images. The averaging calculation is unchanged.
