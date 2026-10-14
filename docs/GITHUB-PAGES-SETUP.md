@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- Chart-preview gallery maximum width is 900px (reduced from its effective 980px limit for slightly smaller tiles), with a 380px responsive grid minimum; full customization charts retain their existing size.
+
 - The second curated preview is **Average Earnings Growth**, **Y/Y % change, private sector**: weekly earnings (`yryr%(LKTPRIVA@USECON)`, Deloitte green) and hourly earnings (`yryr%(LETPRIVA@USECON)`, dark green). It reuses existing consumer source-level year-over-year measures without transforming them again. Defaults start January 2024 with four-month date labels. At the user's explicit request, the shared Y-axis matches the reference: 2.5-4.5%, labels at 2.5%, 3.5% and 4.5%, one decimal place. This prescribed scale overrides the zero-inclusive default for this curated chart only. Custom remains available; Reset restores the reference scale. Both curated charts show subtle horizontal gridlines in previews, customization and copied images.
 
 - **Explore combo charts** sits immediately to the right of **Export CSV** in Macro Monitor. It opens a gallery showing actual chart previews rather than text-only selection cards. Click a preview (or use Tab and Enter) to open its customization and copy controls. Only user-specified comparisons are configured; the first preview is **Unemployment Rates**.
