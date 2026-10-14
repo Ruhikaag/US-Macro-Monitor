@@ -20,6 +20,10 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- **Explore combo charts** sits immediately to the right of **Export CSV** in Macro Monitor. It opens the requested **Unemployment Rates** chart directly, with no intermediate selection card. Only user-specified comparisons are configured.
+- The first comparison uses monthly seasonally adjusted unemployment rates for ages **20-24** (`RA23@EMPL`) and **25-54** (`RA53@EMPL`). Sources are refreshed/published by the existing Haver helper; no new theme tiles are added. Default design follows the supplied reference: black background, dark green and Deloitte green lines, white labels, bottom age-group legend, annual date labels from 2016, and a shared 0-12% scale in steps of 2. The reference scale clips pandemic peaks visually; source values and CSV remain complete.
+- Its **Custom** tab retains X-axis from/to and label interval, Y-axis minimum/maximum, tick interval and 0-3 decimal places. Series/measure selectors are hidden to keep this a prescribed comparison. Clear limits for automatic scaling, or increase the maximum to see the full peaks. **Reset** restores reference settings. Copy chart preserves the reference proportions (1800x1600 PNG), while ordinary chart copies remain 1800x920. Missing sources produce an explicit unavailable message instead of a partial chart. Existing search and ad-hoc combo charts can use the two new sources; chart CSV remains ticker-free.
+
 - Automatic value axes use round tick intervals (0.25 minimum, then steps such as 0.5, 1, 2, 2.5, 5 and powers of ten). Percentage-change measures (% Period, % y/y and % Annual Rate) include a labeled zero by default on either axis, including shared/combo axes and horizontal bars. Level measures remain data-focused. Explicit minimum/maximum bounds and tick intervals retain their existing override behavior; exported chart images use the same axes as the preview.
 
 - AI proxy badges sit directly below their investment card titles with a 3px gap; only these cards omit the standard minimum header height, including when titles wrap.

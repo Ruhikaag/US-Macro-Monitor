@@ -1,4 +1,11 @@
 let chartView = null;
+let activeComboPreset = null;
+const CURATED_COMBO_CHARTS = [
+  { id: "unemployment-age-groups", title: "Unemployment Rates", unit: "Percent",
+    indicatorIds: ["combo_unemployment_20_24", "combo_unemployment_25_54"],
+    labels: ["20-24 Years", "25-54 Years"], colors: ["#006b3c", "#86bc25"],
+    from: "2016-01-01", low: "0", high: "12", interval: "2", decimals: "0", xInterval: "12" },
+];
 const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
 const ADDITIONAL_SERIES_SLOTS = [
   { key: "combo", indicator: "combo-indicator", options: "combo-options", measure: "combo-measure", axis: "combo-axis", type: "combo-type", color: "combo-color" },
@@ -296,7 +303,21 @@ function enableChartExports(enabled) {
   }
 }
 
-function openTrend(item) {
+function openComboGallery() {
+  $("combo-gallery-status").textContent = "";
+  const preset = CURATED_COMBO_CHARTS[0];
+  const items = preset.indicatorIds.map(id => snapshot?.indicators?.[id]);
+  if (items.some(item => !item || item.error || !exportPoints(item).some(point => point.value !== null && Number.isFinite(Number(point.value))))) {
+    $("combo-gallery-status").textContent = "This chart is unavailable. Both unemployment series must be present in the latest published data. Check updates and try again.";
+    $("combo-gallery").showModal();
+    return;
+  }
+  openTrend(items[0], preset);
+}
+
+function openTrend(item, preset = null) {
+  activeComboPreset = preset;
+  $("trend-dialog").classList.toggle("curated-chart", Boolean(preset));
   activeChartItem = item;
   $("trend-title").textContent = item.title;
   fillChartMeasures(item, "chart-measure");
@@ -336,6 +357,23 @@ function resetChartAxes() {
   $("chart-axis").value = "left"; $("combo-axis").value = "right";
   $("chart-type").value = "line"; $("combo-type").value = "line";
   $("chart-x-interval").value = "";
+  if (activeComboPreset) {
+    const preset = activeComboPreset;
+    $("chart-from").value = preset.from;
+    $("chart-min").value = preset.low; $("chart-max").value = preset.high;
+    $("chart-interval").value = preset.interval; $("chart-decimals").value = preset.decimals;
+    $("chart-x-interval").value = preset.xInterval;
+    $("combo-indicator").value = preset.indicatorIds[1];
+    fillChartMeasures(snapshot.indicators[preset.indicatorIds[1]], "combo-measure");
+    $("combo-measure").dataset.indicatorId = preset.indicatorIds[1];
+    $("combo-options").hidden = false;
+    $("combo-axis").value = "left";
+    const lastDates = preset.indicatorIds.flatMap(id => exportPoints(snapshot.indicators[id])
+      .filter(point => point.value !== null && Number.isFinite(Number(point.value)))
+      .map(point => periodBounds(point, snapshot.indicators[id].frequency_code)[1]));
+    $("chart-to").value = lastDates.sort().at(-1);
+    $("chart-to").max = $("chart-to").value;
+  }
   applyChartAxes();
 }
 
@@ -395,6 +433,10 @@ function applyChartAxes(event) {
     $("trend-title").textContent = views.length > 1 ? "Combo chart" : activeChartItem.title;
     $("trend-subtitle").textContent = `${item.frequency} · ${item.chart_label || item.title} (${item.chart_unit || item.unit}) · ${fmtPeriod(rows[0].period)}–${fmtPeriod(rows[rows.length - 1].period)}`;
     if (views.length > 1) $("trend-subtitle").textContent = `${$("chart-from").value} to ${$("chart-to").value} · ${Object.keys(axes).length === 1 ? `Shared ${Object.keys(axes)[0]} Y-axis scale` : "Independent left/right scales"}`;
+    if (activeComboPreset) {
+      $("trend-title").textContent = activeComboPreset.title;
+      $("trend-subtitle").textContent = `${activeComboPreset.unit} · ${$("chart-from").value} to ${$("chart-to").value}`;
+    }
     drawTrend(item);
     enableChartExports(true);
     const description = activeChartItem.chart_measures?.[$("chart-measure").value]?.description || "";
@@ -412,6 +454,7 @@ function applyChartAxes(event) {
 }
 
 function seriesColor(selectorId, index) {
+  if (activeComboPreset) return activeComboPreset.colors[index];
   const value = $(selectorId).value;
   return CHART_SERIES_COLORS.includes(value) ? value : CHART_SERIES_COLORS[index % CHART_SERIES_COLORS.length];
 }
@@ -429,12 +472,22 @@ function drawTrend(item) {
   const { rows, low, high } = chartView;
   const seriesViews = currentChartSeries();
   const multiple = seriesViews.length > 1;
-  const width = 900, height = 390, margin = { top: multiple ? 18 + seriesViews.length * 23 : 20, right: chartView.axes.right ? 92 : 22, bottom: 54, left: 92 };
+  const curated = Boolean(activeComboPreset);
+  const width = 900, height = curated ? 800 : 390;
+  const margin = curated ? { top: 120, right: 25, bottom: 105, left: 60 }
+    : { top: multiple ? 18 + seriesViews.length * 23 : 20, right: chartView.axes.right ? 92 : 22, bottom: 54, left: 92 };
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  if (curated) {
+    svg.append(svgNode("rect", { width, height, fill: "#000000" }),
+      svgNode("text", { x: 45, y: 45, class: "curated-title" }, activeComboPreset.title),
+      svgNode("text", { x: 45, y: 82, class: "curated-title" }, activeComboPreset.unit));
+  }
   const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
   const date = (point, seriesItem) => Date.parse(`${periodBounds(point, seriesItem.frequency_code)[1]}T00:00:00Z`);
   const timeScale = multiple || chartView.xInterval !== null;
   const dates = seriesViews.flatMap(view => view.rows.map(point => date(point, view.item)));
-  const firstDate = dates.length ? Math.min(...dates) : 0, lastDate = dates.length ? Math.max(...dates) : 0;
+  const firstDate = curated ? Date.parse($("chart-from").value) : dates.length ? Math.min(...dates) : 0;
+  const lastDate = curated ? Date.parse($("chart-to").value) : dates.length ? Math.max(...dates) : 0;
   const x = (index, seriesRows = rows, seriesItem = item) => timeScale
     ? margin.left + (date(seriesRows[index], seriesItem) - firstDate) * plotW / Math.max(lastDate - firstDate, 1)
     : margin.left + index * plotW / Math.max(rows.length - 1, 1);
@@ -443,6 +496,12 @@ function drawTrend(item) {
     for (const [index, view] of seriesViews.entries()) {
       const color = view.color;
       const itemAttrs = { "data-series": index };
+      if (curated) {
+        const xx = 290 + index * 220, yy = height - 30;
+        svg.append(svgNode("line", { ...itemAttrs, x1: xx, x2: xx + 45, y1: yy - 6, y2: yy - 6, stroke: color, "stroke-width": 5 }),
+          svgNode("text", { ...itemAttrs, class: "legend-item", x: xx + 50, y: yy }, activeComboPreset.labels[index]));
+        continue;
+      }
       const sample = ["column", "area"].includes(view.type)
         ? svgNode("rect", { ...itemAttrs, class: "legend-swatch", x: 22, y: 10 + index * 23, width: 23, height: 12, fill: color })
         : svgNode("line", { ...itemAttrs, class: "legend-swatch", x1: 22, x2: 45, y1: 17 + index * 23, y2: 17 + index * 23, stroke: color, "stroke-width": 3 });
@@ -456,7 +515,7 @@ function drawTrend(item) {
   for (const [side, axis] of Object.entries(chartView.axes)) {
     for (const value of axisTicks(axis).reverse()) {
       const yy = margin.top + (axis.high - value) * plotH / (axis.high - axis.low);
-      if (side === "left" || !chartView.axes.left) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line" }));
+      if (!curated && (side === "left" || !chartView.axes.left)) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line" }));
       const label = axisTickLabel(value, axis, axis.item.chart_value_style || valueStyle);
       svg.append(axisTickNode(label, { x: side === "left" ? margin.left - 10 : width - margin.right + 12, y: yy + 4,
         "text-anchor": side === "left" ? "end" : "start", "data-axis": side, style: "fill:#ffffff" }));
@@ -470,8 +529,11 @@ function drawTrend(item) {
       : multiple ? margin.left + tick * plotW / Math.max(tickCount - 1, 1) : x(index);
     const label = monthTicks ? new Date(monthTicks[tick]).toISOString().slice(0, 7)
       : multiple ? new Date(firstDate + (lastDate - firstDate) * tick / Math.max(tickCount - 1, 1)).toISOString().slice(0, 10) : rows[index].period;
-    svg.append(svgNode("text", { x: position, y: height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, fmtPeriod(label)));
+    const tickLabel = curated && chartView.xInterval !== null && chartView.xInterval % 12 === 0 ? label.slice(0, 4) : fmtPeriod(label);
+    svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 20, "text-anchor": tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
+    if (curated) svg.append(svgNode("line", { x1: position, x2: position, y1: height - margin.bottom, y2: height - margin.bottom + 7, stroke: "#ffffff" }));
   }
+  if (curated) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#ffffff" }));
   const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
   const endpointPadding = 9;
   clip.append(svgNode("rect", { x: margin.left - endpointPadding, y: margin.top, width: plotW + 2 * endpointPadding, height: plotH }));
@@ -525,7 +587,7 @@ function drawTrend(item) {
     }
     if (["line", "area", "step"].includes(view.type)) plot.append(svgNode("path", { d: path.trim(), class: "series-line", "data-type": view.type, "data-series": seriesIndex, style: `stroke:${view.color}` }));
     const lastIndex = seriesRows.findLastIndex(point => point.value !== null && Number.isFinite(Number(point.value)));
-    if (lastIndex >= 0 && ["line", "area", "step"].includes(view.type)) {
+    if (!curated && lastIndex >= 0 && ["line", "area", "step"].includes(view.type)) {
       plot.append(svgNode("circle", { cx: seriesX(lastIndex), cy: seriesY(Number(seriesRows[lastIndex].value)), r: 5, class: "latest-point", "data-series": seriesIndex, style: `fill:${view.color}` }));
     }
     seriesRows.forEach((point, index) => {
@@ -536,6 +598,14 @@ function drawTrend(item) {
     });
   }
   svg.append(plot);
+  if (curated) {
+    svg.querySelectorAll("text").forEach(node => {
+      node.setAttribute("style", `fill:#ffffff;font:300 ${node.classList.contains("curated-title") ? 32 : 21}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif`);
+    });
+    svg.querySelectorAll(".series-line").forEach(node => {
+      node.style.fill = "none"; node.style.strokeWidth = "5"; node.style.strokeLinejoin = "round";
+    });
+  }
 }
 
 function drawHorizontalBars(svg) {
@@ -584,6 +654,12 @@ function chartSvgSource() {
   if (!chartView || $("trend-chart").hidden) throw new Error("Apply valid axes before copying the chart.");
   const svg = $("trend-chart").cloneNode(true);
   svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  if (activeComboPreset) {
+    svg.setAttribute("width", "900"); svg.setAttribute("height", "800");
+    svg.setAttribute("aria-label", activeComboPreset.title); svg.removeAttribute("aria-labelledby");
+    svg.querySelectorAll(".hover-target").forEach(node => node.remove());
+    return new XMLSerializer().serializeToString(svg);
+  }
   svg.setAttribute("viewBox", "0 0 900 460");
   svg.setAttribute("width", "900"); svg.setAttribute("height", "460");
   svg.setAttribute("aria-label", $("trend-title").textContent);
@@ -614,7 +690,8 @@ function chartPng(source) {
     image.onload = () => {
       URL.revokeObjectURL(url);
       try {
-        const canvas = document.createElement("canvas"); canvas.width = 1800; canvas.height = 920;
+        const canvas = document.createElement("canvas"); canvas.width = 1800;
+        canvas.height = Math.round(canvas.width * image.height / image.width);
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Image export is not supported by this browser.");
         context.drawImage(image, 0, 0, canvas.width, canvas.height);

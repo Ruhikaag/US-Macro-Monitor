@@ -35,6 +35,10 @@
     .hero-copy { position: relative; z-index: 1; max-width: 560px; margin: 22px 0 0; color: #d2e2db; font-size: 13px; line-height: 1.7; }
     .hero-export { position: relative; z-index: 1; margin-top: 18px; border-color: #00a3ad; background: #00a3ad; color: #fff; }
     .hero-export:hover { border-color: #4ed1d0; background: #087e83; }
+    #explore-combos { margin-left: 10px; }
+    #combo-gallery-status { padding: 0 22px 18px; }
+    #trend-dialog.curated-chart #chart-controls fieldset:nth-of-type(2) { display: none; }
+    #trend-dialog.curated-chart .chart-wrap { background: #000; }
     .workspace { max-width: 1420px; margin: 0 auto; padding: 28px 26px 50px; }
     .workspace-layout { display: grid; grid-template-columns: 205px minmax(0, 1fr); gap: 24px; align-items: start; }
     .theme-nav { position: sticky; top: 15px; }
@@ -287,6 +291,7 @@
     <h1>US Macro<span>Monitor</span></h1>
     <p class="hero-copy">Your one-stop view of the economic indicators you need to watch.</p>
     <button class="text-button hero-export" id="export" type="button">Export CSV ↓</button>
+    <button class="text-button hero-export" id="explore-combos" type="button">Explore combo charts</button>
   </section>
   <main class="workspace">
     <div class="error" id="error" role="status" hidden></div>
@@ -313,6 +318,10 @@
   <section class="tab-placeholder" id="panel-publications" role="tabpanel" aria-labelledby="tab-publications" hidden>
     <h2>DI Publications</h2><p>Content will be added later.</p>
   </section>
+  <dialog id="combo-gallery" aria-labelledby="combo-gallery-title">
+    <div class="dialog-head"><div><h2 id="combo-gallery-title">Explore combo charts</h2><p>Selected charts, with designs specified for each comparison.</p></div><button class="close-button" id="close-combo-gallery" type="button">Close</button></div>
+    <p id="combo-gallery-status" role="status" aria-live="polite"></p>
+  </dialog>
   <dialog id="search-dialog" aria-labelledby="search-title">
     <div class="dialog-head"><div><h2 id="search-title">Search indicators</h2><p>Find indicators across all themes and open their charts.</p></div><button class="close-button" id="close-search" type="button">Close</button></div>
     <div class="search-body"><label>Search indicators <input id="indicator-query" type="search" placeholder="e.g. GDP, consumer spending, inflation" autocomplete="off" aria-controls="search-results" aria-describedby="search-status"></label><p id="search-status" role="status" aria-live="polite"></p><div id="search-results"></div></div>
@@ -346,7 +355,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=rounded-zero-axes-20261013"></script>
+  <script src="chart-tools.js?v=curated-combos-20261014"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -694,6 +703,8 @@
       button.disabled = false; button.textContent = "Check updates";
     }
     $("close-trend").addEventListener("click", () => $("trend-dialog").close());
+    $("explore-combos").addEventListener("click", openComboGallery);
+    $("close-combo-gallery").addEventListener("click", () => $("combo-gallery").close());
     $("copy-chart").addEventListener("click", copyChart);
     $("download-chart-csv").addEventListener("click", downloadChartCsv);
     $("chart-controls").addEventListener("submit", applyChartAxes);
