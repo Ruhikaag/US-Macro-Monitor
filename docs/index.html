@@ -36,6 +36,12 @@
     .hero-export { position: relative; z-index: 1; margin-top: 18px; border-color: #00a3ad; background: #00a3ad; color: #fff; }
     .hero-export:hover { border-color: #4ed1d0; background: #087e83; }
     #explore-combos { margin-left: 10px; }
+    #combo-gallery { width: min(1200px, calc(100vw - 40px)); }
+    .combo-gallery-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 20px; padding: 20px 22px; }
+    .combo-preview { padding: 0; overflow: hidden; border: 1px solid #00a3ad; border-radius: 8px; background: #000; color: #edf4f0; text-align: left; cursor: pointer; }
+    .combo-preview svg { display: block; width: 100%; height: auto; }
+    .combo-preview span { display: block; padding: 12px; background: #173b3c; font-size: 12px; }
+    .combo-preview:hover, .combo-preview:focus-visible { outline: 2px solid #86bc25; outline-offset: 2px; }
     #combo-gallery-status { padding: 0 22px 18px; }
     #trend-dialog.curated-chart #chart-controls fieldset:nth-of-type(2) { display: none; }
     #trend-dialog.curated-chart .chart-wrap { background: #000; }
@@ -319,7 +325,8 @@
     <h2>DI Publications</h2><p>Content will be added later.</p>
   </section>
   <dialog id="combo-gallery" aria-labelledby="combo-gallery-title">
-    <div class="dialog-head"><div><h2 id="combo-gallery-title">Explore combo charts</h2><p>Selected charts, with designs specified for each comparison.</p></div><button class="close-button" id="close-combo-gallery" type="button">Close</button></div>
+    <div class="dialog-head"><div><h2 id="combo-gallery-title">Explore combo charts</h2><p>Select a chart to customize its axes or copy it.</p></div><button class="close-button" id="close-combo-gallery" type="button">Close</button></div>
+    <div id="combo-gallery-list" class="combo-gallery-list"></div>
     <p id="combo-gallery-status" role="status" aria-live="polite"></p>
   </dialog>
   <dialog id="search-dialog" aria-labelledby="search-title">
@@ -355,7 +362,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=curated-combos-20261014"></script>
+  <script src="chart-tools.js?v=combo-previews-20261014"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];

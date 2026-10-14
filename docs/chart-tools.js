@@ -305,17 +305,39 @@ function enableChartExports(enabled) {
 
 function openComboGallery() {
   $("combo-gallery-status").textContent = "";
-  const preset = CURATED_COMBO_CHARTS[0];
-  const items = preset.indicatorIds.map(id => snapshot?.indicators?.[id]);
-  if (items.some(item => !item || item.error || !exportPoints(item).some(point => point.value !== null && Number.isFinite(Number(point.value))))) {
-    $("combo-gallery-status").textContent = "This chart is unavailable. Both unemployment series must be present in the latest published data. Check updates and try again.";
-    $("combo-gallery").showModal();
-    return;
+  const list = $("combo-gallery-list"); list.replaceChildren();
+  for (const preset of CURATED_COMBO_CHARTS) {
+    const items = preset.indicatorIds.map(id => snapshot?.indicators?.[id]);
+    const unavailable = items.some(item => !item || item.error ||
+      !exportPoints(item).some(point => point.value !== null && Number.isFinite(Number(point.value))));
+    if (!unavailable) openTrend(items[0], preset, false);
+    if (unavailable || !chartView) {
+      const error = document.createElement("p"); error.className = "export-error";
+      error.textContent = `${preset.title} is unavailable. Check updates and try again.`;
+      list.append(error);
+      continue;
+    }
+    const button = document.createElement("button"); button.type = "button"; button.className = "combo-preview";
+    button.setAttribute("aria-label", `Open ${preset.title} to customize or copy`);
+    const preview = $("trend-chart").cloneNode(true);
+    preview.removeAttribute("id"); preview.removeAttribute("aria-labelledby");
+    preview.setAttribute("aria-hidden", "true");
+    const clipId = `combo-preview-${preset.id}`;
+    preview.querySelector("clipPath").id = clipId;
+    preview.querySelector("[clip-path]").setAttribute("clip-path", `url(#${clipId})`);
+    preview.querySelectorAll(".hover-target").forEach(node => node.remove());
+    const hint = document.createElement("span"); hint.textContent = "Click chart to customize or copy";
+    button.append(preview, hint);
+    button.addEventListener("click", () => {
+      $("combo-gallery").close();
+      openTrend(items[0], preset);
+    });
+    list.append(button);
   }
-  openTrend(items[0], preset);
+  $("combo-gallery").showModal();
 }
 
-function openTrend(item, preset = null) {
+function openTrend(item, preset = null, showDialog = true) {
   activeComboPreset = preset;
   $("trend-dialog").classList.toggle("curated-chart", Boolean(preset));
   activeChartItem = item;
@@ -330,7 +352,7 @@ function openTrend(item, preset = null) {
   }
   resetChartAxes();
   selectChartTab(false);
-  $("trend-dialog").showModal();
+  if (showDialog) $("trend-dialog").showModal();
 }
 
 function resetChartAxes() {
