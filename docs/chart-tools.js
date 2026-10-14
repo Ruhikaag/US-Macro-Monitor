@@ -347,9 +347,12 @@ function openComboGallery() {
     preview.querySelector("clipPath").id = clipId;
     preview.querySelector("[clip-path]").setAttribute("clip-path", `url(#${clipId})`);
     preview.querySelectorAll(".hover-target").forEach(node => node.remove());
-    const hint = document.createElement("span"); hint.textContent = "Click chart to customize or copy" +
-      (preset.connectMissing ? " · Lines connect across missing observations; no values are imputed." : "");
-    button.append(preview, hint);
+    button.append(preview);
+    if (preset.connectMissing) {
+      const note = document.createElement("span");
+      note.textContent = "Lines connect across missing observations; no values are imputed.";
+      button.append(note);
+    }
     button.addEventListener("click", () => {
       $("combo-gallery").close();
       openTrend(items[0], preset);
