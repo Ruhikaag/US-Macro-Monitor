@@ -535,6 +535,52 @@ function currentChartSeries() {
   return chartView?.series || [chartView, ...(chartView?.second ? [chartView.second] : [])];
 }
 
+function spaceChartText(svg, bounds = null, baselines = []) {
+  if (!svg.getBoundingClientRect().width) {
+    const parent = svg.parentNode, next = svg.nextSibling;
+    const measurement = document.createElement("div");
+    measurement.style.cssText = "position:fixed;visibility:hidden;width:900px;pointer-events:none";
+    document.body.append(measurement);
+    measurement.append(svg);
+    try { spaceChartText(svg, bounds, baselines); }
+    finally { parent.insertBefore(svg, next); measurement.remove(); }
+    return;
+  }
+  const overlaps = (a, b, gap = 4) => a.x < b.x + b.width + gap && a.x + a.width + gap > b.x &&
+    a.y < b.y + b.height + gap && a.y + a.height + gap > b.y;
+  for (const side of ["left", "right", "x", "date"]) {
+    const ticks = [...svg.querySelectorAll(`[data-axis="${side}"]`)];
+    const kept = [];
+    for (const [index, tick] of ticks.entries()) {
+      const box = tick.getBBox();
+      const last = ticks.at(-1);
+      if (kept.some(other => overlaps(box, other.getBBox())) ||
+        (index > 0 && index < ticks.length - 1 && overlaps(box, last.getBBox()))) {
+        tick.setAttribute("visibility", "hidden");
+      } else kept.push(tick);
+    }
+  }
+  if (!bounds) return;
+  const obstacles = [...svg.querySelectorAll("text:not(.column-value)")]
+    .filter(node => node.getAttribute("visibility") !== "hidden").map(node => node.getBBox());
+  for (const label of svg.querySelectorAll(".column-value")) {
+    const originalY = Number(label.getAttribute("y")), box = label.getBBox();
+    const minShift = bounds.top + 10 - box.y;
+    const maxShift = bounds.bottom - 10 - box.y - box.height;
+    const shifts = [Math.min(maxShift, Math.max(minShift, 0))];
+    for (let step = 6; step <= bounds.bottom - bounds.top; step += 6) shifts.push(-step, step);
+    const shift = shifts.find(offset => {
+      const candidate = { x: box.x, y: box.y + offset, width: box.width, height: box.height };
+      return offset >= minShift && offset <= maxShift &&
+        baselines.every(y => candidate.y + candidate.height <= y - 8 || candidate.y >= y + 8) &&
+        obstacles.every(other => !overlaps(candidate, other));
+    });
+    if (shift === undefined) throw new Error("Data labels are too crowded. Select a shorter date range to display them without overlap.");
+    label.setAttribute("y", originalY + shift);
+    obstacles.push(label.getBBox());
+  }
+}
+
 function drawTrend(item) {
   const svg = $("trend-chart");
   svg.replaceChildren();
@@ -552,7 +598,7 @@ function drawTrend(item) {
   if (curated) {
     svg.append(svgNode("rect", { width, height, fill: "#000000" }),
       svgNode("text", { x: 45, y: 45, class: "curated-title" }, activeComboPreset.title),
-      svgNode("text", { x: 45, y: 82, class: "curated-title" }, activeComboPreset.unit));
+      svgNode("text", { x: 45, y: 90, class: "curated-title" }, activeComboPreset.unit));
     if (activeComboPreset.note) svg.append(svgNode("text",
       { x: 45, y: height - 40, class: "curated-note" }, activeComboPreset.note));
   }
@@ -619,7 +665,7 @@ function drawTrend(item) {
     svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 40, "text-anchor": categories ? "middle" : tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
     if (curated) svg.append(svgNode("line", { x1: position, x2: position, y1: height - margin.bottom, y2: height - margin.bottom + 7, stroke: "#ffffff" }));
   }
-  if (curated) svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#ffffff" }));
+  if (curated) svg.append(svgNode("line", { class: "chart-baseline", x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#ffffff" }));
   const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
   const endpointPadding = 9;
   clip.append(svgNode("rect", { x: margin.left - endpointPadding, y: margin.top, width: plotW + 2 * endpointPadding, height: plotH }));
@@ -697,7 +743,7 @@ function drawTrend(item) {
   if (categories && low <= 0 && high >= 0) {
     const zeroY = margin.top + high * plotH / (high - low);
     svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right,
-      y1: zeroY, y2: zeroY, stroke: "#ffffff", "stroke-width": 1 }));
+      y1: zeroY, y2: zeroY, class: "chart-baseline", stroke: "#ffffff", "stroke-width": 1 }));
   }
   if (curated) {
     svg.querySelectorAll("text").forEach(node => {
@@ -708,6 +754,8 @@ function drawTrend(item) {
     });
   }
   appendChartSource(svg, height, curated);
+  spaceChartText(svg, { top: margin.top, bottom: height - margin.bottom },
+    [...svg.querySelectorAll(".chart-baseline")].map(line => Number(line.getAttribute("y1"))));
 }
 
 function drawHorizontalBars(svg) {
@@ -751,6 +799,7 @@ function drawHorizontalBars(svg) {
   });
   svg.append(plot);
   appendChartSource(svg, 390);
+  spaceChartText(svg);
 }
 
 function chartSvgSource() {
