@@ -8,7 +8,7 @@ const CURATED_COMBO_CHARTS = [
   { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, private sector",
     indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy",
     labels: ["Weekly Earnings", "Hourly Earnings"], colors: ["#86bc25", "#006b3c"],
-    from: "2024-01-01", low: "0", high: "", interval: ".5", decimals: "1", xInterval: "4", percentLabels: true },
+    from: "2024-01-01", low: "2.5", high: "4.5", interval: "1", decimals: "1", xInterval: "4", percentLabels: true },
 ];
 const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
 const ADDITIONAL_SERIES_SLOTS = [
