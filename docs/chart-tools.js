@@ -10,6 +10,10 @@ const CURATED_COMBO_CHARTS = [
     indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy", threeMonthAverage: true,
     labels: ["Weekly Earnings", "Hourly Earnings"], colors: ["#86bc25", "#006b3c"],
     from: "2024-01-01", low: "2.5", high: "4.5", interval: "1", decimals: "1", xInterval: "4", percentLabels: true },
+  { id: "job-openings-hiring", title: "Job Openings and Hiring Rates", unit: "Percent",
+    indicatorIds: ["combo_hiring_rate", "combo_job_openings_rate"], measure: "level",
+    labels: ["Hiring Rate", "Openings Rate"], colors: ["#86bc25", "#006b3c"],
+    from: "2018-01-01", low: "3", high: "8", interval: "0.5", decimals: "", xInterval: "24" },
 ];
 const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
 const ADDITIONAL_SERIES_SLOTS = [
@@ -582,7 +586,7 @@ function drawTrend(item) {
       if (!multiple && (side === "left" || !chartView.axes.left)) svg.append(svgNode("line", {
         x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line",
       }));
-      const label = axisTickLabel(value, axis, axis.item.chart_value_style || valueStyle) +
+      const label = axisTickLabel(value, axis, curated ? "decimal1" : axis.item.chart_value_style || valueStyle) +
         (activeComboPreset?.percentLabels ? "%" : "");
       svg.append(axisTickNode(label, { x: side === "left" ? margin.left - 10 : width - margin.right + 12, y: yy + 4,
         "text-anchor": side === "left" ? "end" : "start", "data-axis": side, style: "fill:#ffffff" }));
