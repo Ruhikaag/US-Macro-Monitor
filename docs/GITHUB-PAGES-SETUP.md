@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- Latest chart-design preference: all multi-indicator combo charts (curated and ad-hoc), previews and copied images omit gridlines. This supersedes earlier gridline requests below; single-indicator charts are unchanged. Do not add additional text above charts unless specifically requested. Earnings smoothing is labeled **3MMA** in the existing subtitle and chart CSV, replacing **3-month MA**, with the requested definition **3MMA is the 3-month moving average.** below the legend in previews, customization and copied images. The averaging calculation is unchanged.
+
 - At the user's request, unemployment comparison lines connect across missing observations with solid segments (including missing October 2025), with an explanatory preview/dialog note. Missing values remain missing in source histories and are not invented or exported as observations. Other charts retain their normal missing-data gaps.
 
 - Curated subannual X-axis labels use compact `Jan-24`, `May-24`, `Sep-24` formatting to match the reference and prevent collisions in small previews. Earnings ticks remain exactly four calendar months apart; data remain monthly and use the current Haver snapshot rather than values traced from the reference image.

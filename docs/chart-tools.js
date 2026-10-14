@@ -5,7 +5,8 @@ const CURATED_COMBO_CHARTS = [
     indicatorIds: ["combo_unemployment_20_24", "combo_unemployment_25_54"],
     labels: ["20-24 Years", "25-54 Years"], colors: ["#006b3c", "#86bc25"], connectMissing: true,
     from: "2016-01-01", low: "0", high: "12", interval: "2", decimals: "0", xInterval: "12" },
-  { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, 3-month MA, private sector",
+  { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, 3MMA, private sector",
+    note: "3MMA is the 3-month moving average.",
     indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy", threeMonthAverage: true,
     labels: ["Weekly Earnings", "Hourly Earnings"], colors: ["#86bc25", "#006b3c"],
     from: "2024-01-01", low: "2.5", high: "4.5", interval: "1", decimals: "1", xInterval: "4", percentLabels: true },
@@ -148,7 +149,7 @@ function chartMeasureItem(item, selectorId = "chart-measure") {
   const measure = item.chart_measures[$(selectorId).value];
   if (!measure) throw new Error("Choose an available chart measure.");
   const smooth = activeComboPreset?.threeMonthAverage && activeComboPreset.indicatorIds.includes(item.id);
-  return { ...item, chart_label: smooth ? `${measure.label} (3-month MA)` : measure.label, chart_unit: measure.unit,
+  return { ...item, chart_label: smooth ? `${measure.label} (3MMA)` : measure.label, chart_unit: measure.unit,
     chart_value_style: measure.value_style, export_history: smooth ? threeMonthAverage(measure.history) : measure.history,
     chart_percent_change: ["period", "yoy", "annual"].includes($(selectorId).value) };
 }
@@ -531,6 +532,8 @@ function drawTrend(item) {
     svg.append(svgNode("rect", { width, height, fill: "#000000" }),
       svgNode("text", { x: 45, y: 45, class: "curated-title" }, activeComboPreset.title),
       svgNode("text", { x: 45, y: 82, class: "curated-title" }, activeComboPreset.unit));
+    if (activeComboPreset.note) svg.append(svgNode("text",
+      { x: 45, y: height - 12, class: "curated-note" }, activeComboPreset.note));
   }
   const plotW = width - margin.left - margin.right, plotH = height - margin.top - margin.bottom;
   const date = (point, seriesItem) => Date.parse(`${periodBounds(point, seriesItem.frequency_code)[1]}T00:00:00Z`);
@@ -547,7 +550,7 @@ function drawTrend(item) {
       const color = view.color;
       const itemAttrs = { "data-series": index };
       if (curated) {
-        const xx = 290 + index * 220, yy = height - 30;
+        const xx = 290 + index * 220, yy = height - (activeComboPreset.note ? 50 : 30);
         svg.append(svgNode("line", { ...itemAttrs, x1: xx, x2: xx + 45, y1: yy - 6, y2: yy - 6, stroke: color, "stroke-width": 5 }),
           svgNode("text", { ...itemAttrs, class: "legend-item", x: xx + 50, y: yy }, activeComboPreset.labels[index]));
         continue;
@@ -565,9 +568,8 @@ function drawTrend(item) {
   for (const [side, axis] of Object.entries(chartView.axes)) {
     for (const value of axisTicks(axis).reverse()) {
       const yy = margin.top + (axis.high - value) * plotH / (axis.high - axis.low);
-      if (side === "left" || !chartView.axes.left) svg.append(svgNode("line", {
+      if (!multiple && (side === "left" || !chartView.axes.left)) svg.append(svgNode("line", {
         x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line",
-        ...(curated ? { stroke: "#34443d", "stroke-width": 1 } : {}),
       }));
       const label = axisTickLabel(value, axis, axis.item.chart_value_style || valueStyle) +
         (activeComboPreset?.percentLabels ? "%" : "");
