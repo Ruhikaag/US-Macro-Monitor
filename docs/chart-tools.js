@@ -17,7 +17,7 @@ const CURATED_COMBO_CHARTS = [
   { id: "employment-surveys", title: "Employment Growth by Survey", unit: "3-mo CAGR, %",
     indicatorIds: ["combo_establishment_employment", "combo_household_employment"], measure: "cagr3", type: "column",
     labels: ["Establishment survey", "Household survey"], colors: ["#86bc25", "#006b3c"],
-    from: "2026-02-01", low: "-3", high: "", interval: "0.5", decimals: "1", xInterval: "1",
+    from: "2026-02-01", low: "-3.5", high: "", interval: "0.5", decimals: "1", xInterval: "1",
     percentLabels: true, categories: true, valueLabels: true, legendStart: 180, legendGap: 350 },
 ];
 const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
@@ -565,8 +565,11 @@ function spaceChartText(svg, bounds = null, baselines = []) {
     .filter(node => node.getAttribute("visibility") !== "hidden").map(node => node.getBBox());
   for (const label of svg.querySelectorAll(".column-value")) {
     const originalY = Number(label.getAttribute("y")), box = label.getBBox();
-    const minShift = bounds.top + 10 - box.y;
-    const maxShift = bounds.bottom - 10 - box.y - box.height;
+    const edge = Number(label.dataset.barEdge);
+    const minShift = Math.max(bounds.top + 10 - box.y,
+      label.dataset.direction === "below" ? edge + 8 - box.y : -Infinity);
+    const maxShift = Math.min(bounds.bottom - 10 - box.y - box.height,
+      label.dataset.direction === "above" ? edge - 8 - box.y - box.height : Infinity);
     const shifts = [Math.min(maxShift, Math.max(minShift, 0))];
     for (let step = 6; step <= bounds.bottom - bounds.top; step += 6) shifts.push(-step, step);
     const shift = shifts.find(offset => {
@@ -575,7 +578,7 @@ function spaceChartText(svg, bounds = null, baselines = []) {
         baselines.every(y => candidate.y + candidate.height <= y - 8 || candidate.y >= y + 8) &&
         obstacles.every(other => !overlaps(candidate, other));
     });
-    if (shift === undefined) throw new Error("Data labels are too crowded. Select a shorter date range to display them without overlap.");
+    if (shift === undefined) throw new Error("Data labels need more space outside the columns. Widen the Y-axis limits or select a shorter date range.");
     label.setAttribute("y", originalY + shift);
     obstacles.push(label.getBBox());
   }
@@ -708,6 +711,7 @@ function drawTrend(item) {
           valueLabels.append(svgNode("text", {
             x: seriesX(index) + offset, y: value >= 0 ? yy - 12 : yy + 24,
             "text-anchor": "middle", class: "column-value", "data-series": seriesIndex,
+            "data-period": point.period, "data-bar-edge": yy, "data-direction": value >= 0 ? "above" : "below",
           }, label));
         }
       } else if (view.type === "scatter") {
