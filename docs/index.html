@@ -61,14 +61,14 @@
     .workspace-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin: 0 0 14px; }
     .workspace-head h2 { margin: 0; color: #26352d; font: 400 28px/1.1 Georgia, serif; }
     .workspace-head p { margin: 4px 0 0; color: #5f766a; font-size: 11px; }
-    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 10px; }
     .cards[data-theme="real_economy"] { --theme-accent: #79ad20; --theme-tint: #f3f8e9; }
     .cards[data-theme="financial_markets"] { --theme-accent: #008c95; --theme-tint: #eaf7f7; }
     .cards[data-theme="inflation"] { --theme-accent: #397f58; --theme-tint: #eef6ed; }
     .indicator-card { display: flex; flex-direction: column; min-width: 0; border: 1px solid #dce6e0; border-top: 3px solid var(--theme-accent, #86bc25); border-left: 4px solid var(--theme-accent, #86bc25); border-radius: 7px; padding: 14px 14px 12px; background: linear-gradient(118deg, var(--theme-tint, #f4f9ea) 0%, #fff 31%); cursor: pointer; box-shadow: 0 4px 14px #1c3f2b0b; transition: border-color .15s, transform .15s, box-shadow .15s; }
     .indicator-card:hover { border-color: var(--theme-accent, var(--blue)); box-shadow: 0 9px 22px #153e2b1b; transform: translateY(-2px); }
     .indicator-card:focus-visible, .theme-button:focus-visible, .text-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 68px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 0; }
     .card-title-group { min-width: 0; }
     .card-head h3 { margin: 0; color: #1d282e; font-size: 14px; font-weight: 700; line-height: 1.35; }
     .card-descriptor { display: block; margin-top: 3px; color: #728078; font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
@@ -76,7 +76,7 @@
     .ai-proxy-badge { display: inline-flex; align-items: center; gap: 5px; margin-top: 3px; padding: 3px 7px; border: 1px solid #00a3ad; border-radius: 4px; color: #d5f5f3; background: #173b3c; font-size: 10px; line-height: 1.4; }
     .ai-proxy-badge svg { width: 13px; height: 13px; flex-shrink: 0; }
     .card-period { flex: 0 0 auto; color: #007c83; font-size: 10px; font-weight: 700; text-align: right; }
-    .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: auto; border-top: 1px solid #dcebe3; }
+    .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 14px; border-top: 1px solid #dcebe3; }
     .metric { min-width: 0; padding: 8px 8px 6px 0; }
     .metric + .metric { border-left: 1px solid #e5eee8; padding-left: 9px; }
     .metric-label { min-height: 29px; color: #6f7d82; font-size: 9px; line-height: 1.35; }
@@ -142,9 +142,9 @@
     .text-button { border-color: #3a5047; background: #202d27; color: #8dd9d3; }
     .text-button:hover { border-color: #9bcf48; background: #2b3a2d; }
     .hero { background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #111715 0%, #182622 62%, #173b34 100%); }
-    .headline-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 1360px; margin: 28px auto 0; }
-    .headline-card { display: flex; flex-direction: column; min-height: 175px; }
-    .headline-card .card-head { min-height: 68px; }
+    .headline-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; gap: 10px; max-width: 1360px; margin: 28px auto 0; }
+    .headline-card { min-height: 0; }
+    .headline-card .card-head { min-height: 0; }
     .headline-card .metric-row { grid-template-columns: minmax(0, 1fr); }
     .headline-card .metric-label { min-height: 24px; }
     .headline-card .metric-value { font-size: 23px; }
@@ -258,11 +258,10 @@
     .glance-live p { margin: 8px 0 0; font-size: 11px; }
     .glance-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #86bc25; margin-right: 6px; }
     #panel-glance .headline-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 32px; }
-    #panel-glance .headline-card { --theme-accent: #86bc25; border: 1px solid #395042; border-top: 4px solid #86bc25; border-left: 1px solid #395042; padding: 24px; background: linear-gradient(145deg, #25351e, #151f1a); border-radius: 12px; min-height: 205px; }
+    #panel-glance .headline-card { --theme-accent: #86bc25; border: 1px solid #395042; border-top: 4px solid #86bc25; border-left: 1px solid #395042; padding: 24px; background: linear-gradient(145deg, #25351e, #151f1a); border-radius: 12px; min-height: 0; }
     #panel-glance .headline-card:nth-child(even) { border-top-color: #00a3ad; background: linear-gradient(145deg, #17363a, #151f1a); }
     #panel-glance .headline-card .metric-value { font-size: 18px; margin-top: 12px; }
     #panel-glance .headline-card .card-period { color: #c5ded1; }
-    #panel-glance .headline-card .card-foot { margin-top: 20px; }
     .glance-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; padding: 24px 0; border-top: 1px solid #34443d; }
     .glance-bottom h2 { color: #86bc25; font: 400 28px/1.1 Georgia, serif; }
     .glance-note { color: #90a49a; font-size: 11px; }
@@ -361,7 +360,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=tile-descriptors-20261021"></script>
+  <script src="chart-tools.js?v=compact-tile-spacing-20261021"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
