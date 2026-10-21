@@ -145,8 +145,8 @@
     .headline-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: start; gap: 10px; max-width: 1360px; margin: 28px auto 0; }
     .headline-card { min-height: 0; }
     .headline-card .card-head { min-height: 0; }
-    .headline-card .metric-row { grid-template-columns: minmax(0, 1fr); }
-    .headline-card .metric-label { min-height: 24px; }
+    .headline-card .metric-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .headline-card .metric-label { min-height: 29px; }
     .headline-card .metric-value { font-size: 23px; }
     .workspace { color: var(--ink); }
     .section-label { color: #a9d66b; }
@@ -260,8 +260,11 @@
     #panel-glance .headline-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 32px; }
     #panel-glance .headline-card { --theme-accent: #86bc25; border: 1px solid #395042; border-top: 4px solid #86bc25; border-left: 1px solid #395042; padding: 24px; background: linear-gradient(145deg, #25351e, #151f1a); border-radius: 12px; min-height: 0; }
     #panel-glance .headline-card:nth-child(even) { border-top-color: #00a3ad; background: linear-gradient(145deg, #17363a, #151f1a); }
-    #panel-glance .headline-card .metric-value { font-size: 18px; margin-top: 12px; }
-    #panel-glance .headline-card .card-period { color: #c5ded1; }
+    #panel-glance .headline-card { padding: 20px; }
+    #panel-glance .headline-card .metric-label { min-height: 29px; font-size: 9px; }
+    #panel-glance .headline-card .metric-value { font-size: 18px; margin-top: 5px; }
+    #panel-glance .headline-card .metric { padding-top: 7px; }
+    #panel-glance .headline-card .metric + .metric { padding-left: 10px; }
     .glance-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; padding: 24px 0; border-top: 1px solid #34443d; }
     .glance-bottom h2 { color: #86bc25; font: 400 28px/1.1 Georgia, serif; }
     .glance-note { color: #90a49a; font-size: 11px; }
@@ -419,11 +422,11 @@
     let lastAttemptAt = null;
     let lastCheckedAt = null;
     const HEADLINE_TILES = [
-      { id: "headline_real_gdp", title: "Real GDP" },
-      { id: "headline_consumer_spending", title: "Real consumer spending" },
-      { id: "headline_pce_inflation", title: "PCE inflation" },
-      { id: "unemployment", title: "Unemployment rate" },
-      { id: "headline_federal_funds", title: "Federal funds rate" },
+      { id: "headline_real_gdp", title: "Real GDP", comparison: "quarterly" },
+      { id: "headline_consumer_spending", title: "Real consumer spending", comparison: "quarterly" },
+      { id: "headline_pce_inflation", title: "PCE inflation", comparison: "monthly_yoy" },
+      { id: "unemployment", title: "Unemployment rate", comparison: "monthly_level" },
+      { id: "headline_federal_funds", title: "Federal funds rate", comparison: "weekly_change" },
     ];
     function tileDescriptor(item) {
       let descriptor = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
@@ -437,6 +440,58 @@
         ? descriptor.replace(/\)$/, `, ${item.frequency})`)
         : `${descriptor} (${item.frequency})`;
     }
+    function previousMonth(period) {
+      const match = /^(\d{4})-(\d{2})$/.exec(period || "");
+      if (!match) return null;
+      const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 2, 1));
+      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+    }
+    function historyValue(history, period) {
+      const point = history?.find(entry => entry.period === period);
+      return point?.value != null && Number.isFinite(Number(point.value)) ? Number(point.value) : null;
+    }
+    function headlineTileMetrics(item, tile) {
+      const first = item?.metrics?.[0];
+      const current = {
+        label: tile.comparison === "monthly_level" && item?.period
+          ? `${fmtPeriod(item.period)} value (${item.unit || "%"})`
+          : first?.label || (item?.frequency_code === "D" && item.period
+            ? `${fmtPeriod(item.period)} value (${item.unit || "%"})`
+            : `${item?.period_label || "Latest"} value (${item?.unit || "%"})`),
+        value: item?.latest ?? null,
+        style: first?.style || item?.chart_value_style || "decimal2",
+      };
+      let previous = { label: "Previous period", value: null, style: current.style };
+      if (tile.comparison === "quarterly") {
+        const metric = item?.metrics?.[1];
+        const priorLabel = metric?.label
+          ? `${metric.label} (%, QoQ)` : "Previous quarter";
+        previous = { label: priorLabel, value: metric?.value ?? null,
+          style: metric?.style || current.style };
+      } else if (tile.comparison === "monthly_yoy" || tile.comparison === "monthly_level") {
+        const priorPeriod = previousMonth(item?.period);
+        const measure = tile.comparison === "monthly_yoy" ? "yoy" : "level";
+        const value = historyValue(item?.chart_measures?.[measure]?.history, priorPeriod);
+        const priorLabel = priorPeriod ? fmtPeriod(priorPeriod) : "Previous month";
+        previous = {
+          label: tile.comparison === "monthly_yoy"
+            ? `${priorLabel} growth (%, y/y)` : `${priorLabel} value (${item?.unit || "%"})`,
+          value,
+          style: first?.style || current.style,
+        };
+      } else if (tile.comparison === "weekly_change") {
+        const history = item?.chart_measures?.level?.history || [];
+        const latestTime = Date.parse(`${item?.period}T00:00:00Z`);
+        const cutoff = latestTime - 7 * 24 * 60 * 60 * 1000;
+        const prior = history.filter(point => point.value != null &&
+          Number.isFinite(Date.parse(`${point.period}T00:00:00Z`)) &&
+          Date.parse(`${point.period}T00:00:00Z`) <= cutoff && Number.isFinite(Number(point.value))).at(-1);
+        previous = { label: "1-week ch (ppts)",
+          value: prior && item?.latest != null ? Number(item.latest) - Number(prior.value) : null,
+          style: "signed2" };
+      }
+      return [current, previous];
+    }
     function renderHeadlineTiles(data) {
       const grid = $("headline-grid"); grid.replaceChildren();
       for (const tile of HEADLINE_TILES) {
@@ -448,21 +503,17 @@
         const category = document.createElement("h3"); category.textContent = tileTitle(tile.title);
         const descriptor = document.createElement("span"); descriptor.className = "card-descriptor"; descriptor.textContent = tileDescriptor(item);
         titleGroup.append(category, descriptor);
-        const period = document.createElement("span"); period.className = "card-period";
-        period.textContent = item?.period
-          ? item.frequency_code === "D"
-            ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${item.period.slice(0, 10)}T00:00:00Z`))
-            : item.period_label || fmtPeriod(item.period)
-          : (item?.error ? "Unavailable" : data.error ? "Awaiting data" : "Loading");
-        head.append(titleGroup, period);
+        head.append(titleGroup);
         const row = document.createElement("div"); row.className = "metric-row";
-        const metric = document.createElement("div"); metric.className = "metric";
-        const label = document.createElement("div"); label.className = "metric-label";
-        label.textContent = item?.metrics?.[0]?.label || `${item?.period_label || "Latest"} value (${item?.unit || "%"})`;
-        const value = document.createElement("div"); value.className = "metric-value";
-        value.textContent = item ? fmt(item.latest, "decimal2") : "—";
-        if (item?.latest != null && item.latest < 0) value.classList.add("negative");
-        metric.append(label, value); row.append(metric);
+        for (const metricData of headlineTileMetrics(item, tile)) {
+          const metric = document.createElement("div"); metric.className = "metric";
+          const label = document.createElement("div"); label.className = "metric-label";
+          label.textContent = metricData.label;
+          const value = document.createElement("div"); value.className = "metric-value";
+          value.textContent = fmt(metricData.value, metricData.style);
+          if (metricData.value != null && metricData.value < 0) value.classList.add("negative");
+          metric.append(label, value); row.append(metric);
+        }
         card.append(head, row); grid.append(card);
         card.addEventListener("click", () => {
           if (item) openTrend({ ...item, title: tile.title, chart_value_style: item.chart_value_style || "decimal2" });
