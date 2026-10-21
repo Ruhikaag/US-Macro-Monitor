@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- All indicator tiles now put the indicator name first and its Haver descriptor plus observation frequency immediately below (for example, `Real Gross Domestic Product (SAAR, Bil.Chn.2017$, Quarterly)`). Quarterly QoQ labels say `Q2 2026 (%, QoQ)`; SAAR remains in the descriptor instead of repeating in the metric label. Percent units are omitted from the descriptor/footer so `%` is shown with the metric labels only. Tile metric rows align along the bottom within each grid row even when descriptor lengths wrap differently. This applies to Economy at a Glance and every theme tile.
+
 - Survey chart lower Y-axis default is now **-3.5%** (superseding -3% below). Column value labels always stay outside their own bars: above positive columns and below negative columns, with at least 8 SVG units of clearance. Collision handling cannot move them inside a column. Custom limits that leave insufficient room explicitly request wider Y-axis limits or a shorter date range. Previews, Reset and copied images use the same layout.
 
 - Shared chart text layout measures the actual SVG text before exporting or displaying previews. Value labels stay inside the plot with clearance from the bottom and zero axes, other labels, legends and source attribution. Crowded axis captions are thinned without dropping observations or changing the selected scale. This applies to ordinary charts (including horizontal bars), curated previews, customization and copied images. If a custom range cannot fit all data labels, the chart explicitly requests a shorter range instead of publishing overlapping labels.

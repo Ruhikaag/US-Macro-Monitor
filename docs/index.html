@@ -65,23 +65,24 @@
     .cards[data-theme="real_economy"] { --theme-accent: #79ad20; --theme-tint: #f3f8e9; }
     .cards[data-theme="financial_markets"] { --theme-accent: #008c95; --theme-tint: #eaf7f7; }
     .cards[data-theme="inflation"] { --theme-accent: #397f58; --theme-tint: #eef6ed; }
-    .indicator-card { min-width: 0; border: 1px solid #dce6e0; border-top: 3px solid var(--theme-accent, #86bc25); border-left: 4px solid var(--theme-accent, #86bc25); border-radius: 7px; padding: 14px 14px 12px; background: linear-gradient(118deg, var(--theme-tint, #f4f9ea) 0%, #fff 31%); cursor: pointer; box-shadow: 0 4px 14px #1c3f2b0b; transition: border-color .15s, transform .15s, box-shadow .15s; }
+    .indicator-card { display: flex; flex-direction: column; min-width: 0; border: 1px solid #dce6e0; border-top: 3px solid var(--theme-accent, #86bc25); border-left: 4px solid var(--theme-accent, #86bc25); border-radius: 7px; padding: 14px 14px 12px; background: linear-gradient(118deg, var(--theme-tint, #f4f9ea) 0%, #fff 31%); cursor: pointer; box-shadow: 0 4px 14px #1c3f2b0b; transition: border-color .15s, transform .15s, box-shadow .15s; }
     .indicator-card:hover { border-color: var(--theme-accent, var(--blue)); box-shadow: 0 9px 22px #153e2b1b; transform: translateY(-2px); }
     .indicator-card:focus-visible, .theme-button:focus-visible, .text-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 38px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-height: 68px; }
+    .card-title-group { min-width: 0; }
     .card-head h3 { margin: 0; color: #1d282e; font-size: 14px; font-weight: 700; line-height: 1.35; }
+    .card-descriptor { display: block; margin-top: 3px; color: #728078; font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
     .ai-proxy-card .card-head { min-height: 0; }
     .ai-proxy-badge { display: inline-flex; align-items: center; gap: 5px; margin-top: 3px; padding: 3px 7px; border: 1px solid #00a3ad; border-radius: 4px; color: #d5f5f3; background: #173b3c; font-size: 10px; line-height: 1.4; }
     .ai-proxy-badge svg { width: 13px; height: 13px; flex-shrink: 0; }
     .card-period { flex: 0 0 auto; color: #007c83; font-size: 10px; font-weight: 700; text-align: right; }
-    .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #dcebe3; }
+    .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: auto; border-top: 1px solid #dcebe3; }
     .metric { min-width: 0; padding: 8px 8px 6px 0; }
     .metric + .metric { border-left: 1px solid #e5eee8; padding-left: 9px; }
     .metric-label { min-height: 29px; color: #6f7d82; font-size: 9px; line-height: 1.35; }
     .metric-value { overflow: hidden; color: #183b35; font: 500 18px/1.15 Georgia, serif; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
     .metric-value.negative { color: #bd4148; }
     .metric-value.positive { color: #54821a; }
-    .card-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 7px; color: #879298; font-size: 9px; }
     .empty-state { min-height: 240px; display: grid; place-items: center; border: 1px solid #dce1de; background: #fafbf9; color: #728086; text-align: center; }
     .empty-state strong { display: block; margin-bottom: 5px; color: #27353c; font: 20px Georgia, serif; }
     .error { margin: 0 0 14px; border-left: 3px solid #c64b4b; padding: 10px 12px; background: #fff3f1; color: #792c2b; font-size: 12px; }
@@ -143,12 +144,10 @@
     .hero { background: radial-gradient(ellipse at 84% 12%, #00a3ad38 0, transparent 32%), linear-gradient(112deg, #111715 0%, #182622 62%, #173b34 100%); }
     .headline-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 1360px; margin: 28px auto 0; }
     .headline-card { display: flex; flex-direction: column; min-height: 175px; }
-    .headline-card .card-head { min-height: 42px; }
+    .headline-card .card-head { min-height: 68px; }
     .headline-card .metric-row { grid-template-columns: minmax(0, 1fr); }
     .headline-card .metric-label { min-height: 24px; }
     .headline-card .metric-value { font-size: 23px; }
-    .headline-card .card-foot { flex-direction: column; gap: 6px; margin-top: auto; padding-top: 12px; line-height: 1.4; }
-    .headline-card .card-foot span:last-child { overflow-wrap: anywhere; }
     .workspace { color: var(--ink); }
     .section-label { color: #a9d66b; }
     .theme-button { --theme-color: #9bcf48; --theme-tint: #202b22; border-color: color-mix(in srgb, var(--theme-color) 35%, #26332c); color: #e2ece6; box-shadow: 0 3px 12px #0003; }
@@ -185,12 +184,12 @@
     :is(#cards, #headline-grid) .metric-row { border-top-color: color-mix(in srgb, var(--theme-accent) 48%, #35463e); }
     :is(#cards, #headline-grid) .metric + .metric { border-left-color: color-mix(in srgb, var(--theme-accent) 24%, #2c3a34); }
     :is(#cards, #headline-grid) .card-head h3 { color: #f5faf7; }
+    :is(#cards, #headline-grid) .card-descriptor { color: #c0cec6; }
     :is(#cards, #headline-grid) .card-period { color: #fff0a6; }
     :is(#cards, #headline-grid) .metric-label { color: #d2ddd7; }
     :is(#cards, #headline-grid) .metric-value { color: #ffffff; text-shadow: 0 1px 2px #0008; }
     :is(#cards, #headline-grid) .metric-value.negative { color: #ffb3ba; }
     :is(#cards, #headline-grid) .metric-value.positive { color: #d1ff9a; }
-    :is(#cards, #headline-grid) .card-foot { color: #c0cec6; }
     .indicator-card:hover { box-shadow: 0 9px 24px #0007; }
     .card-head h3 { color: #edf4f0; }
     .card-period { color: #72d2d0; }
@@ -362,7 +361,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=outside-column-labels-20261014"></script>
+  <script src="chart-tools.js?v=tile-descriptors-20261021"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -427,6 +426,18 @@
       { id: "unemployment", title: "Unemployment rate" },
       { id: "headline_federal_funds", title: "Federal funds rate" },
     ];
+    function tileDescriptor(item) {
+      let descriptor = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
+      if (item?.unit === "%") {
+        descriptor = descriptor.replace(/\s*\(%\s*p\.a\.\s*\)/i, "")
+          .replace(/,\s*%/g, "").replace(/\(\s*%\s*\)/g, "");
+      }
+      descriptor = descriptor.replace(/([^\s(])\(([^()]*)\)$/, "$1 ($2)");
+      if (!item?.frequency) return descriptor;
+      return /\([^()]*\)$/.test(descriptor)
+        ? descriptor.replace(/\)$/, `, ${item.frequency})`)
+        : `${descriptor} (${item.frequency})`;
+    }
     function renderHeadlineTiles(data) {
       const grid = $("headline-grid"); grid.replaceChildren();
       for (const tile of HEADLINE_TILES) {
@@ -434,14 +445,17 @@
         const card = document.createElement("article"); card.className = "indicator-card headline-card"; card.tabIndex = 0; card.setAttribute("role", "button");
         card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tileTitle(tile.title)} chart`);
         const head = document.createElement("div"); head.className = "card-head";
+        const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
         const category = document.createElement("h3"); category.textContent = tileTitle(tile.title);
+        const descriptor = document.createElement("span"); descriptor.className = "card-descriptor"; descriptor.textContent = tileDescriptor(item);
+        titleGroup.append(category, descriptor);
         const period = document.createElement("span"); period.className = "card-period";
         period.textContent = item?.period
           ? item.frequency_code === "D"
             ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${item.period.slice(0, 10)}T00:00:00Z`))
             : item.period_label || fmtPeriod(item.period)
           : (item?.error ? "Unavailable" : data.error ? "Awaiting data" : "Loading");
-        head.append(category, period);
+        head.append(titleGroup, period);
         const row = document.createElement("div"); row.className = "metric-row";
         const metric = document.createElement("div"); metric.className = "metric";
         const label = document.createElement("div"); label.className = "metric-label";
@@ -450,11 +464,7 @@
         value.textContent = item ? fmt(item.latest, "decimal2") : "—";
         if (item?.latest != null && item.latest < 0) value.classList.add("negative");
         metric.append(label, value); row.append(metric);
-        const foot = document.createElement("div"); foot.className = "card-foot";
-        const frequency = document.createElement("span"); frequency.textContent = item ? `${item.frequency} · ${item.unit}` : "";
-        const source = document.createElement("span"); source.textContent = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
-        foot.append(frequency, source);
-        card.append(head, row, foot); grid.append(card);
+        card.append(head, row); grid.append(card);
         card.addEventListener("click", () => {
           if (item) openTrend({ ...item, title: tile.title, chart_value_style: item.chart_value_style || "decimal2" });
         });
@@ -501,11 +511,15 @@
     function renderCard(item) {
       const card = document.createElement("article");
       card.className = "indicator-card"; card.tabIndex = 0; card.setAttribute("role", "button");
+      card.dataset.indicatorId = item.id;
       card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tileTitle(item.title)} chart`);
       const head = document.createElement("div"); head.className = "card-head";
+      const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
       const title = document.createElement("h3"); title.textContent = tileTitle(item.title);
+      const descriptor = document.createElement("span"); descriptor.className = "card-descriptor"; descriptor.textContent = tileDescriptor(item);
+      titleGroup.append(title, descriptor);
       const period = document.createElement("span"); period.className = "card-period"; period.textContent = item.period_label || fmtPeriod(item.period);
-      head.append(title, period);
+      head.append(titleGroup, period);
       const row = document.createElement("div"); row.className = "metric-row";
       for (const metric of item.metrics || []) {
         const cell = document.createElement("div"); cell.className = "metric";
@@ -515,11 +529,7 @@
         else if (["signed1"].includes(metric.style) && metric.value >= .05) value.classList.add("positive");
         cell.append(label, value); row.append(cell);
       }
-      const foot = document.createElement("div"); foot.className = "card-foot";
-      const frequency = document.createElement("span"); frequency.textContent = `${item.frequency || ""} · ${item.unit || ""}`;
-      const source = document.createElement("span"); source.textContent = item.descriptor || (item.error ? "Series unavailable" : "Economic data");
-      foot.append(frequency, source);
-      card.append(head, row, foot);
+      card.append(head, row);
       if (["investment_fnpsh", "investment_fnenh"].includes(item.id)) {
         card.classList.add("ai-proxy-card");
         const badge = document.createElement("span"); badge.className = "ai-proxy-badge";
