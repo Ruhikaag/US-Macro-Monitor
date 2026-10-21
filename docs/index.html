@@ -454,7 +454,7 @@
       const first = item?.metrics?.[0];
       const current = {
         label: (tile.comparison === "monthly_level" || tile.comparison === "monthly_yoy") && item?.period
-          ? `${fmtPeriod(item.period)}${tile.comparison === "monthly_level" ? ` value (${item.unit || "%"})` : " (%, y/y)"}`
+          ? `${fmtPeriod(item.period)}${tile.comparison === "monthly_level" ? ` (${item.unit || "%"})` : " (%, y/y)"}`
           : first?.label || (item?.frequency_code === "D" && item.period
             ? `${fmtPeriod(item.period)} value (${item.unit || "%"})`
             : `${item?.period_label || "Latest"} value (${item?.unit || "%"})`),
@@ -473,7 +473,7 @@
         const value = historyValue(item?.chart_measures?.[measure]?.history, priorPeriod);
         const priorLabel = priorPeriod ? fmtPeriod(priorPeriod) : "Previous month";
         previous = {
-          label: tile.comparison === "monthly_yoy" ? priorLabel : `${priorLabel} value`,
+          label: priorLabel,
           value,
           style: first?.style || current.style,
         };
@@ -485,7 +485,7 @@
           Number.isFinite(Date.parse(`${point.period}T00:00:00Z`)) &&
           Date.parse(`${point.period}T00:00:00Z`) <= cutoff && Number.isFinite(Number(point.value))).at(-1);
         previous = {
-          label: prior ? `${fmtPeriod(prior.period)} value (%)` : "Prior value (%)",
+          label: prior ? fmtPeriod(prior.period) : "Prior date",
           value: prior?.value != null ? Number(prior.value) : null,
           style: item?.chart_value_style || "decimal2",
         };
