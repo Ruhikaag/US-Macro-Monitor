@@ -464,8 +464,7 @@
       let previous = { label: "Previous period", value: null, style: current.style };
       if (tile.comparison === "quarterly") {
         const metric = item?.metrics?.[1];
-        const priorLabel = metric?.label
-          ? `${metric.label} (%, QoQ)` : "Previous quarter";
+        const priorLabel = metric?.label?.replace(/\s*\(%,\s*QoQ\)$/, "") || "Previous quarter";
         previous = { label: priorLabel, value: metric?.value ?? null,
           style: metric?.style || current.style };
       } else if (tile.comparison === "monthly_yoy" || tile.comparison === "monthly_level") {
@@ -475,7 +474,7 @@
         const priorLabel = priorPeriod ? fmtPeriod(priorPeriod) : "Previous month";
         previous = {
           label: tile.comparison === "monthly_yoy"
-            ? `${priorLabel} growth (%, y/y)` : `${priorLabel} value (${item?.unit || "%"})`,
+            ? `${priorLabel} growth (y/y)` : `${priorLabel} value`,
           value,
           style: first?.style || current.style,
         };
@@ -486,7 +485,7 @@
         const prior = history.filter(point => point.value != null &&
           Number.isFinite(Date.parse(`${point.period}T00:00:00Z`)) &&
           Date.parse(`${point.period}T00:00:00Z`) <= cutoff && Number.isFinite(Number(point.value))).at(-1);
-        previous = { label: "1-week ch (ppts)",
+        previous = { label: "1-week ch",
           value: prior && item?.latest != null ? Number(item.latest) - Number(prior.value) : null,
           style: "signed2" };
       }
