@@ -426,7 +426,7 @@
       { id: "headline_consumer_spending", title: "Real consumer spending", comparison: "quarterly" },
       { id: "headline_pce_inflation", title: "PCE inflation", comparison: "monthly_yoy" },
       { id: "unemployment", title: "Unemployment rate", comparison: "monthly_level" },
-      { id: "headline_federal_funds", title: "Federal funds rate", comparison: "weekly_change" },
+      { id: "headline_federal_funds", title: "Federal funds rate", comparison: "weekly_prior" },
     ];
     function tileDescriptor(item) {
       let descriptor = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
@@ -453,8 +453,8 @@
     function headlineTileMetrics(item, tile) {
       const first = item?.metrics?.[0];
       const current = {
-        label: tile.comparison === "monthly_level" && item?.period
-          ? `${fmtPeriod(item.period)} value (${item.unit || "%"})`
+        label: (tile.comparison === "monthly_level" || tile.comparison === "monthly_yoy") && item?.period
+          ? `${fmtPeriod(item.period)}${tile.comparison === "monthly_level" ? ` value (${item.unit || "%"})` : " (%, y/y)"}`
           : first?.label || (item?.frequency_code === "D" && item.period
             ? `${fmtPeriod(item.period)} value (${item.unit || "%"})`
             : `${item?.period_label || "Latest"} value (${item?.unit || "%"})`),
@@ -473,21 +473,22 @@
         const value = historyValue(item?.chart_measures?.[measure]?.history, priorPeriod);
         const priorLabel = priorPeriod ? fmtPeriod(priorPeriod) : "Previous month";
         previous = {
-          label: tile.comparison === "monthly_yoy"
-            ? `${priorLabel} growth (y/y)` : `${priorLabel} value`,
+          label: tile.comparison === "monthly_yoy" ? priorLabel : `${priorLabel} value`,
           value,
           style: first?.style || current.style,
         };
-      } else if (tile.comparison === "weekly_change") {
+      } else if (tile.comparison === "weekly_prior") {
         const history = item?.chart_measures?.level?.history || [];
         const latestTime = Date.parse(`${item?.period}T00:00:00Z`);
         const cutoff = latestTime - 7 * 24 * 60 * 60 * 1000;
         const prior = history.filter(point => point.value != null &&
           Number.isFinite(Date.parse(`${point.period}T00:00:00Z`)) &&
           Date.parse(`${point.period}T00:00:00Z`) <= cutoff && Number.isFinite(Number(point.value))).at(-1);
-        previous = { label: "1-week ch",
-          value: prior && item?.latest != null ? Number(item.latest) - Number(prior.value) : null,
-          style: "signed2" };
+        previous = {
+          label: prior ? `${fmtPeriod(prior.period)} value (%)` : "Prior value (%)",
+          value: prior?.value != null ? Number(prior.value) : null,
+          style: item?.chart_value_style || "decimal2",
+        };
       }
       return [current, previous];
     }
@@ -496,10 +497,11 @@
       for (const tile of HEADLINE_TILES) {
         const item = data.indicators?.[tile.id];
         const card = document.createElement("article"); card.className = "indicator-card headline-card"; card.tabIndex = 0; card.setAttribute("role", "button");
-        card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tileTitle(tile.title)} chart`);
+        const titleText = tile.id === "headline_pce_inflation" ? tile.title : tileTitle(tile.title);
+        card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${titleText} chart`);
         const head = document.createElement("div"); head.className = "card-head";
         const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
-        const category = document.createElement("h3"); category.textContent = tileTitle(tile.title);
+        const category = document.createElement("h3"); category.textContent = titleText;
         const descriptor = document.createElement("span"); descriptor.className = "card-descriptor"; descriptor.textContent = tileDescriptor(item);
         titleGroup.append(category, descriptor);
         head.append(titleGroup);
