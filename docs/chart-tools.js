@@ -49,7 +49,7 @@ function searchIndicators(data, query) {
     const proxyLabel = aiInvestmentProxyLabel(item.id);
     const text = [item.title, item.ticker, item.descriptor, ...memberships, proxyLabel,
       proxyLabel ? "artificial intelligence" : ""].join(" ").toLowerCase();
-    if (!terms.every(term => text.includes(term))) continue;
+    if (!terms.every(term => term === "ai" ? /\bai\b/.test(text) : text.includes(term))) continue;
     const key = `${item.ticker}|${item.frequency}`;
     if (seen.has(key)) continue;
     seen.add(key);
