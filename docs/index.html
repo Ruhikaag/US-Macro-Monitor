@@ -363,7 +363,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=compact-tile-spacing-20261021"></script>
+  <script src="chart-tools.js?v=ai-proxy-search-20261102"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -581,11 +581,11 @@
         cell.append(label, value); row.append(cell);
       }
       card.append(head, row);
-      if (["investment_fnpsh", "investment_fnenh"].includes(item.id)) {
+      if (aiInvestmentProxyLabel(item.id)) {
         card.classList.add("ai-proxy-card");
         const badge = document.createElement("span"); badge.className = "ai-proxy-badge";
         badge.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1"/><path d="M6 1v3m4-3v3M6 12v3m4-3v3M1 6h3m-3 4h3m8-4h3m-3 4h3"/></svg>';
-        badge.append(document.createTextNode("Proxy for AI-related investment"));
+        badge.append(document.createTextNode(aiInvestmentProxyLabel(item.id)));
         badge.title = "Broad investment category used as a proxy, not a direct measure of AI-only spending.";
         card.setAttribute("aria-description", badge.textContent);
         head.after(badge);

@@ -20,6 +20,8 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
 
 ## Notes
 
+- Search matches "AI", "AI-related investment" and "artificial intelligence" to the software and information-processing equipment investment proxies. Results display the same "Proxy for AI-related investment" label as their tiles.
+
 - Theme news displays up to three newest distinct, US-relevant articles within the past seven days, under the heading "Recent news:", refreshed hourly by the Windows helper. Public CNBC RSS and Deloitte coverage are supplemented by Google News headline RSS searches for CNBC, Reuters, Financial Times and The Economist. Indexed entries require an approved publisher source domain; their links open through Google News. Only headline, publisher, publication date and link are used; full article access may require a publisher subscription. The same article may appear in multiple genuinely relevant themes. No unrelated or expired stories are used to pad a sparse list; refresh failures remain visible. Manual blurbs are unchanged.
 
 - Economy at a Glance's federal funds rate label uses the observation date and `(%)`, without the word "value"; its comparison remains date-only.

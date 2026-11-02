@@ -32,6 +32,10 @@ function tileTitle(title) {
   return (text.charAt(0).toUpperCase() + text.slice(1)).replace(/\bgdp\b/gi, "GDP");
 }
 
+function aiInvestmentProxyLabel(id) {
+  return ["investment_fnpsh", "investment_fnenh"].includes(id) ? "Proxy for AI-related investment" : "";
+}
+
 function searchIndicators(data, query) {
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (!terms.length || !data?.indicators) return [];
@@ -42,7 +46,9 @@ function searchIndicators(data, query) {
     const item = data.indicators[id];
     if (!item) continue;
     const memberships = themes.filter(theme => theme.indicator_ids.includes(id)).map(theme => theme.label);
-    const text = [item.title, item.ticker, item.descriptor, ...memberships].join(" ").toLowerCase();
+    const proxyLabel = aiInvestmentProxyLabel(item.id);
+    const text = [item.title, item.ticker, item.descriptor, ...memberships, proxyLabel,
+      proxyLabel ? "artificial intelligence" : ""].join(" ").toLowerCase();
     if (!terms.every(term => text.includes(term))) continue;
     const key = `${item.ticker}|${item.frequency}`;
     if (seen.has(key)) continue;
@@ -64,7 +70,8 @@ function renderIndicatorSearch() {
     button.type = "button"; button.className = "search-result";
     const name = document.createElement("span"); name.className = "search-result-title"; name.textContent = tileTitle(item.title);
     const context = document.createElement("span");
-    context.textContent = [item.frequency, ...themes, item.error ? "Data unavailable" : item.period_label].filter(Boolean).join(" · ");
+    context.textContent = [item.frequency, ...themes, aiInvestmentProxyLabel(item.id),
+      item.error ? "Data unavailable" : item.period_label].filter(Boolean).join(" · ");
     button.append(name, context);
     button.addEventListener("click", () => { $("search-dialog").close(); openTrend(item); });
     results.append(button);
