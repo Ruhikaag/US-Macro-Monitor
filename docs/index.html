@@ -456,7 +456,7 @@
         label: (tile.comparison === "monthly_level" || tile.comparison === "monthly_yoy") && item?.period
           ? `${fmtPeriod(item.period)}${tile.comparison === "monthly_level" ? ` (${item.unit || "%"})` : " (%, y/y)"}`
           : first?.label || (item?.frequency_code === "D" && item.period
-            ? `${fmtPeriod(item.period)} value (${item.unit || "%"})`
+            ? `${fmtPeriod(item.period)} (${item.unit || "%"})`
             : `${item?.period_label || "Latest"} value (${item?.unit || "%"})`),
         value: item?.latest ?? null,
         style: first?.style || item?.chart_value_style || "decimal2",
