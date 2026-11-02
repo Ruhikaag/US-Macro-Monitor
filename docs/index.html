@@ -309,7 +309,7 @@
       </nav>
       <section class="workspace-main">
         <div class="workspace-head"><div><h2 id="theme-title">National Accounts (GDP)</h2><p id="theme-description">6 indicators · latest observations and changes</p></div></div>
-        <aside class="theme-story" aria-live="polite"><h3>The story behind the numbers</h3><p id="story-text">Waiting for the latest coverage…</p><div class="story-news"><span class="story-news-label">Recent news (past 7 weeks):</span><div class="story-sources" id="story-sources"></div></div><p class="story-note" id="story-note" hidden></p></aside>
+        <aside class="theme-story" aria-live="polite"><h3>The story behind the numbers</h3><p id="story-text">Waiting for the latest coverage…</p><div class="story-news"><span class="story-news-label">Recent news:</span><div class="story-sources" id="story-sources"></div></div><p class="story-note" id="story-note" hidden></p></aside>
         <div class="cards" id="cards"></div>
         <p class="foot" id="footnote">Quarterly growth is annualized quarter-over-quarter (SAAR means seasonally adjusted annual rate); the third measure compares with the same quarter one year ago.</p>
       </section>
@@ -605,7 +605,7 @@
       }
       const fresh = (story.sources || []).filter(source => {
         const date = Date.parse(source.published_at);
-        return Number.isFinite(date) && date <= Date.now() && Date.now() - date <= 49 * 86400000;
+        return Number.isFinite(date) && date <= Date.now() && Date.now() - date <= 7 * 86400000;
       }).sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at)).slice(0, 3);
       $("story-text").textContent = story.text;
       for (const source of fresh) {
