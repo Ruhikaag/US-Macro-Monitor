@@ -1,6 +1,6 @@
 # Weekly Updates
 
-The dashboard embeds this folder's `index.html`. The public page reads only approved issues from `issues.json`; unpublished drafts are never included in the repository.
+The dashboard embeds this folder's `index.html`. The public page reads only approved issues from `issues.json`; unpublished drafts are never included in the repository. The on-screen PDF uses dark-themed page images, while **Download PDF** returns the unchanged original document. Latest-issue metadata shows the date, without indicator tags or introductory copy. Charts have one caption each; **Download PNG** returns a separate original-color plot crop without the figure caption or source footer. The expandable Archive lists clickable issue titles/dates alongside covered indicators.
 
 ## Weekly workflow
 
@@ -21,9 +21,9 @@ Intake and extraction are automatic; approval is deliberately manual. Merely sav
 - Install the extraction dependency with the dashboard interpreter: `python -m pip install -r outputs/requirements-weekly.txt`.
 - Restart the helper after changing configuration or Python code.
 
-The intake reads PDF publication dates from the document, not file modification dates. Matching is designed for the current "US Economic Update: Month D, YYYY" header and numbered Figure captions. Crops include the source attribution; tags are suggestions from the first-page narrative, not every indicator in the repeated dashboard table. Unrecognized dates or unreadable PDFs are shown as errors rather than assigned invented dates. Layout changes may require extraction adjustments; review all chart previews.
+The intake reads PDF publication dates from the document, not file modification dates. Matching is designed for the current "US Economic Update: Month D, YYYY" header and numbered Figure captions. Plot downloads exclude the figure caption/source footer but retain axes, legends, and units. Full PDF previews preserve all document content, including attribution; the original PDF bytes are not changed. Neutral page colors are remapped to the microsite background/text colors for previews only, preserving chart series hues. Tags are suggestions from the first-page narrative, not every indicator in the repeated dashboard table. Unrecognized dates or unreadable PDFs are shown as errors rather than assigned invented dates. Layout changes may require extraction adjustments; review all chart previews.
 
-The helper must be running, with folder access, for intake and approval to work. All 22 initial historical files are staged for individual review, not automatically published. If a PDF changes, its new content becomes a new draft requiring approval. Approving a replacement for the same publication date replaces that archive entry.
+The helper must be running, with folder access, for intake and approval to work.  If a PDF changes, its new content becomes a new draft requiring approval. Approving a replacement for the same publication date replaces that archive entry.
 
 ## Files and validation
 

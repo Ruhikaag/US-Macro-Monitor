@@ -18,14 +18,18 @@ function download(label, url, filename) {
   link.download = filename;
   return link;
 }
+function issueDate(issue) {
+  return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })
+    .format(new Date(`${issue.date}T00:00:00Z`));
+}
 function chartCard(issue, chart, selectable = false) {
   const card = element("figure", "", "chart");
   const image = element("img");
   image.src = asset(issue, chart.file);
   image.alt = chart.title;
   image.loading = "lazy";
-  card.append(image, element("figcaption", chart.title),
-    download("Download chart (PNG)", image.src, `${issue.date}-${chart.file}`));
+  card.append(image, element("figcaption", chart.title.replace(/^Figure\s+\d+[.:]\s*/i, "")),
+    download("Download PNG", asset(issue, chart.download || chart.file), `${issue.date}-${chart.download || chart.file}`));
   if (selectable) {
     const label = element("label", " Include this chart");
     const check = element("input");
@@ -38,10 +42,22 @@ function showIssue(issue) {
   byId("latest").hidden = false;
   byId("issue-heading").textContent = issue.id === publishedIssues[0]?.id ? "Latest issue" : "Selected archive issue";
   const details = byId("latest-details");
-  details.replaceChildren(element("h3", issue.date),
-    element("p", issue.indicators.join(" · "), "tags"),
+  const date = issueDate(issue);
+  details.replaceChildren(element("h3", date),
     download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-US-Economic-Update.pdf`));
-  byId("pdf").src = asset(issue, "update.pdf");
+  byId("pdf").replaceChildren(...(issue.pages || []).map((file, index) => {
+    const image = element("img");
+    image.src = asset(issue, file);
+    image.alt = `US Economic Update, ${date}, page ${index + 1}`;
+    image.loading = index ? "lazy" : "eager";
+    image.addEventListener("error", () => {
+      byId("status").textContent = "Could not load a preview page. The original PDF is available via Download PDF.";
+      byId("status").classList.add("error");
+    });
+    return image;
+  }));
+  byId("pdf").scrollTop = 0;
+  if (!issue.pages?.length) byId("pdf").append(element("p", "Preview is not available. Download the original PDF above."));
   byId("charts").replaceChildren(...issue.charts.map(chart => chartCard(issue, chart)));
   if (!issue.charts.length) byId("charts").append(element("p", "No separate chart downloads for this issue."));
 }
@@ -50,14 +66,15 @@ function renderArchive() {
   const issues = publishedIssues.slice(1).filter(issue => !filter || issue.indicators.includes(filter));
   byId("archive-list").replaceChildren(...issues.map(issue => {
     const card = element("article", "", "issue");
-    const view = element("button", "View issue and charts");
+    const date = issueDate(issue);
+    const view = element("button", `US Economic Update — ${date}`, "issue-title");
     view.addEventListener("click", () => { showIssue(issue); byId("latest").scrollIntoView(); });
     const actions = element("div", "", "actions");
-    actions.append(view, download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-update.pdf`));
-    card.append(element("h3", issue.date), element("p", issue.indicators.join(" · "), "tags"), actions);
+    actions.append(download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-update.pdf`));
+    card.append(view, element("p", issue.indicators.join(" · "), "tags"), actions);
     return card;
   }));
-  if (!issues.length) byId("archive-list").append(element("p", "No published issues match."));
+  if (!issues.length) byId("archive-list").append(element("p", "No previous approved issues match."));
 }
 function draftCard(issue) {
   const card = element("details", "", "draft");
@@ -108,9 +125,11 @@ async function loadWeekly() {
       .sort((a, b) => b.date.localeCompare(a.date));
     if (publishedIssues.length) showIssue(publishedIssues[0]);
     byId("status").textContent = result.error || (publishedIssues.length
-      ? "Published weekly briefings" : "No approved weekly updates have been published yet.");
+      ? "" : "No approved weekly updates have been published yet.");
     byId("status").classList.toggle("error", Boolean(result.error));
     const options = [...new Set(publishedIssues.flatMap(issue => issue.indicators))].sort();
+    const all = element("option", "All indicators"); all.value = "";
+    byId("indicator").replaceChildren(all);
     byId("indicator").append(...options.map(tag => {
       const option = element("option", tag); option.value = tag; return option;
     }));
