@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Weekly Updates | Economics Microsite</title>
-  <link rel="stylesheet" href="weekly.css?v=20261104-soft-paper">
-  <script src="weekly.js?v=20261104-white" defer></script>
+  <link rel="stylesheet" href="weekly.css?v=20261104-chart-preview">
+  <script src="weekly.js?v=20261104-chart-preview" defer></script>
 </head>
 <body>
   <main>
@@ -29,5 +29,14 @@
       <div id="archive-list"></div>
     </details>
   </main>
+  <dialog id="chart-dialog" aria-labelledby="chart-large-title">
+    <div class="chart-dialog-head">
+      <h2 id="chart-large-title"></h2>
+      <button id="close-chart" type="button" autofocus>Close</button>
+    </div>
+    <img id="chart-large" alt="">
+    <p id="chart-preview-status" role="status" hidden></p>
+    <a id="chart-large-download">Download PNG</a>
+  </dialog>
 </body>
 </html>

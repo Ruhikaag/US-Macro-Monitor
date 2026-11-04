@@ -22,13 +22,38 @@ function issueDate(issue) {
   return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })
     .format(new Date(`${issue.date}T00:00:00Z`));
 }
+function openChart(issue, chart, trigger) {
+  const image = byId("chart-large");
+  byId("chart-large-title").textContent = chart.title.replace(/^Figure\s+\d+[.:]\s*/i, "");
+  image.alt = chart.title;
+  image.src = `${asset(issue, chart.file)}?v=20261104-clean`;
+  byId("chart-preview-status").hidden = true;
+  const link = byId("chart-large-download");
+  link.href = asset(issue, chart.download || chart.file);
+  link.download = `${issue.date}-${chart.download || chart.file}`;
+  const dialog = byId("chart-dialog");
+  dialog.onclose = () => { if (trigger.isConnected) trigger.focus({ preventScroll: true }); };
+  dialog.showModal();
+}
+byId("close-chart").addEventListener("click", () => byId("chart-dialog").close());
+byId("chart-large").addEventListener("error", () => {
+  byId("chart-preview-status").textContent = "Could not load the enlarged chart. Try the PNG download.";
+  byId("chart-preview-status").hidden = false;
+});
 function chartCard(issue, chart, selectable = false) {
   const card = element("figure", "", "chart");
   const image = element("img");
   image.src = `${asset(issue, chart.file)}?v=20261104-clean`;
   image.alt = chart.title;
   image.loading = "lazy";
-  card.append(image, element("figcaption", chart.title.replace(/^Figure\s+\d+[.:]\s*/i, "")),
+  const expand = element("button", "", "chart-expand");
+  expand.type = "button";
+  expand.setAttribute("aria-label", `Enlarge chart: ${chart.title}`);
+  expand.setAttribute("aria-haspopup", "dialog");
+  expand.title = "Click to enlarge";
+  expand.append(image);
+  expand.addEventListener("click", () => openChart(issue, chart, expand));
+  card.append(expand, element("figcaption", chart.title.replace(/^Figure\s+\d+[.:]\s*/i, "")),
     download("Download PNG", asset(issue, chart.download || chart.file), `${issue.date}-${chart.download || chart.file}`));
   if (selectable) {
     const label = element("label", " Include this chart");

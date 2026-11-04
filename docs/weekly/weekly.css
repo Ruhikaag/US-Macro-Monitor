@@ -18,11 +18,19 @@ input[type="text"] { width: 100%; }
 .chart { flex: 0 0 min(420px, 85vw); margin: 0; padding: 12px; background: #19221f; border-radius: 8px; }
 .chart img { width: 100%; display: block; background: #141c19; margin-bottom: 10px; }
 .chart figcaption { line-height: 1.4; margin-bottom: 10px; font-size: 13px; }
-#pdf { width: 100%; margin: 18px 0 28px; padding: 24px; background: #202a25; border: 1px solid #35463e; border-radius: 12px; }
-#pdf img { display: block; width: 100%; max-width: 900px; height: auto; margin: 0 auto 20px; background: #fff; filter: sepia(.12) brightness(.86); box-shadow: 0 6px 24px #0003; }
+#pdf { width: 100%; margin: 18px 0 28px; padding: 0; border: 0; }
+#pdf img { display: block; width: 100%; height: auto; margin: 0 0 20px; background: #fff; filter: sepia(.12) brightness(.86); }
 #pdf img:last-child { margin-bottom: 0; }
 .issue-description { margin: -2px 0 20px; max-width: 680px; font-size: 14px; }
-@media (max-width: 600px) { #pdf { padding: 4px; } .chart { flex-basis: 85%; } }
+@media (max-width: 600px) { .chart { flex-basis: 85%; } }
+.chart-expand { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.chart-expand:focus-visible { outline: 2px solid #63d4d8; outline-offset: 3px; }
+#chart-dialog { width: min(1200px, calc(100vw - 24px)); max-height: calc(100vh - 24px); padding: 20px; border: 1px solid #486054; border-radius: 10px; background: #19221f; color: #edf4f0; }
+#chart-dialog::backdrop { background: #000b; }
+.chart-dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+#chart-large-title { font: 400 20px/1.4 Georgia, serif; margin: 0; }
+#close-chart { flex-shrink: 0; }
+#chart-large { display: block; width: 100%; height: auto; max-height: 65vh; object-fit: contain; margin: 18px 0; }
 #latest-details { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 #latest-details h3 { margin: 0; font-size: 20px; }
 .charts-heading { font-size: 22px; }

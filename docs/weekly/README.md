@@ -6,6 +6,8 @@ The dashboard embeds this folder's `index.html`. The public page reads only appr
 
 The latest-issue heading includes a short description of the previous week's US economic releases. A display-only muted paper treatment reduces glare against the dark microsite; original vector assets, PDF downloads, and chart PNG downloads are not recolored or modified by this treatment.
 
+Document pages fill the preview width without an outer padded frame. Click a chart thumbnail (or focus it and press Enter) to open a large dialog preview. Close it with the Close button or Escape; the separate plot-only PNG download remains available both in the strip and the dialog.
+
 1. Save the finished PDF in the folder configured by `WEEKLY_UPDATES_SOURCE`.
 2. Keep the existing Windows dashboard helper running. It checks the folder every minute.
 3. Open the **local** dashboard's Weekly Updates tab. Refresh it to see newly prepared drafts.
