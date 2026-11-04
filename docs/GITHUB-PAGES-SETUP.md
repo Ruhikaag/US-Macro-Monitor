@@ -1,5 +1,7 @@
 # GitHub Pages Snapshot Setup
 
+The site header and browser title use **Economics Microsite**; the Macro Monitor and Economic Forecasts tab names are unchanged.
+
 This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Pages serves the dashboard and public snapshot; the page checks for a newly published snapshot every minute. The Windows helper fetches Haver once per hour while it is running. Indicator values change when Haver releases or revises observations, not continuously.
 
 ## Create the repository
