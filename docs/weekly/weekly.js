@@ -25,7 +25,7 @@ function issueDate(issue) {
 function chartCard(issue, chart, selectable = false) {
   const card = element("figure", "", "chart");
   const image = element("img");
-  image.src = asset(issue, chart.file);
+  image.src = `${asset(issue, chart.file)}?v=20261104-clean`;
   image.alt = chart.title;
   image.loading = "lazy";
   card.append(image, element("figcaption", chart.title.replace(/^Figure\s+\d+[.:]\s*/i, "")),
