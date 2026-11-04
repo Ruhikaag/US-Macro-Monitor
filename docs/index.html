@@ -218,6 +218,8 @@
     .tab-placeholder { max-width: 1420px; margin: 0 auto; padding: 42px 26px; }
     .tab-placeholder h2 { margin: 0; color: #edf4f0; font: 400 28px/1.1 Georgia, serif; }
     .tab-placeholder p { margin: 8px 0 0; color: #a0b0a8; font-size: 13px; }
+    .forecast-panel { max-width: none; padding: 0; }
+    .forecast-frame { display: block; width: 100%; height: max(680px, calc(100vh - 112px)); border: 0; background: #141c19; }
     @media (max-width: 950px) { .workspace-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; } .workspace { padding-inline: 18px; } .headline-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 720px) {
       .primary-tabs { gap: 0; padding-inline: 12px; } .primary-tab { padding-inline: 10px; font-size: 11px; }
@@ -316,8 +318,8 @@
     </div>
   </main>
   </section>
-  <section class="tab-placeholder" id="panel-forecasts" role="tabpanel" aria-labelledby="tab-forecasts" hidden>
-    <h2>Economic Forecasts</h2><p>Content will be added later.</p>
+  <section class="tab-placeholder forecast-panel" id="panel-forecasts" role="tabpanel" aria-labelledby="tab-forecasts" hidden>
+    <iframe class="forecast-frame" id="forecasts-frame" src="forecasts/index.html" title="Economic Forecasts workspace" loading="lazy"></iframe>
   </section>
   <section class="tab-placeholder" id="panel-weekly" role="tabpanel" aria-labelledby="tab-weekly" hidden>
     <h2>Weekly Updates</h2><p>Content will be added later.</p>

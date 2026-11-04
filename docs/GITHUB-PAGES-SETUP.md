@@ -16,6 +16,18 @@ This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Page
    - `GITHUB_PAGES_TOKEN` = the token value
    - `GITHUB_PAGES_BRANCH` = `main` (optional; this is the default)
 3. Sign out and back in (or run `outputs/Open US Macro Monitor.bat`) so the hidden **US Macro Monitor** Windows scheduled task starts with your user environment variables. It runs `pythonw.exe` without a helper console and publishes when it starts, then hourly while you are signed in. The batch file opens the dashboard in a browser, but the scheduled task itself does not. Check `outputs/haver_labor_dashboard.log` for a `Published dashboard snapshot to GitHub` entry after a refresh.
+
+## Collaborate on Economic Forecasts
+
+The Forecasts tab loads its content from `docs/forecasts/index.html` in an isolated frame. A collaborator can update that page and its assets without editing the dashboard shell.
+
+1. Invite the collaborator to the repository with write access.
+2. Have them clone the repository, fetch `main`, and create or check out the `forecast-work` branch from `main`.
+3. Keep their changes inside `docs/forecasts/`. Do not edit `docs/index.html`, `outputs/haver_dashboard.html`, or the Haver publisher for forecast-only work.
+4. Push the branch and open a pull request with base branch `main`.
+5. Review and merge the pull request. GitHub Pages deploys the merged forecast page and assets with the dashboard.
+
+The shared site and forecast files are public. Never commit secrets, private data, or publishing tokens.
 4. The helper publishes `docs/data/snapshot.json` after every successful hourly Haver check, including when indicator values are unchanged, so the public data-update timestamp stays current. A failed Haver check is retried after five minutes. Leave the PC awake, online, signed in, and the helper running for hourly checks and publication. If the PC is shut down, asleep, offline, or not signed in, the shared site retains the last published data and labels updates older than three hours as overdue. If Haver fails before its first successful refresh after restart, the helper leaves the last public snapshot intact rather than publishing empty data.
 
 ## Notes
