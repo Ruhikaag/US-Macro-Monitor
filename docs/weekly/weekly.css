@@ -18,8 +18,10 @@ input[type="text"] { width: 100%; }
 .chart { flex: 0 0 min(420px, 85vw); margin: 0; padding: 12px; background: #19221f; border-radius: 8px; }
 .chart img { width: 100%; display: block; background: #141c19; margin-bottom: 10px; }
 .chart figcaption { line-height: 1.4; margin-bottom: 10px; font-size: 13px; }
-#pdf { width: 100%; margin: 12px 0 28px; padding: 18px; background: #101713; border: 1px solid #35463e; border-radius: 12px; }
-#pdf img { display: block; width: 100%; max-width: 900px; height: auto; margin: 0 auto 16px; background: #fff; }
+#pdf { width: 100%; margin: 18px 0 28px; padding: 24px; background: #202a25; border: 1px solid #35463e; border-radius: 12px; }
+#pdf img { display: block; width: 100%; max-width: 900px; height: auto; margin: 0 auto 20px; background: #fff; filter: sepia(.12) brightness(.86); box-shadow: 0 6px 24px #0003; }
+#pdf img:last-child { margin-bottom: 0; }
+.issue-description { margin: -2px 0 20px; max-width: 680px; font-size: 14px; }
 @media (max-width: 600px) { #pdf { padding: 4px; } .chart { flex-basis: 85%; } }
 #latest-details { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 #latest-details h3 { margin: 0; font-size: 20px; }

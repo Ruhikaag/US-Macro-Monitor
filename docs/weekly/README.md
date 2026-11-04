@@ -4,6 +4,8 @@ The dashboard embeds this folder's `index.html`. The public page reads only appr
 
 ## Weekly workflow
 
+The latest-issue heading includes a short description of the previous week's US economic releases. A display-only muted paper treatment reduces glare against the dark microsite; original vector assets, PDF downloads, and chart PNG downloads are not recolored or modified by this treatment.
+
 1. Save the finished PDF in the folder configured by `WEEKLY_UPDATES_SOURCE`.
 2. Keep the existing Windows dashboard helper running. It checks the folder every minute.
 3. Open the **local** dashboard's Weekly Updates tab. Refresh it to see newly prepared drafts.
@@ -21,7 +23,7 @@ Intake and extraction are automatic; approval is deliberately manual. Merely sav
 - Install the extraction dependency with the dashboard interpreter: `python -m pip install -r outputs/requirements-weekly.txt`.
 - Restart the helper after changing configuration or Python code.
 
-The intake reads PDF publication dates from the document, not file modification dates. Matching is designed for the current "US Economic Update: Month D, YYYY" header and numbered Figure captions. Plot downloads exclude the figure caption/source footer but retain axes, legends, and units. Full PDF previews preserve all document content, including attribution; the original PDF bytes are not changed. Neutral page colors are remapped to the microsite background/text colors for previews only, preserving chart series hues. Tags are suggestions from the first-page narrative, not every indicator in the repeated dashboard table. Unrecognized dates or unreadable PDFs are shown as errors rather than assigned invented dates. Layout changes may require extraction adjustments; review all chart previews.
+The intake reads PDF publication dates from the document, not file modification dates. Matching is designed for the current "US Economic Update: Month D, YYYY" header and numbered Figure captions. Plot downloads exclude the figure caption/source footer but retain axes, legends, and units. Full PDF previews preserve all document content, including attribution; the original PDF bytes are not changed. PDF page previews retain original colors and white backgrounds; chart thumbnails alone use dark-themed colors. Tags are suggestions from the first-page narrative, not every indicator in the repeated dashboard table. Unrecognized dates or unreadable PDFs are shown as errors rather than assigned invented dates. Layout changes may require extraction adjustments; review all chart previews.
 
 The helper must be running, with folder access, for intake and approval to work.  If a PDF changes, its new content becomes a new draft requiring approval. Approving a replacement for the same publication date replaces that archive entry.
 
