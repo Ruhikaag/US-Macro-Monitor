@@ -8,6 +8,8 @@ The preview uses a soft, muted paper tone to reduce glare against the dark theme
 
 Weekly document previews have no padded outer frame. Chart thumbnails open accessible enlarged previews with Close/Escape controls and a separate PNG download.
 
+Enlarged weekly charts use original-color vector crops and proportional sizing. A visible **View chart** label and normal pointer replace the magnifying cursor. PDF preview links retain their original destinations and proportional positions, including the top-right links; supported web links open separately without changing the PDF download.
+
 The Weekly Updates tab embeds `weekly/index.html`. A local folder watcher prepares PDFs, suggested indicator tags, and extracted chart PNGs every minute. Nothing is published until the owner reviews an issue in the local tab and explicitly approves it. Approved issues are atomically published with their assets and archive metadata; the public view has no approval controls. On-screen PDF pages use white backgrounds and original colors in sharp vector previews; PDF downloads retain the original format. Latest issue metadata omits indicator tags, while the expandable archive shows dated issue titles and covered indicators. Chart PNG downloads exclude figure headings/source footers. See [Weekly Updates workflow](weekly/README.md) for configuration, review steps, limitations, and tests.
 
 This publishes the Haver snapshot from the Windows helper to GitHub. GitHub Pages serves the dashboard and public snapshot; the page checks for a newly published snapshot every minute. The Windows helper fetches Haver once per hour while it is running. Indicator values change when Haver releases or revises observations, not continuously.

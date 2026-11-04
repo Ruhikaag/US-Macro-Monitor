@@ -8,11 +8,13 @@ The latest-issue heading includes a short description of the previous week's US 
 
 Document pages fill the preview width without an outer padded frame. Click a chart thumbnail (or focus it and press Enter) to open a large dialog preview. Close it with the Close button or Escape; the separate plot-only PNG download remains available both in the strip and the dialog.
 
+The **View chart** control uses a normal pointer, not a magnifying cursor. Enlarged charts use original-color SVG crops with their original aspect ratios, keeping text and lines sharp without raster stretching or dark recoloring. Existing issues without vector previews fall back to their original plot PNG. Original PDF web/email links remain clickable in the page preview through proportionally positioned overlays; web links open a separate tab. Only HTTP, HTTPS and mailto destinations are supported.
+
 1. Save the finished PDF in the folder configured by `WEEKLY_UPDATES_SOURCE`.
 2. Keep the existing Windows dashboard helper running. It checks the folder every minute.
 3. Open the **local** dashboard's Weekly Updates tab. Refresh it to see newly prepared drafts.
 4. Expand the issue. Verify the PDF, publication date, suggested indicator tags, and extracted chart previews. Edit tags or deselect bad crops as needed.
-5. Select **Approve and publish** and confirm public publication. The PDF, selected PNGs, and updated archive manifest are committed together.
+5. Select **Approve and publish** and confirm public publication. The PDF, selected PNGs, vector previews, link positions, and updated archive manifest are committed together.
 6. Wait for GitHub Pages deployment, then check the shared site. Previous approved issues remain in the archive and can be filtered by indicator.
 
 Intake and extraction are automatic; approval is deliberately manual. Merely saving a PDF does not publish it. You do not need to upload PDFs to chat or provide separate chart images. Only publicly approved documents may be used.

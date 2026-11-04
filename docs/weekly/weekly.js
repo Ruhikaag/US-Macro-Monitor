@@ -26,7 +26,7 @@ function openChart(issue, chart, trigger) {
   const image = byId("chart-large");
   byId("chart-large-title").textContent = chart.title.replace(/^Figure\s+\d+[.:]\s*/i, "");
   image.alt = chart.title;
-  image.src = `${asset(issue, chart.file)}?v=20261104-clean`;
+  image.src = `${asset(issue, chart.preview || chart.download || chart.file)}?v=20261104-sharp`;
   byId("chart-preview-status").hidden = true;
   const link = byId("chart-large-download");
   link.href = asset(issue, chart.download || chart.file);
@@ -50,8 +50,8 @@ function chartCard(issue, chart, selectable = false) {
   expand.type = "button";
   expand.setAttribute("aria-label", `Enlarge chart: ${chart.title}`);
   expand.setAttribute("aria-haspopup", "dialog");
-  expand.title = "Click to enlarge";
-  expand.append(image);
+  expand.title = "View chart";
+  expand.append(image, element("span", "View chart", "chart-view-label"));
   expand.addEventListener("click", () => openChart(issue, chart, expand));
   card.append(expand, element("figcaption", chart.title.replace(/^Figure\s+\d+[.:]\s*/i, "")),
     download("Download PNG", asset(issue, chart.download || chart.file), `${issue.date}-${chart.download || chart.file}`));
@@ -79,7 +79,23 @@ function showIssue(issue) {
       byId("status").textContent = "Could not load a preview page. The original PDF is available via Download PDF.";
       byId("status").classList.add("error");
     });
-    return image;
+    const wrapper = element("div", "", "pdf-page");
+    wrapper.append(image);
+    for (const link of issue.page_links?.[index] || []) {
+      if (!/^(https?:\/\/|mailto:)/i.test(link.href) || !Array.isArray(link.rect) ||
+          link.rect.length !== 4 || !link.rect.every(Number.isFinite)) continue;
+      const anchor = element("a", "", "pdf-link");
+      anchor.href = link.href;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.setAttribute("aria-label", `Open PDF link: ${link.href}`);
+      anchor.title = link.href;
+      ["left", "top", "width", "height"].forEach((property, i) => {
+        anchor.style[property] = `${link.rect[i]}%`;
+      });
+      wrapper.append(anchor);
+    }
+    return wrapper;
   }));
   byId("pdf").scrollTop = 0;
   if (!issue.pages?.length) byId("pdf").append(element("p", "Preview is not available. Download the original PDF above."));
