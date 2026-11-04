@@ -1,0 +1,130 @@
+"use strict";
+const localReview = location.hostname === "127.0.0.1" || location.hostname === "localhost";
+let reviewToken = "";
+let publishedIssues = [];
+const byId = id => document.getElementById(id);
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function asset(issue, file) {
+  return localReview ? `/api/weekly/files/${issue.id}/${file}` : `files/${issue.id}/${file}`;
+}
+function download(label, url, filename) {
+  const link = element("a", label);
+  link.href = url;
+  link.download = filename;
+  return link;
+}
+function chartCard(issue, chart, selectable = false) {
+  const card = element("figure", "", "chart");
+  const image = element("img");
+  image.src = asset(issue, chart.file);
+  image.alt = chart.title;
+  image.loading = "lazy";
+  card.append(image, element("figcaption", chart.title),
+    download("Download chart (PNG)", image.src, `${issue.date}-${chart.file}`));
+  if (selectable) {
+    const label = element("label", " Include this chart");
+    const check = element("input");
+    check.type = "checkbox"; check.value = chart.file; check.checked = true;
+    label.prepend(check); card.append(label);
+  }
+  return card;
+}
+function showIssue(issue) {
+  byId("latest").hidden = false;
+  byId("issue-heading").textContent = issue.id === publishedIssues[0]?.id ? "Latest issue" : "Selected archive issue";
+  const details = byId("latest-details");
+  details.replaceChildren(element("h3", issue.date),
+    element("p", issue.indicators.join(" · "), "tags"),
+    download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-US-Economic-Update.pdf`));
+  byId("pdf").src = asset(issue, "update.pdf");
+  byId("charts").replaceChildren(...issue.charts.map(chart => chartCard(issue, chart)));
+  if (!issue.charts.length) byId("charts").append(element("p", "No separate chart downloads for this issue."));
+}
+function renderArchive() {
+  const filter = byId("indicator").value;
+  const issues = publishedIssues.slice(1).filter(issue => !filter || issue.indicators.includes(filter));
+  byId("archive-list").replaceChildren(...issues.map(issue => {
+    const card = element("article", "", "issue");
+    const view = element("button", "View issue and charts");
+    view.addEventListener("click", () => { showIssue(issue); byId("latest").scrollIntoView(); });
+    const actions = element("div", "", "actions");
+    actions.append(view, download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-update.pdf`));
+    card.append(element("h3", issue.date), element("p", issue.indicators.join(" · "), "tags"), actions);
+    return card;
+  }));
+  if (!issues.length) byId("archive-list").append(element("p", "No published issues match."));
+}
+function draftCard(issue) {
+  const card = element("details", "", "draft");
+  card.append(element("summary", `${issue.date || "Date unknown"} — ${issue.filename}`),
+    element("p", issue.warning, "warning"));
+  if (issue.status === "error") return card;
+  const original = element("a", "Open original PDF for review");
+  original.href = asset(issue, "update.pdf"); original.target = "_blank"; original.rel = "noopener";
+  card.append(original);
+  const dateLabel = element("label", "Publication date");
+  const day = element("input"); day.type = "date"; day.required = true; day.value = issue.date;
+  dateLabel.append(day);
+  const tagLabel = element("label", "Indicators covered (edit suggested tags; separate with commas)");
+  const tags = element("input"); tags.type = "text"; tags.value = issue.indicators.join(", ");
+  tagLabel.append(tags);
+  const charts = element("div", "", "chart-strip");
+  charts.append(...issue.charts.map(chart => chartCard(issue, chart, true)));
+  const button = element("button", "Approve and publish PDF, tags, and selected charts");
+  const message = element("p");
+  message.setAttribute("role", "status");
+  button.addEventListener("click", async () => {
+    if (!day.reportValidity()) return;
+    if (!confirm("Publish this PDF and selected charts to the public website?")) return;
+    button.disabled = true; message.textContent = "Publishing approved issue...";
+    try {
+      const response = await fetch(`/api/weekly/approve/${issue.id}`, {
+        method: "POST", headers: { "Content-Type": "application/json", "X-Weekly-Token": reviewToken },
+        body: JSON.stringify({ date: day.value, indicators: tags.value.split(",").map(x => x.trim()).filter(Boolean),
+          charts: [...charts.querySelectorAll("input:checked")].map(x => x.value) })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Publication failed (${response.status})`);
+      message.textContent = "Published to GitHub. The public website may take a few minutes to update.";
+      button.textContent = "Published"; issue.status = "published";
+    } catch (error) {
+      message.textContent = error.message; button.disabled = false;
+    }
+  });
+  card.append(dateLabel, tagLabel, charts, button, message);
+  return card;
+}
+async function loadWeekly() {
+  try {
+    const response = await fetch(localReview ? "/api/weekly" : `issues.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Could not load weekly updates (${response.status}).`);
+    const result = await response.json();
+    publishedIssues = result.issues.filter(issue => !localReview || issue.status === "published")
+      .sort((a, b) => b.date.localeCompare(a.date));
+    if (publishedIssues.length) showIssue(publishedIssues[0]);
+    byId("status").textContent = result.error || (publishedIssues.length
+      ? "Published weekly briefings" : "No approved weekly updates have been published yet.");
+    byId("status").classList.toggle("error", Boolean(result.error));
+    const options = [...new Set(publishedIssues.flatMap(issue => issue.indicators))].sort();
+    byId("indicator").append(...options.map(tag => {
+      const option = element("option", tag); option.value = tag; return option;
+    }));
+    byId("indicator").addEventListener("change", renderArchive);
+    renderArchive();
+    if (localReview) {
+      reviewToken = result.token; byId("review").hidden = false;
+      const drafts = result.issues.filter(issue => issue.status !== "published");
+      byId("drafts").replaceChildren(...drafts.map(draftCard));
+      if (!drafts.length) byId("drafts").append(element("p", "No drafts yet. Intake checks the folder every minute; refresh this page to see newly prepared issues."));
+    }
+  } catch (error) {
+    byId("status").textContent = error.message;
+    byId("status").classList.add("error");
+  }
+}
+loadWeekly();

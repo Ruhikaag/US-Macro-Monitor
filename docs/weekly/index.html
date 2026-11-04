@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weekly Updates | Economics Microsite</title>
+  <link rel="stylesheet" href="weekly.css">
+  <script src="weekly.js" defer></script>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">United States | Weekly briefing</p>
+    <h1>Weekly Updates</h1>
+    <p>Monday briefings on US economic developments from the preceding week.</p>
+    <p id="status" role="status" aria-live="polite">Loading weekly updates...</p>
+    <section id="review" hidden>
+      <h2>Local review queue</h2>
+      <p>Nothing in this queue is public until you select Approve and publish. Review the PDF, date, indicator tags, and every selected chart crop.</p>
+      <div id="drafts"></div>
+    </section>
+    <section id="latest" hidden>
+      <h2 id="issue-heading">Latest issue</h2>
+      <div id="latest-details"></div>
+      <iframe id="pdf" title="Latest weekly economic update PDF"></iframe>
+      <h2>Charts from this issue</h2>
+      <div id="charts" class="chart-strip"></div>
+    </section>
+    <section id="archive">
+      <h2>Archive</h2>
+      <label>Filter by indicator <select id="indicator"><option value="">All indicators</option></select></label>
+      <div id="archive-list"></div>
+    </section>
+  </main>
+</body>
+</html>
