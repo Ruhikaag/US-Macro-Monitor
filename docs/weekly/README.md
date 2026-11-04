@@ -1,6 +1,6 @@
 # Weekly Updates
 
-The dashboard embeds this folder's `index.html`. The public page reads only approved issues from `issues.json`; unpublished drafts are never included in the repository. The on-screen PDF uses dark-themed page images, while **Download PDF** returns the unchanged original document. Latest-issue metadata shows the date, without indicator tags or introductory copy. Charts have one caption each; **Download PNG** returns a separate original-color plot crop without the figure caption or source footer. The expandable Archive lists clickable issue titles/dates alongside covered indicators.
+The dashboard embeds this folder's `index.html`. The public page reads only approved issues from `issues.json`; unpublished drafts are never included in the repository. The on-screen PDF uses sharp vector page previews on white, preserving original document colors and geometry. **Download PDF** returns the unchanged original document. Latest-issue metadata shows the date, without indicator tags or introductory copy. Charts have one caption each; **Download PNG** returns a separate original-color plot crop without the figure caption or source footer. The expandable Archive lists clickable issue titles/dates alongside covered indicators.
 
 ## Weekly workflow
 

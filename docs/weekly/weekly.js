@@ -47,7 +47,7 @@ function showIssue(issue) {
     download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-US-Economic-Update.pdf`));
   byId("pdf").replaceChildren(...(issue.pages || []).map((file, index) => {
     const image = element("img");
-    image.src = asset(issue, file);
+    image.src = `${asset(issue, file)}?v=original-white-20261104`;
     image.alt = `US Economic Update, ${date}, page ${index + 1}`;
     image.loading = index ? "lazy" : "eager";
     image.addEventListener("error", () => {
