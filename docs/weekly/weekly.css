@@ -19,7 +19,7 @@ input[type="text"] { width: 100%; }
 .chart img { width: 100%; display: block; background: #141c19; margin-bottom: 10px; }
 .chart figcaption { line-height: 1.4; margin-bottom: 10px; font-size: 13px; }
 #pdf { width: 100%; max-width: 900px; margin: 18px auto 28px; padding: 0; border: 0; }
-#pdf img { display: block; width: 100%; height: auto; background: #fff; filter: sepia(.12) brightness(.86); }
+#pdf img { display: block; width: 100%; height: auto; background: #141c19; }
 .pdf-page { position: relative; margin-bottom: 20px; }
 .pdf-page:last-child { margin-bottom: 0; }
 .pdf-link { position: absolute; display: block; }

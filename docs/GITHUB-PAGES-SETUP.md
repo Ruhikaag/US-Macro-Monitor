@@ -4,7 +4,7 @@ The site header and browser title use **Economics Microsite**; the Macro Monitor
 
 ## Automated Weekly Updates
 
-The preview uses a soft, muted paper tone to reduce glare against the dark theme, with a one-line description beneath Latest issue. This is display-only styling; PDF downloads retain their original appearance.
+The PDF preview uses the dark microsite background and white vector typography, with a one-line description beneath Latest issue. This is browser-only recoloring; vector geometry, series hues and original downloads are preserved. Raster logos/images retain their original appearance.
 
 Weekly document previews have no padded outer frame. Chart thumbnails open accessible enlarged previews with Close/Escape controls and a separate PNG download.
 

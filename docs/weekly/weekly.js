@@ -63,6 +63,37 @@ function chartCard(issue, chart, selectable = false) {
   }
   return card;
 }
+function themePDFVector(svg) {
+  const document = new DOMParser().parseFromString(svg, "image/svg+xml");
+  if (document.querySelector("parsererror") || document.documentElement.localName !== "svg") {
+    throw new Error("Invalid PDF vector preview.");
+  }
+  const root = document.documentElement;
+  root.setAttribute("fill", "#ffffff");
+  for (const node of root.querySelectorAll("[fill], [stroke]")) {
+    for (const attribute of ["fill", "stroke"]) {
+      const color = node.getAttribute(attribute);
+      if (!/^#[0-9a-f]{6}$/i.test(color || "")) continue;
+      const rgb = [1, 3, 5].map(index => parseInt(color.slice(index, index + 2), 16));
+      if (Math.max(...rgb) - Math.min(...rgb) > 20) continue;
+      const light = rgb.reduce((sum, channel) => sum + channel, 0) / 3;
+      node.setAttribute(attribute, light > 235 ? "#141c19" : attribute === "fill" ? "#ffffff" : "#a0b0a8");
+    }
+  }
+  for (const text of root.querySelectorAll("[data-text]")) text.setAttribute("fill", "#ffffff");
+  return new XMLSerializer().serializeToString(document);
+}
+async function loadPDFPreview(image, url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`PDF preview unavailable (HTTP ${response.status}).`);
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(themePDFVector(await response.text()))}`;
+  } catch (error) {
+    if (!image.isConnected) return;
+    byId("status").textContent = `${error.message} Download PDF still provides the original document.`;
+    byId("status").classList.add("error");
+  }
+}
 function showIssue(issue) {
   byId("latest").hidden = false;
   byId("issue-heading").textContent = issue.id === publishedIssues[0]?.id ? "Latest issue" : "Selected archive issue";
@@ -72,7 +103,7 @@ function showIssue(issue) {
     download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-US-Economic-Update.pdf`));
   byId("pdf").replaceChildren(...(issue.pages || []).map((file, index) => {
     const image = element("img");
-    image.src = `${asset(issue, file)}?v=original-white-20261104`;
+    loadPDFPreview(image, `${asset(issue, file)}?v=original-white-20261104`);
     image.alt = `US Economic Update, ${date}, page ${index + 1}`;
     image.loading = index ? "lazy" : "eager";
     image.addEventListener("error", () => {
