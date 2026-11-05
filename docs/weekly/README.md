@@ -6,7 +6,7 @@ The dashboard embeds this folder's `index.html`. The public page reads only appr
 
 The latest-issue heading includes a short description of the previous week's US economic releases. A display-only muted paper treatment reduces glare against the dark microsite; original vector assets, PDF downloads, and chart PNG downloads are not recolored or modified by this treatment.
 
-Document pages fill the preview width without an outer padded frame. Click a chart thumbnail (or focus it and press Enter) to open a large dialog preview. Close it with the Close button or Escape; the separate plot-only PNG download remains available both in the strip and the dialog.
+Document pages are centered with a maximum preview width of 900px, shrinking to fit smaller screens without an outer padded frame. Chart-strip and enlarged-chart widths are independent and unchanged. Click a chart thumbnail (or focus it and press Enter) to open a large dialog preview. Close it with the Close button or Escape; the separate plot-only PNG download remains available both in the strip and the dialog.
 
 The **View chart** control uses a normal pointer, not a magnifying cursor. Enlarged charts use original-color SVG crops with their original aspect ratios, keeping text and lines sharp without raster stretching or dark recoloring. Existing issues without vector previews fall back to their original plot PNG. Original PDF web/email links remain clickable in the page preview through proportionally positioned overlays; web links open a separate tab. Only HTTP, HTTPS and mailto destinations are supported.
 

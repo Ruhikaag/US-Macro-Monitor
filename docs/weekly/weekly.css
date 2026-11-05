@@ -18,7 +18,7 @@ input[type="text"] { width: 100%; }
 .chart { flex: 0 0 min(420px, 85vw); margin: 0; padding: 12px; background: #19221f; border-radius: 8px; }
 .chart img { width: 100%; display: block; background: #141c19; margin-bottom: 10px; }
 .chart figcaption { line-height: 1.4; margin-bottom: 10px; font-size: 13px; }
-#pdf { width: 100%; margin: 18px 0 28px; padding: 0; border: 0; }
+#pdf { width: 100%; max-width: 900px; margin: 18px auto 28px; padding: 0; border: 0; }
 #pdf img { display: block; width: 100%; height: auto; background: #fff; filter: sepia(.12) brightness(.86); }
 .pdf-page { position: relative; margin-bottom: 20px; }
 .pdf-page:last-child { margin-bottom: 0; }
