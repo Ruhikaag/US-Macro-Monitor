@@ -2,8 +2,6 @@
 
 The site header and browser title use **Economics Microsite**; the Macro Monitor and Economic Forecasts tab names are unchanged.
 
-Macro Monitor indicator tiles use equal-width columns and equal-height rows within the displayed theme. Height adapts to the longest visible content instead of imposing a large fixed minimum; values align at the bottom with at least 14px separation from the header/badge. This keeps tiles compact without clipping labels. Mobile retains the single-column layout. Economy at a glance tiles are unchanged. Run `outputs/test_macro_tile_sizes.js` in the dashboard browser and call `runMacroTileSizeTests()` to check sizing, unnecessary whitespace, bottom alignment and overflow for all populated themes at each viewport width.
-
 ## Automated Weekly Updates
 
 The PDF preview uses the dark microsite background and white vector typography, with a one-line description beneath Latest issue. This is browser-only recoloring; vector geometry, series hues and original downloads are preserved. Raster logos/images retain their original appearance.
