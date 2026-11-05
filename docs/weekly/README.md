@@ -54,3 +54,7 @@ The helper must be running, with folder access, for intake and approval to work.
 
 Run Python tests from `outputs`: `python -m unittest test_weekly_updates test_chart_tools`.
 Do not overwrite the remote `issues.json` or `weekly/files/` with stale local copies during ordinary dashboard UI publication. Forecast files are unrelated and must be preserved.
+
+## Macro Monitor layout
+
+The parent Macro Monitor now uses consistently sized indicator tiles with bottom-aligned metrics on desktop and mobile. This does not change Weekly Updates cards or document styling; see [dashboard setup](../GITHUB-PAGES-SETUP.md) for sizing and browser regression checks.
