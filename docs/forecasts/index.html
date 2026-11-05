@@ -5,7 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Economic Forecasts</title>
   <style>
-    :root { color-scheme: dark; font-family: "Segoe UI", Arial, sans-serif; background: #141c19; color: #edf4f0; }
+    :root {
+      color-scheme: dark;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #141c19;
+      color: #edf4f0;
+      --baseline: #0d8390;
+      --upside: #86bc25;
+      --downside: #ed8b00;
+    }
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; padding: 38px clamp(20px, 5vw, 72px); }
     main { max-width: 1280px; margin: 0 auto; }
@@ -13,9 +21,52 @@
     h1 { margin: 0; color: #edf4f0; font: 400 clamp(32px, 5vw, 48px)/1.1 Georgia, serif; }
     .eyebrow { margin: 0 0 12px; color: #43c5ca; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
     .intro { max-width: 720px; margin-bottom: 30px; }
-    .workspace { min-height: 280px; border: 1px solid #2a3932; border-radius: 12px; background: #19221f; padding: 24px; }
+    .workspace { border: 1px solid #2a3932; border-radius: 12px; background: #19221f; padding: 24px; }
     .workspace h2 { margin: 0; color: #edf4f0; font: 400 24px/1.2 Georgia, serif; }
-    .workspace p { margin: 10px 0 0; }
+    .workspace-intro { margin: 8px 0 20px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 22px 0 0; padding: 16px 0 0; border-top: 1px solid #2a3932; list-style: none; }
+    .legend li { display: inline-flex; align-items: center; gap: 9px; color: #c5d0ca; font-size: 13px; }
+    .key { width: 28px; height: 0; border-top: 3px dotted; }
+    .key-history { border-top-style: solid; }
+    .key-history { border-color: var(--baseline); }
+    .key-baseline { border-color: var(--baseline); }
+    .key-upside { border-color: var(--upside); }
+    .key-downside { border-color: var(--downside); }
+    .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .chart-card { min-width: 0; padding: 18px; border: 1px solid #2a3932; border-radius: 10px; background: #141c19; }
+    .chart-card h3 { margin: 0; color: #edf4f0; font: 400 19px/1.3 Georgia, serif; }
+    .chart-note { margin: 5px 0 12px; font-size: 12px; }
+    .chart-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+    .chart { display: block; width: 100%; min-width: 430px; height: auto; }
+    .chart text { font-family: "Segoe UI", Arial, sans-serif; }
+    .gridline { stroke: #34443d; stroke-width: 1; }
+    .axis-label { fill: #a0b0a8; font-size: 12px; }
+    .axis-title { fill: #c5d0ca; font-size: 12px; }
+    .scenario-line { fill: none; stroke-width: 3; stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round; }
+    .history-line { fill: none; stroke: var(--baseline); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .line-baseline { stroke: var(--baseline); }
+    .line-upside { stroke: var(--upside); }
+    .line-downside { stroke: var(--downside); }
+    .scenario-point { stroke: #141c19; stroke-width: 2; }
+    .history-point { fill: var(--baseline); stroke: #141c19; stroke-width: 2; }
+    .point-baseline { fill: var(--baseline); }
+    .point-upside { fill: var(--upside); }
+    .point-downside { fill: var(--downside); }
+    .source-note { margin: 20px 0 0; color: #8d9d95; font-size: 12px; line-height: 1.6; }
+    details { margin-top: 16px; border-top: 1px solid #2a3932; padding-top: 14px; }
+    summary { color: #c5d0ca; font-size: 13px; cursor: pointer; }
+    .table-scroll { overflow-x: auto; margin-top: 12px; }
+    table { width: 100%; min-width: 480px; border-collapse: collapse; color: #c5d0ca; font-size: 13px; text-align: right; }
+    caption { margin-bottom: 8px; color: #8d9d95; text-align: left; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #2a3932; }
+    th { color: #edf4f0; font-weight: 600; }
+    th:first-child, td:first-child { text-align: left; }
+    @media (max-width: 760px) {
+      body { padding: 28px 16px; }
+      .workspace { padding: 18px 14px; }
+      .chart-grid { grid-template-columns: 1fr; }
+      .chart-card { padding: 16px 12px; }
+    }
   </style>
 </head>
 <body>
@@ -23,12 +74,209 @@
     <header class="intro">
       <p class="eyebrow">United States | Outlook</p>
       <h1>Economic Forecasts</h1>
-      <p>Forecast content will be developed in this section.</p>
+      <p>Compare baseline, upside, and downside projections in the latest US economic forecast.</p>
     </header>
     <section class="workspace" aria-labelledby="forecast-workspace-title">
-      <h2 id="forecast-workspace-title">Forecast workspace</h2>
-      <p>This section is ready for forecast materials.</p>
+      <h2 id="forecast-workspace-title">Q3 2026 forecast by scenario</h2>
+      <p class="workspace-intro">Annual history from 2022 through 2025 and projections from 2026 through 2031. Solid lines show history; dotted lines show forecasts. Each chart is scaled to its measure.</p>
+      <div id="chart-grid" class="chart-grid"></div>
+      <ul class="legend" aria-label="Chart legend">
+        <li><span class="key key-history" aria-hidden="true"></span>History</li>
+        <li><span class="key key-baseline" aria-hidden="true"></span>Baseline</li>
+        <li><span class="key key-upside" aria-hidden="true"></span>Upside</li>
+        <li><span class="key key-downside" aria-hidden="true"></span>Downside</li>
+      </ul>
+      <p class="source-note">Source: Q3 2026 US Economic Forecast, Baseline, Upside, and Downside sheets. Growth and inflation are annual percent changes; unemployment is a percent of the labor force. PCE inflation is measured by the chained price index for personal consumption expenditures.</p>
     </section>
   </main>
+  <script>
+    const years = [2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031];
+    const scenarios = [
+      { id: "baseline", name: "Baseline", color: "#0d8390" },
+      { id: "upside", name: "Upside", color: "#86bc25" },
+      { id: "downside", name: "Downside", color: "#ed8b00" }
+    ];
+    const indicators = [
+      {
+        id: "real-gdp",
+        title: "Real GDP growth",
+        measure: "Annual percent change",
+        history: [2.524, 2.935, 2.793, 2.106],
+        values: {
+          baseline: [2.22, 2.092, 1.914, 2.091, 2.219, 2.312],
+          upside: [2.264, 2.532, 2.242, 2.33, 2.503, 2.607],
+          downside: [2.22, 1.671, -0.773, -0.623, 1.831, 2.318]
+        }
+      },
+      {
+        id: "consumer-spending",
+        title: "Real consumer spending (total)",
+        measure: "Annual percent change",
+        history: [3.004, 2.566, 2.948, 2.624],
+        values: {
+          baseline: [2.112, 1.615, 1.704, 1.998, 2.044, 2.12],
+          upside: [2.128, 2, 2.11, 2.293, 2.392, 2.491],
+          downside: [2.112, 1.505, -0.371, -0.638, 1.334, 2.161]
+        }
+      },
+      {
+        id: "pce-inflation",
+        title: "PCE inflation",
+        measure: "Annual percent change",
+        history: [6.564, 3.803, 2.616, 2.63],
+        values: {
+          baseline: [3.596, 2.479, 2.087, 2.023, 2, 2],
+          upside: [3.557, 2.41, 2.238, 2.056, 2, 2],
+          downside: [3.596, 2.337, 1.373, 0.933, 1.293, 1.689]
+        }
+      },
+      {
+        id: "unemployment-rate",
+        title: "Unemployment rate",
+        measure: "Percent of the labor force",
+        history: [3.65, 3.625, 4.025, 4.279],
+        values: {
+          baseline: [4.196, 4.238, 4.269, 4.242, 4.195, 4.132],
+          upside: [4.192, 4.141, 4.145, 4.101, 4.051, 4.055],
+          downside: [4.196, 4.34, 5.834, 7.347, 6.822, 5.872]
+        }
+      }
+    ];
+    const svgNamespace = "http://www.w3.org/2000/svg";
+    const svgElement = (name, attributes, text) => {
+      const element = document.createElementNS(svgNamespace, name);
+      Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+      if (text !== undefined) element.textContent = text;
+      return element;
+    };
+
+    function renderChart(indicator) {
+      const card = document.createElement("article");
+      card.className = "chart-card";
+      const heading = document.createElement("h3");
+      heading.id = `${indicator.id}-title`;
+      heading.textContent = indicator.title;
+      const note = document.createElement("p");
+      note.className = "chart-note";
+      note.textContent = indicator.measure;
+
+      const scroll = document.createElement("div");
+      scroll.className = "chart-scroll";
+      const svg = svgElement("svg", {
+        class: "chart",
+        viewBox: "0 0 680 340",
+        role: "img",
+        "aria-labelledby": `${indicator.id}-title ${indicator.id}-description`
+      });
+      svg.append(svgElement("desc", { id: `${indicator.id}-description` },
+        `${indicator.title} history from 2022 to 2025 and baseline, upside, and downside projections from 2026 to 2031. History is solid; forecasts are dotted.`));
+
+      const plot = { left: 62, right: 650, top: 28, bottom: 276 };
+      const allValues = [...indicator.history, ...scenarios.flatMap(scenario => indicator.values[scenario.id])];
+      const minValue = Math.min(...allValues);
+      const maxValue = Math.max(...allValues);
+      const step = 1;
+      const min = indicator.id === "unemployment-rate"
+        ? Math.floor(minValue / step) * step - step
+        : Math.min(0, Math.floor(minValue / step) * step);
+      const max = Math.ceil(maxValue / step) * step + step;
+      const x = index => plot.left + (index / (years.length - 1)) * (plot.right - plot.left);
+      const y = value => plot.top + ((max - value) / (max - min)) * (plot.bottom - plot.top);
+
+      const grid = svgElement("g", {});
+      for (let value = min; value <= max; value += step) {
+        grid.append(
+          svgElement("line", { x1: plot.left, x2: plot.right, y1: y(value), y2: y(value), class: "gridline" }),
+          svgElement("text", { x: plot.left - 10, y: y(value) + 4, "text-anchor": "end", class: "axis-label" }, `${value}%`)
+        );
+      }
+      years.forEach((year, index) => {
+        grid.append(svgElement("text", {
+          x: x(index), y: plot.bottom + 27, "text-anchor": "middle", class: "axis-label"
+        }, String(year)));
+      });
+      grid.append(svgElement("text", { x: plot.left, y: 16, class: "axis-title" }, indicator.measure));
+      svg.append(grid);
+
+      const historyPath = indicator.history
+        .map((value, index) => `${index ? "L" : "M"} ${x(index)} ${y(value)}`)
+        .join(" ");
+      svg.append(svgElement("path", { d: historyPath, class: "history-line" }));
+      indicator.history.forEach((value, index) => {
+        const point = svgElement("circle", {
+          cx: x(index), cy: y(value), r: 4, class: "history-point"
+        });
+        point.append(svgElement("title", {}, `History · ${years[index]}: ${value.toFixed(3)}%`));
+        svg.append(point);
+      });
+
+      const lastHistoryIndex = indicator.history.length - 1;
+      const baseline2026 = indicator.values.baseline[0];
+      svg.append(svgElement("path", {
+        d: `M ${x(lastHistoryIndex)} ${y(indicator.history[lastHistoryIndex])} L ${x(lastHistoryIndex + 1)} ${y(baseline2026)}`,
+        class: "history-line"
+      }));
+
+      [...scenarios.slice(1), scenarios[0]].forEach(scenario => {
+        const values = indicator.values[scenario.id];
+        const path = values.map((value, index) => `${index ? "L" : "M"} ${x(index + indicator.history.length)} ${y(value)}`).join(" ");
+        svg.append(svgElement("path", { d: path, class: `scenario-line line-${scenario.id}` }));
+        values.forEach((value, index) => {
+          const point = svgElement("circle", {
+            cx: x(index + indicator.history.length), cy: y(value), r: 4, class: `scenario-point point-${scenario.id}`
+          });
+          point.append(svgElement("title", {}, `${scenario.name} · ${years[index + indicator.history.length]}: ${value.toFixed(3)}%`));
+          svg.append(point);
+        });
+      });
+
+      scroll.append(svg);
+      card.append(heading, note, scroll);
+
+      const details = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = "View data";
+      const tableScroll = document.createElement("div");
+      tableScroll.className = "table-scroll";
+      const table = document.createElement("table");
+      const caption = document.createElement("caption");
+      caption.textContent = `${indicator.title} · ${indicator.measure}`;
+      table.append(caption);
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      ["Year", "History", ...scenarios.map(scenario => `${scenario.name} forecast`)].forEach(label => {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        cell.textContent = label;
+        headerRow.append(cell);
+      });
+      thead.append(headerRow);
+      table.append(thead);
+      const tbody = document.createElement("tbody");
+      years.forEach((year, index) => {
+        const row = document.createElement("tr");
+        const history = index < indicator.history.length ? indicator.history[index].toFixed(3) : "—";
+        const forecastIndex = index - indicator.history.length;
+        const forecastValues = scenarios.map(scenario => {
+          const value = indicator.values[scenario.id][forecastIndex];
+          return value === undefined ? "—" : value.toFixed(3);
+        });
+        [year, history, ...forecastValues].forEach(value => {
+          const cell = document.createElement("td");
+          cell.textContent = value;
+          row.append(cell);
+        });
+        tbody.append(row);
+      });
+      table.append(tbody);
+      tableScroll.append(table);
+      details.append(summary, tableScroll);
+      card.append(details);
+      return card;
+    }
+
+    const chartGrid = document.getElementById("chart-grid");
+    indicators.forEach(indicator => chartGrid.append(renderChart(indicator)));
+  </script>
 </body>
 </html>
