@@ -23,7 +23,7 @@ function renderReleaseCalendar(host, data, now = new Date()) {
   if (!data || !validDay(data.verified) || !validDay(data.through) || !Array.isArray(data.events) ||
       data.events.some(event => !event || !validDay(event.date) || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(event.time) ||
         typeof event.title !== "string" ||
-        !/^https:\/\/www\.(bls|bea|census|federalreserve)\.gov\//.test(event.source))) {
+        !/^https:\/\/(?:www\.(?:bls|bea|census|federalreserve)\.gov|oui\.doleta\.gov|www\.nar\.realtor|www\.sca\.isr\.umich\.edu|www\.conference-board\.org)\//.test(event.source))) {
     throw new Error("The release calendar contains invalid schedule data.");
   }
   const { start, end } = releaseWindow(now);
