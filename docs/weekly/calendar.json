@@ -1,0 +1,27 @@
+{
+  "verified": "2026-11-05",
+  "through": "2026-12-05",
+  "events": [
+    {"date":"2026-11-03","time":"10:00","title":"Job Openings and Labor Turnover Survey (JOLTS)","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
+    {"date":"2026-11-03","time":"10:00","title":"Factory orders","source":"https://www.census.gov/economic-indicators/calendar-listview-2026.html"},
+    {"date":"2026-11-04","time":"08:30","title":"Trade balance (goods and services)","source":"https://www.census.gov/about/event-calendar.html"},
+    {"date":"2026-11-05","time":"08:30","title":"Productivity and costs (preliminary)","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
+    {"date":"2026-11-06","time":"08:30","title":"Employment report; average hourly earnings; unemployment rate","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
+    {"date":"2026-11-09","time":"10:00","title":"Wholesale trade: sales and inventories","source":"https://www.census.gov/about/event-calendar.html"},
+    {"date":"2026-11-10","time":"08:30","title":"Consumer Price Index (CPI); real earnings","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
+    {"date":"2026-11-13","time":"08:30","title":"Producer Price Index (PPI)","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
+    {"date":"2026-11-17","time":"08:30","title":"Import and export price indexes","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
+    {"date":"2026-11-17","time":"08:30","title":"Retail sales","source":"https://www.census.gov/about/event-calendar.html"},
+    {"date":"2026-11-17","time":"10:00","title":"Business inventories and sales","source":"https://www.census.gov/about/event-calendar.html"},
+    {"date":"2026-11-18","time":"08:30","title":"Housing starts and building permits","source":"https://www.census.gov/about/event-calendar.html"},
+    {"date":"2026-11-25","time":"08:30","title":"Gross domestic product (GDP), second estimate; corporate profits","source":"https://www.bea.gov/news/schedule"},
+    {"date":"2026-11-25","time":"08:30","title":"Personal income and spending; PCE inflation","source":"https://www.bea.gov/news/schedule"},
+    {"date":"2026-11-25","time":"08:30","title":"Durable goods orders","source":"https://www.census.gov/economic-indicators/calendar-listview-2026.html"},
+    {"date":"2026-11-25","time":"10:00","title":"New home sales","source":"https://www.census.gov/about/event-calendar.html"},
+    {"date":"2026-11-27","time":"08:30","title":"Advance economic indicators (goods trade and inventories)","source":"https://www.census.gov/economic-indicators/calendar-listview-2026.html"},
+    {"date":"2026-12-01","time":"10:00","title":"Job Openings and Labor Turnover Survey (JOLTS)","source":"https://www.bls.gov/schedule/2026/12_sched.htm"},
+    {"date":"2026-12-01","time":"10:00","title":"Construction spending","source":"https://www.census.gov/economic-indicators/calendar-listview-2026.html"},
+    {"date":"2026-12-03","time":"10:00","title":"Factory orders","source":"https://www.census.gov/economic-indicators/calendar-listview-2026.html"},
+    {"date":"2026-12-04","time":"08:30","title":"Employment report; average hourly earnings; unemployment rate","source":"https://www.bls.gov/schedule/2026/12_sched.htm"}
+  ]
+}

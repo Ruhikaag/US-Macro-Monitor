@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Weekly Updates | Economics Microsite</title>
-  <link rel="stylesheet" href="weekly.css?v=20261105-narrow">
-  <script src="weekly.js?v=20261104-sharp" defer></script>
+  <link rel="stylesheet" href="weekly.css?v=20261105-calendar">
+  <script src="calendar.js?v=20261105-calendar" defer></script>
+  <script src="weekly.js?v=20261105-calendar" defer></script>
 </head>
 <body>
   <main>
@@ -16,9 +17,17 @@
       <div id="drafts"></div>
     </details>
     <section id="latest" aria-labelledby="issue-heading" hidden>
-      <h2 id="issue-heading">Latest issue</h2>
-      <p class="issue-description">A weekly briefing on US economic data released during the previous week.</p>
-      <div id="latest-details"></div>
+      <div id="latest-details">
+        <div>
+          <h2 id="issue-heading">Latest issue</h2>
+          <p class="issue-description">A weekly briefing on US economic data released during the previous week.</p>
+          <h3 id="issue-date"></h3>
+        </div>
+        <div class="issue-tools">
+          <aside id="release-calendar" aria-label="Upcoming data releases"><p>Loading release calendar...</p></aside>
+          <div id="pdf-download"></div>
+        </div>
+      </div>
       <div id="pdf" role="region" aria-label="Weekly update preview" tabindex="0"></div>
       <h2 class="charts-heading">Charts</h2>
       <div id="charts" class="chart-strip"></div>

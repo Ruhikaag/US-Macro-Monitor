@@ -4,6 +4,10 @@ The dashboard embeds this folder's `index.html`. The public page reads only appr
 
 ## Weekly workflow
 
+The right-hand **Upcoming data releases** panel sits above **Download PDF** and stacks on narrow screens. It lists selected national releases from BLS, BEA and Census, with source links and US Eastern times. Groups use **This week**, **Next week**, and later relative labels. The window includes the current Monday-start week (including earlier releases) through one calendar month from today's US Eastern date; month-end dates are clamped. It follows today's date even when viewing an archived PDF.
+
+`calendar.json` is a verified schedule snapshot, **not an automated live feed**. Initial verification is November 5, 2026, with selected releases through December 5, 2026. Update the events, `verified`, and `through` together from the official source schedules before that coverage expires. The UI refreshes this file and relative week labels every 15 minutes; this does not fetch new dates from agencies. Missing future coverage, expired schedules, malformed data and fetch failures are shown explicitly. Do not infer unscheduled releases from an empty week or invent dates to fill it.
+
 The latest-issue heading includes a short description of the previous week's US economic releases. A display-only muted paper treatment reduces glare against the dark microsite; original vector assets, PDF downloads, and chart PNG downloads are not recolored or modified by this treatment.
 
 Document pages are centered with a maximum preview width of 900px, shrinking to fit smaller screens without an outer padded frame. Chart-strip and enlarged-chart widths are independent and unchanged. Click a chart thumbnail (or focus it and press Enter) to open a large dialog preview. Close it with the Close button or Escape; the separate plot-only PNG download remains available both in the strip and the dialog.
@@ -37,6 +41,8 @@ The helper must be running, with folder access, for intake and approval to work.
 - `outputs/test_weekly_updates.py`: isolated tests with faked files, PDF renderer, and GitHub.
 - `outputs/test_chart_tools.py`: local routing and approval-origin/token checks.
 - `outputs/test_weekly_updates.js`: browser presentation regression tests.
+- `calendar.js` / `calendar.json`: relative-week calendar rendering and verified release schedule.
+- `outputs/test_release_calendar.js`: deterministic month/week/timezone, validation and error-state tests using fixed dates and mocked fetch.
 
 Run Python tests from `outputs`: `python -m unittest test_weekly_updates test_chart_tools`.
 Do not overwrite the remote `issues.json` or `weekly/files/` with stale local copies during ordinary dashboard UI publication. Forecast files are unrelated and must be preserved.

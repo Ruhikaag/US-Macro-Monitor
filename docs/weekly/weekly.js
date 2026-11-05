@@ -66,9 +66,9 @@ function chartCard(issue, chart, selectable = false) {
 function showIssue(issue) {
   byId("latest").hidden = false;
   byId("issue-heading").textContent = issue.id === publishedIssues[0]?.id ? "Latest issue" : "Selected archive issue";
-  const details = byId("latest-details");
   const date = issueDate(issue);
-  details.replaceChildren(element("h3", date),
+  byId("issue-date").textContent = date;
+  byId("pdf-download").replaceChildren(
     download("Download PDF", asset(issue, "update.pdf"), `${issue.date}-US-Economic-Update.pdf`));
   byId("pdf").replaceChildren(...(issue.pages || []).map((file, index) => {
     const image = element("img");
@@ -188,3 +188,5 @@ async function loadWeekly() {
   }
 }
 loadWeekly();
+loadReleaseCalendar();
+setInterval(loadReleaseCalendar, 15 * 60 * 1000);
