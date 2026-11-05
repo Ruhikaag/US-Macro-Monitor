@@ -83,11 +83,47 @@ function themePDFVector(svg) {
   for (const text of root.querySelectorAll("[data-text]")) text.setAttribute("fill", "#ffffff");
   return new XMLSerializer().serializeToString(document);
 }
+function themeLogoPixels(pixels) {
+  for (let i = 0; i < pixels.length; i += 4) {
+    const rgb = [pixels[i], pixels[i + 1], pixels[i + 2]];
+    if (Math.max(...rgb) - Math.min(...rgb) > 20) continue;
+    const ink = 255 - Math.round(rgb.reduce((sum, value) => sum + value, 0) / 3);
+    pixels[i] = pixels[i + 1] = pixels[i + 2] = 255;
+    pixels[i + 3] = Math.round(pixels[i + 3] * ink / 255);
+  }
+}
+async function themePDFLogo(svg) {
+  const document = new DOMParser().parseFromString(svg, "image/svg+xml");
+  for (const logo of document.querySelectorAll("image")) {
+    const width = Number(logo.getAttribute("width"));
+    const height = Number(logo.getAttribute("height"));
+    const transform = logo.parentElement.getAttribute("transform") || "";
+    const matrix = transform.match(/^matrix\(([^)]+)\)$/);
+    const position = matrix?.[1].split(/[,\s]+/).map(Number);
+    if (!position || position.length !== 6 || position[4] > 150 || position[5] > 100 ||
+        width < 200 || width / height < 4 || width / height > 6) continue;
+    const image = new Image();
+    const href = logo.getAttributeNS("http://www.w3.org/1999/xlink", "href") || logo.getAttribute("href");
+    image.src = href;
+    await image.decode();
+    const canvas = window.document.createElement("canvas");
+    canvas.width = width; canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Cannot prepare the themed PDF logo.");
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, width, height);
+    themeLogoPixels(pixels.data);
+    context.putImageData(pixels, 0, 0);
+    logo.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", canvas.toDataURL("image/png"));
+  }
+  return new XMLSerializer().serializeToString(document);
+}
 async function loadPDFPreview(image, url) {
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`PDF preview unavailable (HTTP ${response.status}).`);
-    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(themePDFVector(await response.text()))}`;
+    const svg = await themePDFLogo(themePDFVector(await response.text()));
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   } catch (error) {
     if (!image.isConnected) return;
     byId("status").textContent = `${error.message} Download PDF still provides the original document.`;
