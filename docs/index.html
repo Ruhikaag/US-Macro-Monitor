@@ -63,8 +63,7 @@
     .workspace-head p { margin: 4px 0 0; color: #5f766a; font-size: 11px; }
     .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 10px; }
     #cards { align-items: stretch; grid-auto-rows: 1fr; }
-    #cards .indicator-card { min-height: 240px; }
-    #cards .metric-row { margin-top: auto; }
+    #cards .indicator-card { justify-content: space-between; }
     .cards[data-theme="real_economy"] { --theme-accent: #79ad20; --theme-tint: #f3f8e9; }
     .cards[data-theme="financial_markets"] { --theme-accent: #008c95; --theme-tint: #eaf7f7; }
     .cards[data-theme="inflation"] { --theme-accent: #397f58; --theme-tint: #eef6ed; }
