@@ -8,7 +8,7 @@ The preview uses a soft, muted paper tone to reduce glare against the dark theme
 
 Weekly document previews have no padded outer frame. Chart thumbnails open accessible enlarged previews with Close/Escape controls and a separate PNG download.
 
-Weekly Updates includes a right-hand upcoming release calendar above Download PDF. It uses official BLS/BEA/Census schedule links and US Eastern times, grouped as This week, Next week and later weeks through one calendar month. `weekly/calendar.json` is a manually verified snapshot, not an agency-synchronized feed; maintain its verification/coverage dates and events together. The UI reports expired/missing future coverage and reloads the snapshot every 15 minutes. Initial coverage ends December 5, 2026.
+Weekly Updates includes a right-hand Data release calendar button above Download PDF; dates appear only after opening its Close/Escape dialog. It uses official BLS/BEA/Census schedule links and US Eastern times, grouped as This week, Next week and later weeks through one calendar month. `weekly/calendar.json` is a manually verified snapshot, not an agency-synchronized feed; maintain its verification/coverage dates and events together. The UI reports expired/missing future coverage and reloads the snapshot every 15 minutes. Initial coverage ends December 5, 2026.
 
 Enlarged weekly charts use original-color vector crops and proportional sizing. A visible **View chart** label and normal pointer replace the magnifying cursor. PDF preview links retain their original destinations and proportional positions, including the top-right links; supported web links open separately without changing the PDF download.
 

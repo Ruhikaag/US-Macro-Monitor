@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Weekly Updates | Economics Microsite</title>
-  <link rel="stylesheet" href="weekly.css?v=20261105-calendar">
-  <script src="calendar.js?v=20261105-calendar" defer></script>
+  <link rel="stylesheet" href="weekly.css?v=20261105-calendar-button">
+  <script src="calendar.js?v=20261105-calendar-button" defer></script>
   <script src="weekly.js?v=20261105-calendar" defer></script>
 </head>
 <body>
@@ -24,7 +24,7 @@
           <h3 id="issue-date"></h3>
         </div>
         <div class="issue-tools">
-          <aside id="release-calendar" aria-label="Upcoming data releases"><p>Loading release calendar...</p></aside>
+          <button id="open-calendar" type="button" aria-haspopup="dialog" aria-controls="calendar-dialog">Data release calendar</button>
           <div id="pdf-download"></div>
         </div>
       </div>
@@ -38,6 +38,12 @@
       <div id="archive-list"></div>
     </details>
   </main>
+  <dialog id="calendar-dialog" aria-label="Data release calendar">
+    <div class="calendar-dialog-actions">
+      <button id="close-calendar" type="button" autofocus>Close</button>
+    </div>
+    <div id="release-calendar"><p>Loading release calendar...</p></div>
+  </dialog>
   <dialog id="chart-dialog" aria-labelledby="chart-large-title">
     <div class="chart-dialog-head">
       <h2 id="chart-large-title"></h2>

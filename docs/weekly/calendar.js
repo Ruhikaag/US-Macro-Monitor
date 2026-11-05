@@ -83,4 +83,13 @@ async function loadReleaseCalendar() {
   } catch (error) {
     host.replaceChildren(element("h3", "Upcoming data releases"), element("p", error.message, "warning"));
   }
+  document.getElementById("open-calendar").addEventListener("click", () => {
+    document.getElementById("calendar-dialog").showModal();
+  });
+  document.getElementById("close-calendar").addEventListener("click", () => {
+    document.getElementById("calendar-dialog").close();
+  });
+  document.getElementById("calendar-dialog").addEventListener("close", () => {
+    document.getElementById("open-calendar").focus({ preventScroll: true });
+  });
 }
