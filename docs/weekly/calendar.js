@@ -27,7 +27,7 @@ function renderReleaseCalendar(host, data, now = new Date()) {
     throw new Error("The release calendar contains invalid schedule data.");
   }
   const { start, end } = releaseWindow(now);
-  host.replaceChildren(element("h3", "Upcoming data releases"),
+  host.replaceChildren(element("h3", "Upcoming Data Releases"),
     element("p", `${releaseDate(start)} - ${releaseDate(end)} | US Eastern Time`, "calendar-range"));
   if (data.through < start) {
     host.append(element("p", "The release schedule needs updating. Check the official calendars below.", "warning"));
@@ -81,7 +81,7 @@ async function loadReleaseCalendar() {
     if (!response.ok) throw new Error(`Release calendar unavailable (HTTP ${response.status}).`);
     renderReleaseCalendar(host, await response.json());
   } catch (error) {
-    host.replaceChildren(element("h3", "Upcoming data releases"), element("p", error.message, "warning"));
+    host.replaceChildren(element("h3", "Upcoming Data Releases"), element("p", error.message, "warning"));
   }
   document.getElementById("open-calendar").addEventListener("click", () => {
     document.getElementById("calendar-dialog").showModal();
