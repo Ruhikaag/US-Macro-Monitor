@@ -61,8 +61,6 @@ function renderReleaseCalendar(host, data, now = new Date()) {
         first > data.through ? "Schedule not yet verified for this week." : "No selected releases in the verified schedule."));
       host.append(details);
     }
-    if (data.through < end) host.append(element("p",
-      `Verified schedule available only through ${releaseDate(data.through)}. Later dates need updating.`, "warning"));
   }
   host.append(element("p", `Selected national releases. Verified ${releaseDate(data.verified, true)}. Dates may change; this is not a live feed.`, "calendar-note"));
   const sources = element("p", "", "calendar-sources");
