@@ -5,6 +5,7 @@
     {"date":"2026-11-03","time":"10:00","title":"Job Openings and Labor Turnover Survey (JOLTS)","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
     {"date":"2026-11-04","time":"08:30","title":"Trade balance (goods and services)","source":"https://www.census.gov/about/event-calendar.html"},
     {"date":"2026-11-05","time":"08:30","title":"Weekly Jobless Claims","source":"https://oui.doleta.gov/unemploy/claims_arch.asp"},
+    {"date":"2026-11-05","time":"08:30","title":"Labor Productivity","source":"https://www.bls.gov/schedule/news_release/prod2.htm"},
     {"date":"2026-11-06","time":"08:30","title":"Employment report; average hourly earnings; unemployment rate","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
     {"date":"2026-11-10","time":"08:30","title":"Consumer Price Index (CPI)","source":"https://www.bls.gov/schedule/2026/11_sched.htm"},
     {"date":"2026-11-12","time":"10:00","title":"Existing Home Sales","source":"https://www.nar.realtor/research-and-statistics/housing-statistics/existing-home-sales"},
