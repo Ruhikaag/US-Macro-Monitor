@@ -29,7 +29,7 @@ const ADDITIONAL_SERIES_SLOTS = [
 
 function tileTitle(title) {
   const text = title.toLowerCase();
-  return (text.charAt(0).toUpperCase() + text.slice(1)).replace(/\bgdp\b/gi, "GDP");
+  return (text.charAt(0).toUpperCase() + text.slice(1)).replace(/\b(gdp|cpi)\b/gi, match => match.toUpperCase());
 }
 
 function aiInvestmentProxyLabel(id) {

@@ -365,7 +365,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=ai-proxy-search-20261102"></script>
+  <script src="chart-tools.js?v=inflation-20261112"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -434,7 +434,8 @@
       let descriptor = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
       if (item?.unit === "%") {
         descriptor = descriptor.replace(/\s*\(%\s*p\.a\.\s*\)/i, "")
-          .replace(/,\s*%/g, "").replace(/\(\s*%\s*\)/g, "");
+          .replace(/,\s*%/g, "").replace(/\(\s*%\s*\)/g, "")
+          .replace(/(Y\/Y)\s*%(?:Change|Chg)/gi, "$1");
       }
       descriptor = descriptor.replace(/([^\s(])\(([^()]*)\)$/, "$1 ($2)");
       if (!item?.frequency) return descriptor;
