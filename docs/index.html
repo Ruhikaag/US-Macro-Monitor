@@ -432,6 +432,9 @@
     ];
     function tileDescriptor(item) {
       let descriptor = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
+      if (item?.id === "financial_p112brt") {
+        descriptor = descriptor.replace(/:\s*1st Exp(?:iring)? Contract/i, "");
+      }
       if (item?.unit === "%") {
         descriptor = descriptor.replace(/\s*\(%\s*p\.a\.\s*\)/i, "")
           .replace(/,\s*%/g, "").replace(/\(\s*%\s*\)/g, "")
