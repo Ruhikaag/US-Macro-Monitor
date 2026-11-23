@@ -2,7 +2,7 @@
 
 The site header and browser title use **Economics Microsite**; the Macro Monitor and Economic Forecasts tab names are unchanged.
 
-The **Other Econ Publication** tab is a placeholder for future content.
+The **Other Econ Publications** tab is a placeholder for future content.
 
 Interface text, chart labels and legends are enlarged by 1px while heading sizes and original PDF previews remain unchanged. The Haver helper matches source columns by exact series code to prevent similarly named series from being substituted.
 
