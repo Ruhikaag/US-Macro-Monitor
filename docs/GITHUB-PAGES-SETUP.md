@@ -2,7 +2,7 @@
 
 The site header and browser title use **Economics Microsite**; the Macro Monitor and Economic Forecasts tab names are unchanged.
 
-Weekly Updates has **US** and **Global** subtabs. US contains the existing US PDF updates and release calendar. Global shows a short original summary of the latest issue posted by Deloitte Insights and links to the live [Weekly Global Economic Update](https://www.deloitte.com/us/en/insights/topics/economy/global-economic-outlook/weekly-update.html#sept22). The current summary is for the week of November 9, 2026; refresh its week label and takeaways when Deloitte posts a newer issue. Deloitte restricts its article page to same-origin framing, so the microsite does not embed or reproduce the full article.
+Weekly Updates has **US** and **Global** subtabs. US contains the existing US PDF updates and release calendar. Global shows a short original summary of the latest issue posted by Deloitte Insights, credits the author Ira Kalish, and links to the live [Weekly Global Economic Update](https://www.deloitte.com/us/en/insights/topics/economy/global-economic-outlook/weekly-update.html#sept22). The current summary is for the week of November 9, 2026; refresh its week label, attribution and takeaways when Deloitte posts a newer issue. Deloitte restricts its article page to same-origin framing, so the microsite does not embed or reproduce the full article.
 
 ## Automated Weekly Updates
 
