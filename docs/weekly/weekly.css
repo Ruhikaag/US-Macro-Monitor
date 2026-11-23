@@ -1,9 +1,10 @@
 :root { color-scheme: dark; font-family: "Segoe UI", Arial, sans-serif; background: #141c19; color: #edf4f0; }
 * { box-sizing: border-box; }
-body { margin: 0; padding: 18px clamp(16px, 4vw, 56px) 32px; }
+body { margin: 0; padding: 18px clamp(16px, 4vw, 56px) 32px; font-size: 17px; }
 main { max-width: 1280px; margin: auto; }
 h2, h3 { font-family: Georgia, serif; font-weight: 400; }
 h2 { font-size: 26px; margin: 0 0 12px; }
+h3 { font-size: 1.17rem; }
 p { color: #a0b0a8; line-height: 1.6; }
 section { margin-top: 12px; }
 a { color: #63d4d8; }
@@ -13,21 +14,21 @@ button:disabled { opacity: .6; cursor: wait; }
 label { display: block; margin: 12px 0; }
 input[type="text"] { width: 100%; }
 .issue, .draft { padding: 20px; margin: 14px 0; background: #19221f; border: 1px solid #35463e; border-radius: 10px; }
-.tags { color: #a9d66b; font-size: 13px; overflow-wrap: anywhere; }
+.tags { color: #a9d66b; font-size: 14px; overflow-wrap: anywhere; }
 .chart-strip { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; }
 .chart { flex: 0 0 min(420px, 85vw); margin: 0; padding: 12px; background: #19221f; border-radius: 8px; }
 .chart img { width: 100%; display: block; background: #141c19; margin-bottom: 10px; }
-.chart figcaption { line-height: 1.4; margin-bottom: 10px; font-size: 13px; }
+.chart figcaption { line-height: 1.4; margin-bottom: 10px; font-size: 14px; }
 #pdf { width: 100%; max-width: 900px; margin: 18px auto 28px; padding: 0; border: 0; }
 #pdf img { display: block; width: 100%; height: auto; background: #141c19; }
 .pdf-page { position: relative; margin-bottom: 20px; }
 .pdf-page:last-child { margin-bottom: 0; }
 .pdf-link { position: absolute; display: block; }
 .pdf-link:hover, .pdf-link:focus-visible { outline: 2px solid #087c80; background: #087c8018; }
-.issue-description { margin: -2px 0 20px; max-width: 680px; font-size: 14px; }
+.issue-description { margin: -2px 0 20px; max-width: 680px; font-size: 15px; }
 @media (max-width: 600px) { .chart { flex-basis: 85%; } }
 .chart-expand { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
-.chart-view-label { display: block; text-align: left; color: #63d4d8; margin-bottom: 10px; font-size: 13px; }
+.chart-view-label { display: block; text-align: left; color: #63d4d8; margin-bottom: 10px; font-size: 14px; }
 .chart-expand:focus-visible { outline: 2px solid #63d4d8; outline-offset: 3px; }
 #chart-dialog { width: min(1200px, calc(100vw - 24px)); max-height: calc(100vh - 24px); padding: 20px; border: 1px solid #486054; border-radius: 10px; background: #19221f; color: #edf4f0; }
 #chart-dialog::backdrop { background: #000b; }
@@ -44,11 +45,11 @@ input[type="text"] { width: 100%; }
 .calendar-dialog-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 #release-calendar { text-align: left; }
 #release-calendar h3 { margin: 0; font-size: 21px; }
-#release-calendar p { font-size: 12px; margin: 10px 0; }
+#release-calendar p { font-size: 13px; margin: 10px 0; }
 .release-week { border-top: 1px solid #35463e; padding: 10px 0; }
 .release-week summary { cursor: pointer; font-size: 14px; }
 #release-calendar .release-day { color: #63d4d8; margin-bottom: 5px; font-weight: 600; }
-.release-event { display: grid; grid-template-columns: 65px minmax(0, 1fr); gap: 8px; margin: 6px 0; font-size: 12px; line-height: 1.5; }
+.release-event { display: grid; grid-template-columns: 65px minmax(0, 1fr); gap: 8px; margin: 6px 0; font-size: 13px; line-height: 1.5; }
 .release-event span { color: #a0b0a8; }
 .release-event a { color: #edf4f0; text-decoration: none; }
 .release-event a:hover { text-decoration: underline; }

@@ -344,7 +344,7 @@ function chartSourceText(items) {
 function appendChartSource(svg, height, curated = false) {
   const text = chartSourceText(currentChartSeries().map(view => view.item));
   const attrs = { x: curated ? 45 : 22, y: height - 12, class: "chart-source",
-    style: `fill:#ffffff;font:300 ${curated ? 16 : 12}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif` };
+    style: `fill:#ffffff;font:300 ${curated ? 17 : 13}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif` };
   if (text.length > (curated ? 90 : 110)) {
     attrs.textLength = curated ? 810 : 856;
     attrs.lengthAdjust = "spacingAndGlyphs";
@@ -672,7 +672,7 @@ function drawTrend(item) {
       ? label.slice(0, 4)
       : curated ? new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" })
         .format(new Date(`${label.slice(0, 7)}-01T00:00:00Z`)) + "-" + label.slice(2, 4) : fmtPeriod(label);
-    svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 32 : height - 40, "text-anchor": categories ? "middle" : tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
+    svg.append(svgNode("text", { x: position, y: curated ? height - margin.bottom + 31 : height - 40, "text-anchor": categories ? "middle" : tick === 0 ? "start" : tick === tickCount - 1 ? "end" : "middle", "data-axis": "x", "data-period": label, style: "fill:#ffffff" }, tickLabel));
     if (curated) svg.append(svgNode("line", { x1: position, x2: position, y1: height - margin.bottom, y2: height - margin.bottom + 7, stroke: "#ffffff" }));
   }
   if (curated) svg.append(svgNode("line", { class: "chart-baseline", x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#ffffff" }));
@@ -758,7 +758,7 @@ function drawTrend(item) {
   }
   if (curated) {
     svg.querySelectorAll("text").forEach(node => {
-      node.setAttribute("style", `fill:#ffffff;font:300 ${node.classList.contains("curated-title") ? 32 : node.classList.contains("curated-note") ? 18 : 21}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif`);
+      node.setAttribute("style", `fill:#ffffff;font:300 ${node.classList.contains("curated-title") ? 32 : node.classList.contains("curated-note") ? 19 : 22}px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif`);
     });
     svg.querySelectorAll(".series-line").forEach(node => {
       node.style.fill = "none"; node.style.strokeWidth = "5"; node.style.strokeLinejoin = "round";
@@ -830,7 +830,7 @@ function chartSvgSource() {
   const graph = svgNode("g", { transform: "translate(0 70)" });
   graph.append(...svg.childNodes);
   graph.querySelectorAll(".hover-target").forEach(node => node.remove());
-  const style = svgNode("style", {}, "#trend-chart text{fill:#b1c0b8;font:300 11px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif}#trend-chart .grid-line{stroke:#34443d;stroke-width:1}#trend-chart .series-line{fill:none;stroke:#43c5ca;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}#trend-chart .latest-point{fill:#b9fa38;stroke:#19221f;stroke-width:2}#trend-chart .image-title{fill:#edf4f0;font-size:20px}");
+  const style = svgNode("style", {}, "#trend-chart text{fill:#b1c0b8;font:300 12px 'Calibri Light',Calibri,'Segoe UI',Arial,sans-serif}#trend-chart .grid-line{stroke:#34443d;stroke-width:1}#trend-chart .series-line{fill:none;stroke:#43c5ca;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}#trend-chart .latest-point{fill:#b9fa38;stroke:#19221f;stroke-width:2}#trend-chart .image-title{fill:#edf4f0;font-size:20px}");
   svg.replaceChildren(style, svgNode("rect", { width: 900, height: 460, fill: "#19221f" }),
     svgNode("text", { x: 22, y: 28, class: "image-title" }, $("trend-title").textContent),
     svgNode("text", { x: 22, y: 50 }, $("trend-subtitle").textContent), graph);
