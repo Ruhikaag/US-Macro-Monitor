@@ -220,9 +220,27 @@
     .tab-placeholder p { margin: 8px 0 0; color: #a0b0a8; font-size: 13px; }
     .forecast-panel { max-width: none; padding: 0; }
     .forecast-frame { display: block; width: 100%; height: max(680px, calc(100vh - 112px)); border: 0; background: #141c19; }
+    .weekly-subtabs { display: flex; gap: 4px; overflow-x: auto; padding: 8px max(20px, calc((100vw - 1400px)/2)); background: #141c19; border-bottom: 1px solid #2a3932; }
+    .weekly-subtab { flex: 0 0 auto; border: 0; border-bottom: 2px solid transparent; padding: 10px 14px 8px; background: transparent; color: #a0b0a8; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .weekly-subtab:hover { background: #202d27; color: #edf4f0; }
+    .weekly-subtab[aria-selected="true"] { border-bottom-color: var(--green); background: #1c2822; color: #f3f8f4; }
+    .weekly-subtab:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+    .weekly-global-panel { min-height: max(520px, calc(100vh - 165px)); padding: clamp(24px, 5vw, 64px) 26px; background: #101714; }
+    .global-update-source { max-width: 760px; margin: 0 auto; border: 1px solid #34443d; border-left: 4px solid #86bc25; border-radius: 8px; padding: clamp(24px, 4vw, 40px); background: #19221f; }
+    .global-update-source .eyebrow { margin-bottom: 10px; }
+    .global-update-source h2 { margin: 0; color: #edf4f0; font: 400 clamp(27px, 4vw, 38px)/1.15 Georgia, serif; }
+    .global-update-source p:not(.eyebrow) { margin: 14px 0 20px; color: #c1cec7; font-size: 14px; line-height: 1.65; }
+    .global-update-date { margin: 10px 0 0 !important; color: #9bcf48 !important; font-size: 11px !important; font-weight: 700; }
+    .global-update-summary { margin: 22px 0; }
+    .global-update-summary h3 { margin: 0 0 10px; color: #edf4f0; font-size: 13px; }
+    .global-update-summary ul { display: grid; gap: 10px; margin: 0; padding-left: 20px; color: #c1cec7; font-size: 13px; line-height: 1.6; }
+    .global-update-summary li::marker { color: #86bc25; }
+    .global-update-link { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #00a3ad; border-radius: 999px; padding: 11px 16px; background: #173b3c; color: #f3f8f4; font-size: 12px; font-weight: 700; text-decoration: none; }
+    .global-update-link:hover { border-color: #86bc25; background: #203d35; }
+    .global-update-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
     @media (max-width: 950px) { .workspace-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; } .workspace { padding-inline: 18px; } .headline-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 720px) {
-      .primary-tabs { gap: 0; padding-inline: 12px; } .primary-tab { padding-inline: 10px; font-size: 11px; }
+      .primary-tabs, .weekly-subtabs { gap: 0; padding-inline: 12px; } .primary-tab { padding-inline: 10px; font-size: 11px; } .weekly-subtab { padding-inline: 10px; font-size: 11px; }
       .masthead { padding: 12px 15px; gap: 10px; } .brand { min-width: 0; } .head-actions { margin-left: auto; gap: 10px; }
       .hero { padding: 39px 22px 42px; } .hero-copy { max-width: 480px; }
       .headline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 22px; }
@@ -322,7 +340,29 @@
     <iframe class="forecast-frame" id="forecasts-frame" src="forecasts/index.html" title="Economic Forecasts workspace" loading="lazy"></iframe>
   </section>
   <section class="tab-placeholder forecast-panel" id="panel-weekly" role="tabpanel" aria-labelledby="tab-weekly" hidden>
-    <iframe class="forecast-frame" src="weekly/index.html?v=20261105-white-logo" title="Weekly economic updates" loading="lazy"></iframe>
+    <nav class="weekly-subtabs" role="tablist" aria-label="Weekly Update editions">
+      <button class="weekly-subtab" id="weekly-us-tab" type="button" role="tab" aria-selected="true" aria-controls="weekly-us-panel" tabindex="0">US</button>
+      <button class="weekly-subtab" id="weekly-global-tab" type="button" role="tab" aria-selected="false" aria-controls="weekly-global-panel" tabindex="-1">Global</button>
+    </nav>
+    <section id="weekly-us-panel" role="tabpanel" aria-labelledby="weekly-us-tab">
+      <iframe class="forecast-frame" id="weekly-us-frame" src="weekly/index.html?v=20261105-white-logo" title="Weekly US economic updates" loading="lazy"></iframe>
+    </section>
+    <section class="weekly-global-panel" id="weekly-global-panel" role="tabpanel" aria-labelledby="weekly-global-tab" hidden>
+      <div class="global-update-source">
+        <p class="eyebrow">Deloitte Insights</p>
+        <h2>Weekly Global Economic Update</h2>
+        <p class="global-update-date" id="weekly-global-date">Week of November 9, 2026</p>
+        <section class="global-update-summary" id="weekly-global-summary" aria-labelledby="weekly-global-summary-title">
+          <h3 id="weekly-global-summary-title">Key takeaways</h3>
+          <ul>
+            <li>US employment grew strongly in October and unemployment fell; wage growth eased while private healthcare-benefit costs accelerated.</li>
+            <li>Eurozone inflation accelerated, while the Bank of England raised rates and markets saw greater odds of tighter European Central Bank policy.</li>
+            <li>The update highlights major AI investment in both the US and China and renewed global nuclear construction amid rising electricity demand.</li>
+          </ul>
+        </section>
+        <a class="global-update-link" id="weekly-global-link" href="https://www.deloitte.com/us/en/insights/topics/economy/global-economic-outlook/weekly-update.html#sept22" target="_blank" rel="noopener noreferrer">Open the latest update on Deloitte Insights <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
   </section>
   <section class="tab-placeholder" id="panel-publications" role="tabpanel" aria-labelledby="tab-publications" hidden>
     <h2>DI Publications</h2><p>Content will be added later.</p>
@@ -393,6 +433,30 @@
       });
     });
     selectPrimaryTab($("tab-glance"));
+    const weeklyEditionTabs = [...document.querySelectorAll(".weekly-subtab")];
+    function selectWeeklyEdition(selectedTab, focus = false) {
+      for (const tab of weeklyEditionTabs) {
+        const isSelected = tab === selectedTab;
+        tab.setAttribute("aria-selected", String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        $(tab.getAttribute("aria-controls")).hidden = !isSelected;
+      }
+      if (focus) selectedTab.focus();
+    }
+    weeklyEditionTabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => selectWeeklyEdition(tab));
+      tab.addEventListener("keydown", event => {
+        let nextIndex = null;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % weeklyEditionTabs.length;
+        else if (event.key === "ArrowLeft") nextIndex = (index - 1 + weeklyEditionTabs.length) % weeklyEditionTabs.length;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = weeklyEditionTabs.length - 1;
+        if (nextIndex !== null) {
+          event.preventDefault();
+          selectWeeklyEdition(weeklyEditionTabs[nextIndex], true);
+        }
+      });
+    });
     const fmt = (value, style = "decimal1") => {
       if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
       let n = Number(value);

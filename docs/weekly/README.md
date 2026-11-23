@@ -2,6 +2,10 @@
 
 The dashboard embeds this folder's `index.html`. The public page reads published issues from `issues.json`; unpublished drafts are never included in the repository. **Download PDF** returns the unchanged original document. Latest-issue metadata shows the date, without indicator tags or introductory copy. Charts have one caption each; **Download PNG** returns a separate original-color plot crop without the figure caption or source footer. The expandable Archive lists clickable issue titles/dates alongside covered indicators.
 
+## Dashboard editions
+
+The dashboard's Weekly Updates tab has **US** and **Global** subtabs. The US edition contains this existing page, including its weekly PDF archive and Data Release Calendar. The Global edition shows an original three-point summary of Deloitte Insights' latest posted [Weekly Global Economic Update](https://www.deloitte.com/us/en/insights/topics/economy/global-economic-outlook/weekly-update.html#sept22) and links to the full article. The current summary covers the week of November 9, 2026; update its week label and takeaways when Deloitte posts a newer issue. Deloitte sets same-origin framing restrictions on the article, so the full content is not copied or embedded here.
+
 ## Weekly workflow
 
 The displayed top-left Deloitte raster wordmark uses white lettering on transparency, preserving the original green dot. Its neutral pixels are remapped with alpha antialiasing; only the current document template's wide header logo is targeted. Original PDF assets and other raster illustrations are unchanged.

@@ -2,6 +2,8 @@
 
 The site header and browser title use **Economics Microsite**; the Macro Monitor and Economic Forecasts tab names are unchanged.
 
+Weekly Updates has **US** and **Global** subtabs. US contains the existing US PDF updates and release calendar. Global shows a short original summary of the latest issue posted by Deloitte Insights and links to the live [Weekly Global Economic Update](https://www.deloitte.com/us/en/insights/topics/economy/global-economic-outlook/weekly-update.html#sept22). The current summary is for the week of November 9, 2026; refresh its week label and takeaways when Deloitte posts a newer issue. Deloitte restricts its article page to same-origin framing, so the microsite does not embed or reproduce the full article.
+
 ## Automated Weekly Updates
 
 As authorized November 6, 2026, the configured helper now checks the watched PDF folder on Mondays and Thursdays at 22:00 India Standard Time and automatically publishes new/changed readable issues without manual approval. Latest issue uses the filename month/day and the year printed in the PDF, never the folder-added or modification date. If the PC is off, it performs the most recent missed check after the helper next starts at sign-in. This supersedes the earlier Monday-only schedule and minute-by-minute/manual-approval workflow below for this configured installation. The local persisted schedule prevents daily scans/retries. Only public-ready documents belong in the watched folder. See [Weekly Updates workflow](weekly/README.md) for scheduling, failure handling and the optional legacy manual mode.
