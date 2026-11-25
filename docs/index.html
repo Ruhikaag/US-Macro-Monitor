@@ -735,9 +735,11 @@
       } else {
         for (const id of theme.indicator_ids) {
           const item = data.indicators?.[id];
-          const heading = theme.id === "real_economy" || theme.id === "inflation" || (theme.id === "investments" && id === "investment_fnh")
-            ? TILE_HEADING_OVERRIDES[id] : undefined;
-          if (item) cards.append(renderCard(item, heading));
+          if (!item) continue;
+          const heading = theme.id === "labor_market" ? item.title.replace(/\s*\(NSA\)/gi, "")
+            : theme.id === "real_economy" || theme.id === "inflation" || (theme.id === "investments" && id === "investment_fnh")
+              ? TILE_HEADING_OVERRIDES[id] : undefined;
+          cards.append(renderCard(item, heading));
         }
       }
     }
