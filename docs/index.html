@@ -484,11 +484,11 @@
     let lastCheckedAt = null;
     const HEADLINE_TILES = [
       { id: "headline_real_gdp", title: "Real GDP", comparison: "quarterly" },
-      { id: "investment_fnh", title: "Real private nonresidential fixed investment", comparison: "quarterly" },
-      { id: "headline_corporate_profits", title: "Corporate profits with IVA and CCAdj", comparison: "quarterly" },
+      { id: "investment_fnh", title: "Business investment", comparison: "quarterly" },
+      { id: "headline_corporate_profits", title: "Corporate profits", comparison: "quarterly" },
       { id: "headline_consumer_spending", title: "Real consumer spending", comparison: "quarterly" },
       { id: "headline_pce_inflation", title: "PCE inflation", comparison: "monthly_yoy" },
-      { id: "headline_payroll_change", title: "Change in nonfarm payroll employment", comparison: "monthly_level" },
+      { id: "headline_payroll_change", title: "Nonfarm payroll employment", comparison: "monthly_level" },
       { id: "unemployment", title: "Unemployment rate", comparison: "monthly_level" },
       { id: "headline_federal_funds", title: "Federal funds rate", comparison: "weekly_prior" },
       { id: "financial_fcm10", title: "10-year Treasury yield", comparison: "weekly_change" },
@@ -573,7 +573,7 @@
       for (const tile of HEADLINE_TILES) {
         const item = data.indicators?.[tile.id];
         const card = document.createElement("article"); card.className = "indicator-card headline-card"; card.tabIndex = 0; card.setAttribute("role", "button");
-        const titleText = ["headline_pce_inflation", "headline_corporate_profits", "financial_sp500", "financial_spna"].includes(tile.id) ? tile.title : tileTitle(tile.title);
+        const titleText = ["headline_pce_inflation", "financial_sp500", "financial_spna"].includes(tile.id) ? tile.title : tileTitle(tile.title);
         card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${titleText} chart`);
         const head = document.createElement("div"); head.className = "card-head";
         const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
