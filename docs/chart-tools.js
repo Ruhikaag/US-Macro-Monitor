@@ -5,12 +5,12 @@ const CURATED_COMBO_CHARTS = [
   { id: "unemployment-age-groups", title: "Unemployment Rates", unit: "Percent",
     indicatorIds: ["combo_unemployment_20_24", "combo_unemployment_25_54"],
     labels: ["20-24 Years", "25-54 Years"], colors: ["#006b3c", "#86bc25"], connectMissing: true,
-    from: "2016-01-01", low: "0", high: "12", interval: "2", decimals: "0", xInterval: "12" },
+    from: "2016-01-01", low: "0", high: "12", interval: "2", decimals: "", xInterval: "12" },
   { id: "average-earnings-growth", title: "Average Earnings Growth", unit: "Y/Y % change, 3MMA, private sector",
     note: "3MMA is the 3-month moving average.",
     indicatorIds: ["consumer_lktpriva", "consumer_letpriva"], measure: "yoy", threeMonthAverage: true,
     labels: ["Weekly Earnings", "Hourly Earnings"], colors: ["#86bc25", "#006b3c"],
-    from: "2024-01-01", low: "2.5", high: "4.5", interval: "1", decimals: "1", xInterval: "4", percentLabels: true },
+    from: "2024-01-01", low: "2.5", high: "4.5", interval: "1", decimals: "", xInterval: "4", percentLabels: true },
   { id: "job-openings-hiring", title: "Job Openings and Hiring Rates", unit: "Percent",
     indicatorIds: ["combo_hiring_rate", "combo_job_openings_rate"], measure: "level",
     labels: ["Hiring Rate", "Openings Rate"], colors: ["#86bc25", "#006b3c"],
@@ -18,7 +18,7 @@ const CURATED_COMBO_CHARTS = [
   { id: "employment-surveys", title: "Employment Growth by Survey", unit: "3-mo CAGR, %",
     indicatorIds: ["combo_establishment_employment", "combo_household_employment"], measure: "cagr3", type: "column",
     labels: ["Establishment survey", "Household survey"], colors: ["#86bc25", "#006b3c"],
-    from: "2026-02-01", low: "-3.5", high: "", interval: "0.5", decimals: "1", xInterval: "1",
+    from: "2026-02-01", low: "-3.5", high: "", interval: "0.5", decimals: "", xInterval: "1",
     percentLabels: true, categories: true, valueLabels: true, legendStart: 180, legendGap: 350 },
 ];
 const CHART_SERIES_COLORS = ["#00a3ad", "#86bc25", "#63666a", "#ffcd00"];
@@ -316,11 +316,22 @@ function axisTicks(view) {
   return Array.from({ length: count }, (_, index) => Number((view.low + index * view.interval).toPrecision(15)));
 }
 
-function axisTickLabel(value, view, valueStyle) {
+function axisTickLabel(value, view) {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: view.decimals ?? view.digits,
-    minimumFractionDigits: view.decimals ?? (valueStyle === "decimal2" ? 2 : 0),
+    minimumFractionDigits: view.decimals ?? 0,
   }).format(value);
+}
+
+function axisTickLabels(view) {
+  const values = axisTicks(view);
+  let digits = view.digits;
+  while (true) {
+    const labels = values.map(value => axisTickLabel(value, { ...view, digits }));
+    if (view.decimals !== null || new Set(labels).size === labels.length) return labels;
+    if (digits >= 20) throw new Error("Y-axis tick labels require more precision. Choose a larger interval.");
+    digits++;
+  }
 }
 
 function axisTickNode(label, attrs) {
@@ -559,6 +570,14 @@ function spaceChartText(svg, bounds = null, baselines = []) {
   }
   const overlaps = (a, b, gap = 4) => a.x < b.x + b.width + gap && a.x + a.width + gap > b.x &&
     a.y < b.y + b.height + gap && a.y + a.height + gap > b.y;
+  for (const tick of svg.querySelectorAll('[data-axis="left"], [data-axis="right"]')) {
+    const box = tick.getBBox(), x = Number(tick.getAttribute("x"));
+    const available = tick.dataset.axis === "left" ? x - 2 : svg.viewBox.baseVal.width - x - 2;
+    if (box.width > available && available > 0) {
+      tick.setAttribute("textLength", available);
+      tick.setAttribute("lengthAdjust", "spacingAndGlyphs");
+    }
+  }
   for (const side of ["left", "right", "x", "date"]) {
     const ticks = [...svg.querySelectorAll(`[data-axis="${side}"]`)];
     const kept = [];
@@ -629,7 +648,6 @@ function drawTrend(item) {
     : timeScale
     ? margin.left + (date(seriesRows[index], seriesItem) - firstDate) * plotW / Math.max(lastDate - firstDate, 1)
     : margin.left + index * plotW / Math.max(rows.length - 1, 1);
-  const valueStyle = item.chart_value_style || (Math.abs(high - low) > 100 ? "decimal0" : "decimal1");
   if (multiple) {
     for (const [index, view] of seriesViews.entries()) {
       const color = view.color;
@@ -651,13 +669,15 @@ function drawTrend(item) {
     }
   }
   for (const [side, axis] of Object.entries(chartView.axes)) {
-    for (const value of axisTicks(axis).reverse()) {
+    const values = axisTicks(axis);
+    const labels = axisTickLabels(axis);
+    for (let index = values.length - 1; index >= 0; index--) {
+      const value = values[index];
       const yy = margin.top + (axis.high - value) * plotH / (axis.high - axis.low);
       if (!multiple && (side === "left" || !chartView.axes.left)) svg.append(svgNode("line", {
         x1: margin.left, x2: width - margin.right, y1: yy, y2: yy, class: "grid-line",
       }));
-      const label = axisTickLabel(value, axis, curated ? "decimal1" : axis.item.chart_value_style || valueStyle) +
-        (activeComboPreset?.percentLabels ? "%" : "");
+      const label = labels[index] + (activeComboPreset?.percentLabels ? "%" : "");
       svg.append(axisTickNode(label, { x: side === "left" ? margin.left - 10 : width - margin.right + 12, y: yy + 4,
         "text-anchor": side === "left" ? "end" : "start", "data-axis": side, style: "fill:#ffffff" }));
     }
@@ -718,7 +738,7 @@ function drawTrend(item) {
         bar.append(svgNode("title", {}, `${seriesItem.title} · ${fmtPeriod(point.period)}: ${fmt(point.value, seriesStyle)} ${seriesItem.chart_unit || seriesItem.unit}`));
         plot.append(bar);
         if (activeComboPreset?.valueLabels) {
-          const label = axisTickLabel(Math.abs(value) < .05 ? 0 : value, { ...view, decimals: 1 }, "decimal1") + "%";
+          const label = axisTickLabel(Math.abs(value) < .05 ? 0 : value, { ...view, decimals: 1 }) + "%";
           valueLabels.append(svgNode("text", {
             x: seriesX(index) + offset, y: value >= 0 ? yy - 12 : yy + 24,
             "text-anchor": "middle", class: "column-value", "data-series": seriesIndex,
@@ -790,10 +810,11 @@ function drawHorizontalBars(svg) {
     svg.append(svgNode("text", { x: margin.left - 10, y: (ticks ? yDate(ticks[tick]) : y(index)) + 4,
       "text-anchor": "end", "data-axis": "date", "data-period": label, style: "fill:#ffffff" }, fmtPeriod(label)));
   }
-  for (const value of axisTicks(view)) {
+  const values = axisTicks(view), labels = axisTickLabels(view);
+  for (const [index, value] of values.entries()) {
     const xx = x(value);
     svg.append(svgNode("line", { x1: xx, x2: xx, y1: margin.top, y2: margin.top + height, class: "grid-line" }));
-    svg.append(axisTickNode(axisTickLabel(value, view, item.chart_value_style), { x: xx, y: 350,
+    svg.append(axisTickNode(labels[index], { x: xx, y: 350,
       "text-anchor": value === low ? "start" : value === high ? "end" : "middle", "data-axis": "value", style: "fill:#ffffff" }));
   }
   const defs = svgNode("defs"), clip = svgNode("clipPath", { id: "chart-plot-clip" });
