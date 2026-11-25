@@ -496,6 +496,11 @@
       { id: "financial_spna", title: "NASDAQ Composite", comparison: "weekly_change" },
       { id: "financial_p112brt", title: "Brent crude oil futures price", comparison: "weekly_change" },
     ];
+    const NATIONAL_ACCOUNTS_HEADINGS = {
+      headline_consumer_spending: "Consumer spending",
+      investment_fnh: "Business investment",
+      government_consumption_investment: "Government spending and investment",
+    };
     function tileDescriptor(item) {
       let descriptor = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
       if (item?.id === "financial_p112brt") {
@@ -634,14 +639,14 @@
         nav.append(button);
       }
     }
-    function renderCard(item) {
+    function renderCard(item, heading = item.title) {
       const card = document.createElement("article");
       card.className = "indicator-card"; card.tabIndex = 0; card.setAttribute("role", "button");
       card.dataset.indicatorId = item.id;
-      card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tileTitle(item.title)} chart`);
+      card.setAttribute("aria-haspopup", "dialog"); card.setAttribute("aria-label", `Open ${tileTitle(heading)} chart`);
       const head = document.createElement("div"); head.className = "card-head";
       const titleGroup = document.createElement("div"); titleGroup.className = "card-title-group";
-      const title = document.createElement("h3"); title.textContent = tileTitle(item.title);
+      const title = document.createElement("h3"); title.textContent = tileTitle(heading);
       const descriptor = document.createElement("span"); descriptor.className = "card-descriptor"; descriptor.textContent = tileDescriptor(item);
       titleGroup.append(title, descriptor);
       const period = document.createElement("span"); period.className = "card-period"; period.textContent = item.period_label || fmtPeriod(item.period);
@@ -727,7 +732,7 @@
       } else {
         for (const id of theme.indicator_ids) {
           const item = data.indicators?.[id];
-          if (item) cards.append(renderCard(item));
+          if (item) cards.append(renderCard(item, theme.id === "real_economy" ? NATIONAL_ACCOUNTS_HEADINGS[id] : undefined));
         }
       }
     }
