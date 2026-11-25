@@ -1,5 +1,6 @@
 let chartView = null;
 let activeComboPreset = null;
+const DEFAULT_CHART_START = "2023-01-01";
 const CURATED_COMBO_CHARTS = [
   { id: "unemployment-age-groups", title: "Unemployment Rates", unit: "Percent",
     indicatorIds: ["combo_unemployment_20_24", "combo_unemployment_25_54"],
@@ -401,7 +402,8 @@ function openTrend(item, preset = null, showDialog = true) {
   refreshComboIndicatorOptions();
   const available = exportPoints(item).filter(point => point.value !== null && Number.isFinite(Number(point.value)));
   for (const id of ["chart-from", "chart-to"]) {
-    $(id).min = available.length ? periodBounds(available[0], item.frequency_code)[0] : "";
+    const first = available.length ? periodBounds(available[0], item.frequency_code)[0] : "";
+    $(id).min = first && !preset && first > DEFAULT_CHART_START ? DEFAULT_CHART_START : first;
     $(id).max = available.length ? periodBounds(available[available.length - 1], item.frequency_code)[1] : "";
   }
   resetChartAxes();
@@ -423,8 +425,10 @@ function resetChartAxes() {
   $("chart-right-min").value = ""; $("chart-right-max").value = "";
   $("chart-measure").value = activeChartItem.default_chart_measure || "current";
   const rows = activeChartItem.history || [];
-  $("chart-from").value = rows.length ? periodBounds(rows[0], activeChartItem.frequency_code)[0] : "";
   $("chart-to").value = rows.length ? periodBounds(rows[rows.length - 1], activeChartItem.frequency_code)[1] : "";
+  $("chart-from").value = rows.length
+    ? $("chart-to").value >= DEFAULT_CHART_START ? DEFAULT_CHART_START : periodBounds(rows[0], activeChartItem.frequency_code)[0]
+    : "";
   $("chart-min").value = "";
   $("chart-max").value = "";
   $("chart-decimals").value = "";
