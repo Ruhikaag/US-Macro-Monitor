@@ -500,6 +500,9 @@
       headline_consumer_spending: "Consumer spending",
       investment_fnh: "Business investment",
       government_consumption_investment: "Government spending and investment",
+      inflation_pcuy: "Consumer price index (CPI)",
+      headline_pce_inflation: "Personal consumption expenditures (PCE) inflation",
+      inflation_pa4: "Producer price index (PPI): final demand",
     };
     function tileDescriptor(item) {
       let descriptor = item?.descriptor || (item?.error ? "Series unavailable" : "Economic data");
@@ -732,7 +735,7 @@
       } else {
         for (const id of theme.indicator_ids) {
           const item = data.indicators?.[id];
-          const heading = theme.id === "real_economy" || (theme.id === "investments" && id === "investment_fnh")
+          const heading = theme.id === "real_economy" || theme.id === "inflation" || (theme.id === "investments" && id === "investment_fnh")
             ? TILE_HEADING_OVERRIDES[id] : undefined;
           if (item) cards.append(renderCard(item, heading));
         }
