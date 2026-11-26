@@ -10,6 +10,7 @@ function updatePDFPreview(image) {
 }
 document.addEventListener("microsite-appearance-change", () => {
   byId("pdf").querySelectorAll("img").forEach(updatePDFPreview);
+  document.querySelectorAll(".chart-expand img").forEach(updateChartThumbnail);
 });
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -51,7 +52,9 @@ byId("chart-large").addEventListener("error", () => {
 function chartCard(issue, chart, selectable = false) {
   const card = element("figure", "", "chart");
   const image = element("img");
-  image.src = `${asset(issue, chart.file)}?v=20261104-clean`;
+  image.dataset.darkSrc = `${asset(issue, chart.file)}?v=20261104-clean`;
+  image.dataset.lightSrc = `${asset(issue, chart.download || chart.preview || chart.file)}?v=20261104-clean`;
+  updateChartThumbnail(image);
   image.alt = chart.title;
   image.loading = "lazy";
   const expand = element("button", "", "chart-expand");
@@ -70,6 +73,9 @@ function chartCard(issue, chart, selectable = false) {
     label.prepend(check); card.append(label);
   }
   return card;
+}
+function updateChartThumbnail(image) {
+  image.src = document.documentElement.dataset.appearance === "light" ? image.dataset.lightSrc : image.dataset.darkSrc;
 }
 function themePDFVector(svg) {
   const document = new DOMParser().parseFromString(svg, "image/svg+xml");

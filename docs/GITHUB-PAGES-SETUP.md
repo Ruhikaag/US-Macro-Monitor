@@ -4,6 +4,8 @@ The site header and browser title use **Economics Microsite**; the Macro Monitor
 
 The header's Light | Dark buttons and Small/Medium/Large text selector apply across the microsite and are saved in the browser. Dark and Medium are the defaults. Text sizes scale the layout, including tiles and embedded pages. Weekly PDF pages show their original white preview in Light and the existing dark preview in Dark; downloads remain unchanged. Curated chart designs retain their dark background.
 
+Indicator tiles use one consistent green-accented design within each appearance mode. The AI-investment proxy labels have a gently pulsing indicator, disabled when reduced motion is requested. In Light mode, Weekly chart thumbnails use the original white plot when available, the archive filter uses light colors, and the US watermark is teal; chart and PDF downloads are unchanged.
+
 The **Other Econ Publications** tab is a placeholder for future content.
 
 Interface text, chart labels and legends are enlarged by 1px while heading sizes and original PDF previews remain unchanged. The Haver helper matches source columns by exact series code to prevent similarly named series from being substituted.
