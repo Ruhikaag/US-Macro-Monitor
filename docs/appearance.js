@@ -37,7 +37,7 @@
         const link = doc.createElement("link");
         link.id = "microsite-appearance-style";
         link.rel = "stylesheet";
-        link.href = new URL("appearance.css?v=20261126-3", document.baseURI).href;
+        link.href = new URL("appearance.css?v=20261126-4", document.baseURI).href;
         link.addEventListener("error", () => {
           console.error("Could not load appearance styles in", frame.title);
           controls.status.textContent = "Appearance could not be applied to an embedded page.";
