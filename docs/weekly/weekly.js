@@ -3,6 +3,14 @@ const localReview = location.hostname === "127.0.0.1" || location.hostname === "
 let reviewToken = "";
 let publishedIssues = [];
 const byId = id => document.getElementById(id);
+const pdfPreviews = new WeakMap();
+function updatePDFPreview(image) {
+  const previews = pdfPreviews.get(image);
+  if (previews) image.src = document.documentElement.dataset.appearance === "light" ? previews.light : previews.dark;
+}
+document.addEventListener("microsite-appearance-change", () => {
+  byId("pdf").querySelectorAll("img").forEach(updatePDFPreview);
+});
 function element(tag, text, className) {
   const node = document.createElement(tag);
   if (text) node.textContent = text;
@@ -122,8 +130,11 @@ async function loadPDFPreview(image, url) {
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`PDF preview unavailable (HTTP ${response.status}).`);
-    const svg = await themePDFLogo(themePDFVector(await response.text()));
-    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    const original = await response.text();
+    const themed = await themePDFLogo(themePDFVector(original));
+    const uri = svg => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    pdfPreviews.set(image, { light: uri(original), dark: uri(themed) });
+    updatePDFPreview(image);
   } catch (error) {
     if (!image.isConnected) return;
     byId("status").textContent = `${error.message} Download PDF still provides the original document.`;

@@ -287,11 +287,18 @@
     @media (max-width: 480px) { #panel-glance .headline-grid { grid-template-columns: 1fr; } }
     @media (max-width: 720px) { .glance-intro h1 { font-size: 46px; } }
   </style>
+  <link rel="stylesheet" href="appearance.css?v=20261126-2">
+  <script src="appearance.js?v=20261126-2" defer></script>
 </head>
 <body>
   <header class="masthead">
     <div class="brand-mark" aria-hidden="true"></div>
     <div class="brand"><strong>ECONOMICS MICROSITE</strong></div>
+    <div class="appearance-controls">
+      <div class="appearance-view"><span>View</span><div class="appearance-toggle" role="group" aria-label="View"><button id="appearance-light" type="button" aria-pressed="false">Light</button><button id="appearance-dark" type="button" aria-pressed="true">Dark</button></div></div>
+      <label>Text size <select id="appearance-size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></label>
+      <span class="appearance-status" id="appearance-status" role="status" hidden></span>
+    </div>
     <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="search" type="button" aria-haspopup="dialog">Search</button><button class="text-button" id="refresh" type="button">Check updates</button></div>
   </header>
   <nav class="primary-tabs" role="tablist" aria-label="Dashboard sections">
@@ -339,7 +346,7 @@
       <button class="weekly-subtab" id="weekly-global-tab" type="button" role="tab" aria-selected="false" aria-controls="weekly-global-panel" tabindex="-1">Global</button>
     </nav>
     <section id="weekly-us-panel" role="tabpanel" aria-labelledby="weekly-us-tab">
-      <iframe class="forecast-frame" id="weekly-us-frame" src="weekly/index.html?v=20261123-typography" title="Weekly US economic updates" loading="lazy"></iframe>
+      <iframe class="forecast-frame" id="weekly-us-frame" src="weekly/index.html?v=20261126-appearance" title="Weekly US economic updates" loading="lazy"></iframe>
     </section>
     <section class="weekly-global-panel" id="weekly-global-panel" role="tabpanel" aria-labelledby="weekly-global-tab" hidden>
       <div class="global-update-source">
