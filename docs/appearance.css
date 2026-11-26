@@ -9,7 +9,6 @@ html[data-font-size="large"] { zoom: 1.1; }
 .appearance-controls select:focus-visible, .appearance-toggle button:focus-visible { outline: 2px solid #43c5ca; outline-offset: -2px; }
 .appearance-status { color: #ffc5c0; font-size: 11px; }
 .ai-proxy-badge { border-color: #007c83; color: #001f21; background: #43c5ca; font-weight: 700; box-shadow: 0 0 0 0 #b9ed5000; animation: proxy-pulse 1.8s ease-in-out infinite; }
-.ai-proxy-badge::before { content: ""; flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%; background: #00585c; }
 @keyframes proxy-pulse { 50% { background-color: #b9ed50; border-color: #689c12; box-shadow: 0 0 12px 2px #b9ed50aa; } }
 @media (prefers-reduced-motion: reduce) { .ai-proxy-badge { animation: none; } }
 html:not([data-appearance="light"]) :is(#cards, #headline-grid) .indicator-card { --theme-accent: #43c5ca; --theme-tint: #203639; background: linear-gradient(132deg, #273d40, #19292c 100%); border-color: #4b7073; border-top-color: #43c5ca; border-left-color: #4b7073; box-shadow: 0 5px 18px #0004; }
