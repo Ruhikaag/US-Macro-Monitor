@@ -210,7 +210,8 @@
     #trend-chart text { fill: #b1c0b8; }
     #trend-chart .grid-line { stroke: #34443d; }
     #trend-chart .series-line { stroke: #43c5ca; }
-    .primary-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 8px max(20px, calc((100vw - 1400px)/2)); background: #141c19; border-bottom: 1px solid #2a3932; scrollbar-width: thin; }
+    .primary-bar { display: flex; align-items: center; gap: 12px; padding: 8px max(20px, calc((100vw - 1400px)/2)); background: #141c19; border-bottom: 1px solid #2a3932; }
+    .primary-tabs { display: flex; flex: 1 1 auto; min-width: 0; gap: 4px; overflow-x: auto; scrollbar-width: thin; }
     .primary-tab { flex: 0 0 auto; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 12px 14px 10px; background: transparent; color: #a0b0a8; font-size: 13px; font-weight: 700; text-align: left; white-space: nowrap; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
     .primary-tab:hover { background: #202d27; color: #edf4f0; }
     .primary-tab[aria-selected="true"] { border-bottom-color: var(--green); background: #1c2822; color: #f3f8f4; }
@@ -240,7 +241,7 @@
     .global-update-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
     @media (max-width: 950px) { .workspace-layout { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; } .workspace { padding-inline: 18px; } .headline-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 720px) {
-      .primary-tabs, .weekly-subtabs { gap: 0; padding-inline: 12px; } .primary-tab { padding-inline: 10px; font-size: 12px; } .weekly-subtab { padding-inline: 10px; font-size: 12px; }
+      .primary-bar { gap: 8px; padding-inline: 12px; } .primary-tabs { gap: 0; } .weekly-subtabs { gap: 0; padding-inline: 12px; } .primary-tab { padding-inline: 10px; font-size: 12px; } .weekly-subtab { padding-inline: 10px; font-size: 12px; }
       .masthead { padding: 12px 15px; gap: 10px; } .brand { min-width: 0; } .head-actions { margin-left: auto; gap: 10px; }
       .hero { padding: 39px 22px 42px; } .hero-copy { max-width: 480px; }
       .headline-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 22px; }
@@ -287,8 +288,8 @@
     @media (max-width: 480px) { #panel-glance .headline-grid { grid-template-columns: 1fr; } }
     @media (max-width: 720px) { .glance-intro h1 { font-size: 46px; } }
   </style>
-  <link rel="stylesheet" href="appearance.css?v=20261126-7">
-  <script src="appearance.js?v=20261126-7" defer></script>
+  <link rel="stylesheet" href="appearance.css?v=20261126-8">
+  <script src="appearance.js?v=20261126-8" defer></script>
 </head>
 <body>
   <header class="masthead">
@@ -296,18 +297,20 @@
     <div class="brand"><strong>ECONOMICS MICROSITE</strong></div>
     <div class="appearance-controls">
       <div class="appearance-view"><span>View</span><div class="appearance-toggle" role="group" aria-label="View"><button id="appearance-light" type="button" aria-pressed="false">Light</button><button id="appearance-dark" type="button" aria-pressed="true">Dark</button></div></div>
-      <label>Text size <select id="appearance-size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></label>
       <span class="appearance-status" id="appearance-status" role="status" hidden></span>
     </div>
     <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="search" type="button" aria-haspopup="dialog">Search</button></div>
   </header>
-  <nav class="primary-tabs" role="tablist" aria-label="Dashboard sections">
-    <button class="primary-tab" id="tab-glance" type="button" role="tab" aria-selected="false" aria-controls="panel-glance" tabindex="-1">Economy at a Glance</button>
-    <button class="primary-tab" id="tab-monitor" type="button" role="tab" aria-selected="true" aria-controls="panel-monitor" tabindex="0">Macro Monitor</button>
-    <button class="primary-tab" id="tab-forecasts" type="button" role="tab" aria-selected="false" aria-controls="panel-forecasts" tabindex="-1">Economic Forecasts</button>
-    <button class="primary-tab" id="tab-weekly" type="button" role="tab" aria-selected="false" aria-controls="panel-weekly" tabindex="-1">Weekly Updates</button>
-    <button class="primary-tab" id="tab-publications" type="button" role="tab" aria-selected="false" aria-controls="panel-publications" tabindex="-1">Other Econ Publications</button>
-  </nav>
+  <div class="primary-bar">
+    <nav class="primary-tabs" role="tablist" aria-label="Dashboard sections">
+      <button class="primary-tab" id="tab-glance" type="button" role="tab" aria-selected="false" aria-controls="panel-glance" tabindex="-1">Economy at a Glance</button>
+      <button class="primary-tab" id="tab-monitor" type="button" role="tab" aria-selected="true" aria-controls="panel-monitor" tabindex="0">Macro Monitor</button>
+      <button class="primary-tab" id="tab-forecasts" type="button" role="tab" aria-selected="false" aria-controls="panel-forecasts" tabindex="-1">Economic Forecasts</button>
+      <button class="primary-tab" id="tab-weekly" type="button" role="tab" aria-selected="false" aria-controls="panel-weekly" tabindex="-1">Weekly Updates</button>
+      <button class="primary-tab" id="tab-publications" type="button" role="tab" aria-selected="false" aria-controls="panel-publications" tabindex="-1">Other Econ Publications</button>
+    </nav>
+    <label class="appearance-size">Text size <select id="appearance-size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></label>
+  </div>
   <section id="panel-glance" class="glance-page" role="tabpanel" aria-labelledby="tab-glance" hidden>
     <div class="glance-intro"><div><p class="eyebrow">United States | Key economic signals</p><h1>Economy at a Glance</h1><p>A concise view of growth, consumers, prices, employment and policy.</p></div></div>
     <div class="headline-grid" id="headline-grid" aria-label="Key US economic indicators" aria-live="polite"></div>
