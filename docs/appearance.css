@@ -2,6 +2,7 @@ html[data-font-size="small"] { zoom: .9; }
 html[data-font-size="large"] { zoom: 1.1; }
 .appearance-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .appearance-size, .appearance-view { display: flex; align-items: center; gap: 5px; color: #c1cec7; font-size: 11px; }
+.appearance-view { gap: 12px; }
 .appearance-size { flex: 0 0 auto; white-space: nowrap; }
 .appearance-size select { padding: 5px 7px; border: 1px solid #3a5047; border-radius: 6px; background: #202d27; color: #edf4f0; font: inherit; }
 .appearance-toggle { display: flex; overflow: hidden; border: 1px solid #3a5047; border-radius: 6px; }
