@@ -380,7 +380,7 @@ function openComboGallery() {
     if (!unavailable) openTrend(items[0], preset, false);
     if (unavailable || !chartView) {
       const error = document.createElement("p"); error.className = "export-error";
-      error.textContent = `${preset.title} is unavailable. Check updates and try again.`;
+      error.textContent = `${preset.title} is unavailable. Wait for the next data update and try again.`;
       list.append(error);
       continue;
     }

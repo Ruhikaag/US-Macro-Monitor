@@ -287,8 +287,8 @@
     @media (max-width: 480px) { #panel-glance .headline-grid { grid-template-columns: 1fr; } }
     @media (max-width: 720px) { .glance-intro h1 { font-size: 46px; } }
   </style>
-  <link rel="stylesheet" href="appearance.css?v=20261126-4">
-  <script src="appearance.js?v=20261126-4" defer></script>
+  <link rel="stylesheet" href="appearance.css?v=20261126-5">
+  <script src="appearance.js?v=20261126-5" defer></script>
 </head>
 <body>
   <header class="masthead">
@@ -299,7 +299,7 @@
       <label>Text size <select id="appearance-size"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></label>
       <span class="appearance-status" id="appearance-status" role="status" hidden></span>
     </div>
-    <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="search" type="button" aria-haspopup="dialog">Search</button><button class="text-button" id="refresh" type="button">Check updates</button></div>
+    <div class="head-actions"><span class="updated" id="updated">Loading latest data…</span><button class="text-button" id="search" type="button" aria-haspopup="dialog">Search</button></div>
   </header>
   <nav class="primary-tabs" role="tablist" aria-label="Dashboard sections">
     <button class="primary-tab" id="tab-glance" type="button" role="tab" aria-selected="false" aria-controls="panel-glance" tabindex="-1">Economy at a Glance</button>
@@ -407,7 +407,7 @@
       <div class="export-actions"><button class="chart-export-button" type="submit">Download CSV</button></div>
     </form>
   </dialog>
-  <script src="chart-tools.js?v=axis-labels-20261125"></script>
+  <script src="chart-tools.js?v=20261126-refresh-label"></script>
   <script>
     const $ = id => document.getElementById(id);
     const primaryTabs = [...document.querySelectorAll(".primary-tab")];
@@ -486,9 +486,6 @@
     let snapshot = null;
     let activeTheme = "real_economy";
     let activeChartItem = null;
-    let lastSuccessAt = null;
-    let lastAttemptAt = null;
-    let lastCheckedAt = null;
     const HEADLINE_TILES = [
       { id: "headline_real_gdp", title: "Real GDP", comparison: "quarterly" },
       { id: "investment_fnh", title: "Business investment", comparison: "quarterly" },
@@ -621,15 +618,12 @@
     function renderStatus(data) {
       const indicators = Object.values(data.indicators || {});
       const stamp = data.last_success_at || data.retrieved_at;
-      lastSuccessAt = data.last_success_at || null;
-      lastAttemptAt = data.last_attempt_at || null;
-      const checkedText = lastCheckedAt ? `Checked ${lastCheckedAt.toLocaleTimeString()}` : "Not checked yet";
       const publishedAt = stamp ? new Date(stamp) : null;
       const overdue = publishedAt && Number.isFinite(publishedAt.getTime()) && Date.now() - publishedAt.getTime() > 3 * 60 * 60 * 1000;
       const publishedText = publishedAt && Number.isFinite(publishedAt.getTime())
-        ? `${overdue ? "Update overdue — last data update" : "Last data update"} ${publishedAt.toLocaleString()}`
+        ? `${overdue ? "Update overdue — last refreshed" : "Last refreshed"}: ${publishedAt.toLocaleString()}`
         : "No published data yet";
-      $("updated").textContent = `${publishedText} · ${checkedText}`;
+      $("updated").textContent = publishedText;
       const box = $("error");
       if (data.error) { box.textContent = `Data update issue: ${data.error}. Showing the last available data, if any.`; box.hidden = false; }
       else if (indicators.some(item => item.error)) { box.textContent = "Some series could not be retrieved. The affected tiles are marked unavailable."; box.hidden = false; }
@@ -849,17 +843,10 @@
         const response = await fetch(dataUrl, { cache: "no-store" });
         if (!response.ok) throw new Error(`Published snapshot returned ${response.status}`);
         const data = await response.json();
-        lastCheckedAt = new Date();
         render(data);
       } catch (error) {
         const box = $("error"); box.textContent = `Could not load published dashboard data. (${error.message})`; box.hidden = false;
       }
-    }
-    async function refreshNow() {
-      const button = $("refresh");
-      button.disabled = true; button.textContent = "Checking…";
-      await load();
-      button.disabled = false; button.textContent = "Check updates";
     }
     $("close-trend").addEventListener("click", () => $("trend-dialog").close());
     $("explore-combos").addEventListener("click", openComboGallery);
@@ -882,7 +869,6 @@
       chartMessage("Choose Apply changes to update the preview before copying or exporting data.");
     });
     $("trend-dialog").addEventListener("click", event => { if (event.target === event.currentTarget) event.currentTarget.close(); });
-    $("refresh").addEventListener("click", refreshNow);
     $("export").addEventListener("click", openExport);
     setupIndicatorSearch();
     $("close-export").addEventListener("click", () => $("export-dialog").close());
